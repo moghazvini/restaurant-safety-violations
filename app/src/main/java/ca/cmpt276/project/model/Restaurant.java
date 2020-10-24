@@ -1,5 +1,9 @@
 package ca.cmpt276.project.model;
 
+/**
+ * Represents a Restaurant and contains
+ * a list of inspections.
+ */
 public class Restaurant {
     private String name;
     private String address;

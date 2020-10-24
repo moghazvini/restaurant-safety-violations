@@ -4,6 +4,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * Represents an inpsection report and
+ * contains a list of violations.
+ */
 public class Inspection {
     private Date date;
     private InspectionType type;

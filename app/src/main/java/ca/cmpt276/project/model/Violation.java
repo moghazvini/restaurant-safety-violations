@@ -1,5 +1,8 @@
 package ca.cmpt276.project.model;
 
+/**
+ * Represents a violation.
+ */
 public class Violation {
     private int code;
     private ViolationType type;

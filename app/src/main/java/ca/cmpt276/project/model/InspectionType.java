@@ -1,7 +1,8 @@
 package ca.cmpt276.project.model;
 
-import java.util.InputMismatchException;
-
+/**
+ * Represents the inspection type.
+ */
 public enum InspectionType {
     ROUTINE("routine"),
     FOLLOWUP("follow-up");

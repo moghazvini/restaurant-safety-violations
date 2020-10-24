@@ -3,6 +3,10 @@ package ca.cmpt276.project.model;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Manages the list of restaurants that had
+ * inspections.
+ */
 public class RestaurantListManager {
     private final List<Restaurant> restaurants;
     private static RestaurantListManager instance;

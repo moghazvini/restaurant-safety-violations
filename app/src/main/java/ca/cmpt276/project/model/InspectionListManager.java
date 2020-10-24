@@ -3,6 +3,9 @@ package ca.cmpt276.project.model;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Manages a restaurant's list of inspections.
+ */
 public class InspectionListManager {
     private final List<Inspection> inspections;
     private static InspectionListManager instance;

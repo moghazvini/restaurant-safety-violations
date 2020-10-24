@@ -1,5 +1,8 @@
 package ca.cmpt276.project.model;
 
+/**
+ * Represents the Hazard level of an Inspection
+ */
 public enum HazardLevel {
     LOW("Low"),
     MODERATE("Moderate"),
