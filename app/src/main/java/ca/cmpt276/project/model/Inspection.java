@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import ca.cmpt276.project.model.types.HazardLevel;
+import ca.cmpt276.project.model.types.InspectionType;
+
 /**
  * Represents an inpsection report and
  * contains a list of violations.

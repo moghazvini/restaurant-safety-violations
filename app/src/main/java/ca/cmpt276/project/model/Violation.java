@@ -1,5 +1,8 @@
 package ca.cmpt276.project.model;
 
+import ca.cmpt276.project.model.types.Severity;
+import ca.cmpt276.project.model.types.ViolationType;
+
 /**
  * Represents a violation.
  */

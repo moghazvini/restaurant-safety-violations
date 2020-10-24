@@ -1,4 +1,4 @@
-package ca.cmpt276.project.model;
+package ca.cmpt276.project.model.types;
 
 /**
  * Represents the severity of a violation
