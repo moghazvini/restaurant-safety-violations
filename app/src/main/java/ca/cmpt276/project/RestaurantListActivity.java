@@ -2,16 +2,21 @@ package ca.cmpt276.project;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,12 +32,13 @@ public class RestaurantListActivity extends AppCompatActivity {
         restaurantManager = RestaurantListManager.getInstance();
         fillRestaurantManager();
         populateListView();
+        registerCallBack();
     }
 
     private void fillRestaurantManager() {
         InputStream is = getResources().openRawResource(R.raw.restaurants_itr1);
         BufferedReader reader = new BufferedReader(
-                new InputStreamReader(is, Charset.forName("UTF-8"))
+                new InputStreamReader(is, StandardCharsets.UTF_8)
         );
         String line = "";
         try {
@@ -43,11 +49,11 @@ public class RestaurantListActivity extends AppCompatActivity {
 
                 //read data
                 Restaurant restaurant = new Restaurant(
-                        tokens[1], // Restaurant name
-                        tokens[2], // Restaurant Address
+                        tokens[1].replace("\"", ""), // Restaurant name
+                        tokens[2].replace("\"", ""), // Restaurant Address
                         Float.parseFloat(tokens[6]), // Restaurant Longitude
                         Float.parseFloat(tokens[5]), // Restaurant Latitude
-                        tokens[0] // Restaurant tracking number
+                        tokens[0].replace("\"", "") // Restaurant tracking number
                 );
                 restaurantManager.add(restaurant);
             }
@@ -69,5 +75,16 @@ public class RestaurantListActivity extends AppCompatActivity {
 
         ListView list = findViewById(R.id.listViewRestaurants);
         list.setAdapter(adapter);
+    }
+
+    private void registerCallBack(){
+        ListView list = findViewById(R.id.listViewRestaurants);
+        list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View viewClicked, int position, long id) {
+                // Code to start Inspection List activity goes here, that activity does not exist yet so this is left empty for now
+                Toast.makeText(RestaurantListActivity.this, "Open Inspection list activity for position: " + position, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 }
