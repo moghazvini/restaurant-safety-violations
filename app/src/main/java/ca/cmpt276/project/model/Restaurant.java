@@ -4,7 +4,7 @@ package ca.cmpt276.project.model;
  * Represents a Restaurant and contains
  * a list of inspections.
  */
-public class Restaurant {
+public class Restaurant implements Comparable<Restaurant>{
     private String name;
     private String address;
     private float gpsLong;
@@ -66,5 +66,10 @@ public class Restaurant {
 
     public void setInspections(InspectionListManager inspections) {
         this.inspections = inspections;
+    }
+
+    @Override
+    public int compareTo(Restaurant other) {
+        return this.name.compareTo(other.name);
     }
 }
