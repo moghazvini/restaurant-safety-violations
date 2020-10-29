@@ -165,21 +165,24 @@ public class RestaurantListActivity extends AppCompatActivity {
                 String issuesMessage = (latestInspection.getCritical() + latestInspection.getNonCritical()) + " issue(s)";
                 issuesText.setText(issuesMessage);
 
-                if(latestInspection.getLevel() == HazardLevel.LOW){
-                    hazardText.setText(R.string.hazard_low);
-                    hazardText.setTextColor(Color.parseColor("#45DE08")); // Green
-                    hazardImageView.setBackgroundResource(R.drawable.green_hazard);
+                switch (latestInspection.getLevel()) {
+                    case LOW:
+                        hazardText.setText(R.string.hazard_low);
+                        hazardText.setTextColor(Color.parseColor("#45DE08")); // Green
+                        hazardImageView.setBackgroundResource(R.drawable.green_hazard);
+                        break;
+                    case MODERATE:
+                        hazardText.setText(R.string.hazard_moderate);
+                        hazardText.setTextColor(Color.parseColor("#FA9009")); // Orange
+                        hazardImageView.setBackgroundResource(R.drawable.orange_hazard);
+                        break;
+                    case HIGH:
+                        hazardText.setText(R.string.hazard_high);
+                        hazardText.setTextColor(Color.parseColor("#FA2828")); // Red
+                        hazardImageView.setBackgroundResource(R.drawable.red_hazard);
+                        break;
                 }
-                else if(latestInspection.getLevel() == HazardLevel.MODERATE){
-                    hazardText.setText(R.string.hazard_moderate);
-                    hazardText.setTextColor(Color.parseColor("#FA9009")); // Orange
-                    hazardImageView.setBackgroundResource(R.drawable.orange_hazard);
-                }
-                else if(latestInspection.getLevel() == HazardLevel.HIGH){
-                    hazardText.setText(R.string.hazard_high);
-                    hazardText.setTextColor(Color.parseColor("#FA2828")); // Red
-                    hazardImageView.setBackgroundResource(R.drawable.red_hazard);
-                }
+
                 // code to find difference between dates from https://www.baeldung.com/java-date-difference
                 Date currentDate = new Date();
                 SimpleDateFormat formatter1 = new SimpleDateFormat("MMM yyyy");
