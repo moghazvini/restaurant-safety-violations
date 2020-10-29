@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -212,12 +211,9 @@ public class RestaurantListActivity extends AppCompatActivity {
 
     private void registerCallBack(){
         ListView list = findViewById(R.id.listViewRestaurants);
-        list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View viewClicked, int position, long id) {
-                // Code to start Inspection List activity goes here, that activity does not exist yet so this is left empty for now
-                Toast.makeText(RestaurantListActivity.this, "Open Inspection list activity for position: " + position, Toast.LENGTH_SHORT).show();
-            }
+        list.setOnItemClickListener((parent, viewClicked, position, id) -> {
+            // Code to start Inspection List activity goes here, that activity does not exist yet so this is left empty for now
+            Toast.makeText(RestaurantListActivity.this, "Open Inspection list activity for position: " + position, Toast.LENGTH_SHORT).show();
         });
     }
 }
