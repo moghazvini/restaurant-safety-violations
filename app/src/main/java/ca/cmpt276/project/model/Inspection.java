@@ -11,7 +11,7 @@ import ca.cmpt276.project.model.types.InspectionType;
  * Represents an inpsection report and
  * contains a list of violations.
  */
-public class Inspection {
+public class Inspection implements Comparable<Inspection>{
     private Date date;
     private InspectionType type;
     private int critical;
@@ -66,5 +66,10 @@ public class Inspection {
 
     public void setLevel(HazardLevel level) {
         this.level = level;
+    }
+
+    @Override
+    public int compareTo(Inspection other) {
+        return this.date.compareTo(other.date);
     }
 }

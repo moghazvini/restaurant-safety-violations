@@ -2,4 +2,12 @@
     <string name="app_name">Restaurant Inspection Reports</string>
     <!--Restaurant List-->
     <string name="restaurants">Restaurants</string>
+    <string name="no_inspection_found">No inspection</string>
+    <string name="restaurant_icon">restaurant icon</string>
+    <string name="restaurant_name">restaurant name</string>
+    <string name="issues_found">issues found</string>
+    <string name="latest_inspection">latest inspection</string>
+    <string name="hazard_low">Low</string>
+    <string name="hazard_moderate">Medium</string>
+    <string name="hazard_high">High</string>
 </resources>

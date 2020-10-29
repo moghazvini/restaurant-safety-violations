@@ -1,6 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
-<TextView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="wrap_content"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
-    android:textSize="24sp" />
+    <ImageView
+        android:id="@+id/item_restaurantIcon"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:adjustViewBounds="true"
+        android:contentDescription="@string/restaurant_icon"
+        app:srcCompat="@drawable/food2" />
+
+    <TextView
+        android:id="@+id/item_txt_restaurant_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/item_restaurantIcon"
+        android:layout_marginStart="5dp"
+        android:layout_marginBottom="30dp"
+        android:layout_toEndOf="@+id/item_restaurantIcon"
+        android:text="@string/restaurant_name"
+        android:textSize="18sp" />
+
+    <TextView
+        android:id="@+id/item_txt_issues_found"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/item_restaurantIcon"
+        android:layout_marginStart="5dp"
+        android:layout_marginBottom="5dp"
+        android:layout_toEndOf="@+id/item_restaurantIcon"
+        android:text="@string/issues_found" />
+
+    <TextView
+        android:id="@+id/item_txt_latest_inspection"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/item_restaurantIcon"
+        android:layout_marginStart="180dp"
+        android:layout_marginBottom="5dp"
+        android:layout_toEndOf="@+id/item_restaurantIcon"
+        android:text="@string/latest_inspection" />
+
+    <ImageView
+        android:id="@+id/item_hazard_icon"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:layout_alignBottom="@+id/item_restaurantIcon"
+        android:layout_marginStart="8dp"
+        android:layout_marginBottom="4dp"
+        android:layout_toEndOf="@+id/item_txt_issues_found" />
+
+    <TextView
+        android:id="@+id/item_txt_hazard"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/item_hazard_icon"
+        android:layout_marginStart="12dp"
+        android:layout_marginBottom="0dp"
+        android:layout_toEndOf="@+id/item_hazard_icon" />
+</RelativeLayout>
