@@ -1,12 +1,15 @@
 package ca.cmpt276.project;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -67,7 +70,6 @@ public class RestaurantListActivity extends AppCompatActivity {
                 String inspectionTracking = tokens[0].replace("\"", "");
 
                 if(restaurantTracking.equals(inspectionTracking)) {
-
                     SimpleDateFormat formatter1 = new SimpleDateFormat("yyyyMMdd");
                     Date date = formatter1.parse(tokens[1]);
                     String stringType = tokens[2].replace("\"", "");
@@ -84,7 +86,6 @@ public class RestaurantListActivity extends AppCompatActivity {
                     } else if (stringHazardLevel.equals("High")) {
                         hazardLevel = HazardLevel.HIGH;
                     }
-                    //Log.d("TAG", "new inspection made for Tracking: " + restaurantTracking);
                     Inspection inspection = new Inspection(date, type, numCritical, numNonCritical, hazardLevel);
                     inspectionList.add(inspection);
                 }
@@ -115,14 +116,10 @@ public class RestaurantListActivity extends AppCompatActivity {
                         Float.parseFloat(tokens[5]), // Restaurant Latitude
                         tokens[0].replace("\"", "") // Restaurant tracking number
                 );
-                //
-                InspectionListManager inspectionManager = new InspectionListManager();
+                InspectionListManager filled = new InspectionListManager();
                 String restaurantTracking = restaurant.getTracking();
-                InspectionListManager filled;
-
-                filled = fillInspectionManager(inspectionManager, restaurantTracking);
+                filled = fillInspectionManager(filled, restaurantTracking);
                 restaurant.setInspections(filled);
-                //END
                 restaurantManager.add(restaurant);
             }
         } catch(IOException e){
@@ -155,7 +152,7 @@ public class RestaurantListActivity extends AppCompatActivity {
 
             //ImageView imageView = itemView.findViewById(R.id.item_restaurantIcon);
             //imageView.setImageResource();
-
+            ImageView hazardImageView = itemView.findViewById(R.id.item_hazard_icon);
             TextView nameText = itemView.findViewById(R.id.item_txt_restaurant_name);
             TextView issuesText = itemView.findViewById(R.id.item_txt_issues_found);
             TextView inspectionText = itemView.findViewById(R.id.item_txt_latest_inspection);
@@ -166,6 +163,19 @@ public class RestaurantListActivity extends AppCompatActivity {
                 latestInspection = Collections.max(currentInspectionList.getInspections());
                 String issuesMessage = (latestInspection.getCritical() + latestInspection.getNonCritical()) + " issue(s)";
                 issuesText.setText(issuesMessage);
+
+                if(latestInspection.getLevel() == HazardLevel.LOW){
+                    itemView.setBackgroundColor(Color.parseColor("#45E648")); // Green
+                    hazardImageView.setBackgroundResource(R.drawable.green_hazard);
+                }
+                else if(latestInspection.getLevel() == HazardLevel.MODERATE){
+                    itemView.setBackgroundColor(Color.parseColor("#EAC230")); // Orange
+                    hazardImageView.setBackgroundResource(R.drawable.orange_hazard);
+                }
+                else if(latestInspection.getLevel() == HazardLevel.HIGH){
+                    itemView.setBackgroundColor(Color.parseColor("#FA2828")); // Red
+                    hazardImageView.setBackgroundResource(R.drawable.red_hazard);
+                }
                 // code to find difference between dates from https://www.baeldung.com/java-date-difference
                 Date currentDate = new Date();
                 SimpleDateFormat formatter1 = new SimpleDateFormat("MMM yyyy");

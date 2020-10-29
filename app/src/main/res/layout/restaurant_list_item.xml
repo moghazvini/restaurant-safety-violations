@@ -11,12 +11,12 @@
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
         android:adjustViewBounds="true"
-        app:srcCompat="@drawable/food2"
-        android:contentDescription="@string/restaurant_icon" />
+        android:contentDescription="@string/restaurant_icon"
+        app:srcCompat="@drawable/food2" />
 
     <TextView
         android:id="@+id/item_txt_restaurant_name"
-        android:layout_width="317dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignBottom="@+id/item_restaurantIcon"
         android:layout_marginStart="5dp"
@@ -40,8 +40,18 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignBottom="@+id/item_restaurantIcon"
-        android:layout_marginStart="150dp"
+        android:layout_marginStart="165dp"
         android:layout_marginBottom="5dp"
         android:layout_toEndOf="@+id/item_restaurantIcon"
         android:text="@string/latest_inspection" />
+
+    <ImageView
+        android:id="@+id/item_hazard_icon"
+        android:layout_width="21dp"
+        android:layout_height="23dp"
+        android:layout_alignBottom="@+id/item_restaurantIcon"
+        android:layout_marginStart="15dp"
+        android:layout_marginBottom="27dp"
+        android:layout_toEndOf="@+id/item_txt_restaurant_name"
+        />
 </RelativeLayout>
