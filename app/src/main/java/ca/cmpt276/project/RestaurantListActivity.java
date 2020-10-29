@@ -54,8 +54,8 @@ public class RestaurantListActivity extends AppCompatActivity {
 
 
 
-    private InspectionListManager fillInspectionManager(InspectionListManager inspectionList, String restaurantTracking) {
-
+    private InspectionListManager fillInspectionManager(String restaurantTracking) {
+        InspectionListManager inspectionList = new InspectionListManager();
         InputStream is = getResources().openRawResource(R.raw.inspectionreports_itr1);
         BufferedReader reader = new BufferedReader(
                 new InputStreamReader(is, StandardCharsets.UTF_8)
@@ -116,9 +116,8 @@ public class RestaurantListActivity extends AppCompatActivity {
                         Float.parseFloat(tokens[5]), // Restaurant Latitude
                         tokens[0].replace("\"", "") // Restaurant tracking number
                 );
-                InspectionListManager filled = new InspectionListManager();
                 String restaurantTracking = restaurant.getTracking();
-                filled = fillInspectionManager(filled, restaurantTracking);
+                InspectionListManager filled = fillInspectionManager(restaurantTracking);
                 restaurant.setInspections(filled);
                 restaurantManager.add(restaurant);
             }
@@ -156,6 +155,7 @@ public class RestaurantListActivity extends AppCompatActivity {
             TextView nameText = itemView.findViewById(R.id.item_txt_restaurant_name);
             TextView issuesText = itemView.findViewById(R.id.item_txt_issues_found);
             TextView inspectionText = itemView.findViewById(R.id.item_txt_latest_inspection);
+            TextView hazardText = itemView.findViewById(R.id.item_txt_hazard);
             nameText.setText(currentRestaurant.getName());
 
             if(currentInspectionList.getInspections().size() > 0) {
@@ -165,15 +165,18 @@ public class RestaurantListActivity extends AppCompatActivity {
                 issuesText.setText(issuesMessage);
 
                 if(latestInspection.getLevel() == HazardLevel.LOW){
-                    itemView.setBackgroundColor(Color.parseColor("#45E648")); // Green
+                    hazardText.setText(R.string.hazard_low);
+                    hazardText.setTextColor(Color.parseColor("#45DE08")); // Green
                     hazardImageView.setBackgroundResource(R.drawable.green_hazard);
                 }
                 else if(latestInspection.getLevel() == HazardLevel.MODERATE){
-                    itemView.setBackgroundColor(Color.parseColor("#EAC230")); // Orange
+                    hazardText.setText(R.string.hazard_moderate);
+                    hazardText.setTextColor(Color.parseColor("#FA9009")); // Orange
                     hazardImageView.setBackgroundResource(R.drawable.orange_hazard);
                 }
                 else if(latestInspection.getLevel() == HazardLevel.HIGH){
-                    itemView.setBackgroundColor(Color.parseColor("#FA2828")); // Red
+                    hazardText.setText(R.string.hazard_high);
+                    hazardText.setTextColor(Color.parseColor("#FA2828")); // Red
                     hazardImageView.setBackgroundResource(R.drawable.red_hazard);
                 }
                 // code to find difference between dates from https://www.baeldung.com/java-date-difference
