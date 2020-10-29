@@ -4,7 +4,6 @@ import android.graphics.Color;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -13,11 +12,8 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import androidx.appcompat.app.AppCompatActivity;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -156,8 +152,6 @@ public class RestaurantListActivity extends AppCompatActivity {
             Restaurant currentRestaurant = restaurantManager.getRestaurant(position);
             InspectionListManager currentInspectionList = currentRestaurant.getInspections();
 
-            //ImageView imageView = itemView.findViewById(R.id.item_restaurantIcon);
-            //imageView.setImageResource();
             ImageView hazardImageView = itemView.findViewById(R.id.item_hazard_icon);
             TextView nameText = itemView.findViewById(R.id.item_txt_restaurant_name);
             TextView issuesText = itemView.findViewById(R.id.item_txt_issues_found);
