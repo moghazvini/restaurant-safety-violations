@@ -8,18 +8,11 @@ import java.util.List;
  */
 public class InspectionListManager {
     private final List<Inspection> inspections;
-    private static InspectionListManager instance;
 
-    private InspectionListManager() {
+    public InspectionListManager() {
         inspections = new ArrayList<>();
     }
 
-    public static InspectionListManager getInstance() {
-        if (instance == null) {
-            instance = new InspectionListManager();
-        }
-        return instance;
-    }
 
     public void add(Inspection inspection) {
         inspections.add(inspection);

@@ -11,7 +11,8 @@
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
         android:adjustViewBounds="true"
-        app:srcCompat="@drawable/food2" />
+        app:srcCompat="@drawable/food2"
+        android:contentDescription="@string/restaurant_icon" />
 
     <TextView
         android:id="@+id/item_txt_restaurant_name"
@@ -21,7 +22,7 @@
         android:layout_marginStart="5dp"
         android:layout_marginBottom="30dp"
         android:layout_toEndOf="@+id/item_restaurantIcon"
-        android:text="restaurant name"
+        android:text="@string/restaurant_name"
         android:textSize="18sp" />
 
     <TextView
@@ -32,7 +33,7 @@
         android:layout_marginStart="5dp"
         android:layout_marginBottom="5dp"
         android:layout_toEndOf="@+id/item_restaurantIcon"
-        android:text="issues found" />
+        android:text="@string/issues_found" />
 
     <TextView
         android:id="@+id/item_txt_latest_inspection"
@@ -42,5 +43,5 @@
         android:layout_marginStart="150dp"
         android:layout_marginBottom="5dp"
         android:layout_toEndOf="@+id/item_restaurantIcon"
-        android:text="latest inspection" />
+        android:text="@string/latest_inspection" />
 </RelativeLayout>
