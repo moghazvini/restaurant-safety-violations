@@ -1,4 +1,4 @@
-package ca.cmpt276.project;
+package ca.cmpt276.project.ui;
 
 import android.graphics.Color;
 import androidx.appcompat.app.AppCompatActivity;
@@ -26,6 +26,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
+import ca.cmpt276.project.R;
 import ca.cmpt276.project.model.Inspection;
 import ca.cmpt276.project.model.InspectionListManager;
 import ca.cmpt276.project.model.Restaurant;
