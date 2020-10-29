@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">project</string>
+    <string name="app_name">Restaurant Inspection Reports</string>
     <!--Restaurant List-->
     <string name="restaurants">Restaurants</string>
 </resources>
