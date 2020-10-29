@@ -1,6 +1,9 @@
 package ca.cmpt276.project;
 
 import android.graphics.Color;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -9,11 +12,8 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import androidx.appcompat.app.AppCompatActivity;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -41,6 +41,9 @@ public class RestaurantListActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_restaurant_list);
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
         restaurantManager = RestaurantListManager.getInstance();
 
         if(!read){
@@ -149,8 +152,6 @@ public class RestaurantListActivity extends AppCompatActivity {
             Restaurant currentRestaurant = restaurantManager.getRestaurant(position);
             InspectionListManager currentInspectionList = currentRestaurant.getInspections();
 
-            //ImageView imageView = itemView.findViewById(R.id.item_restaurantIcon);
-            //imageView.setImageResource();
             ImageView hazardImageView = itemView.findViewById(R.id.item_hazard_icon);
             TextView nameText = itemView.findViewById(R.id.item_txt_restaurant_name);
             TextView issuesText = itemView.findViewById(R.id.item_txt_issues_found);
@@ -164,21 +165,24 @@ public class RestaurantListActivity extends AppCompatActivity {
                 String issuesMessage = (latestInspection.getCritical() + latestInspection.getNonCritical()) + " issue(s)";
                 issuesText.setText(issuesMessage);
 
-                if(latestInspection.getLevel() == HazardLevel.LOW){
-                    hazardText.setText(R.string.hazard_low);
-                    hazardText.setTextColor(Color.parseColor("#45DE08")); // Green
-                    hazardImageView.setBackgroundResource(R.drawable.green_hazard);
+                switch (latestInspection.getLevel()) {
+                    case LOW:
+                        hazardText.setText(R.string.hazard_low);
+                        hazardText.setTextColor(Color.parseColor("#45DE08")); // Green
+                        hazardImageView.setBackgroundResource(R.drawable.green_hazard);
+                        break;
+                    case MODERATE:
+                        hazardText.setText(R.string.hazard_moderate);
+                        hazardText.setTextColor(Color.parseColor("#FA9009")); // Orange
+                        hazardImageView.setBackgroundResource(R.drawable.orange_hazard);
+                        break;
+                    case HIGH:
+                        hazardText.setText(R.string.hazard_high);
+                        hazardText.setTextColor(Color.parseColor("#FA2828")); // Red
+                        hazardImageView.setBackgroundResource(R.drawable.red_hazard);
+                        break;
                 }
-                else if(latestInspection.getLevel() == HazardLevel.MODERATE){
-                    hazardText.setText(R.string.hazard_moderate);
-                    hazardText.setTextColor(Color.parseColor("#FA9009")); // Orange
-                    hazardImageView.setBackgroundResource(R.drawable.orange_hazard);
-                }
-                else if(latestInspection.getLevel() == HazardLevel.HIGH){
-                    hazardText.setText(R.string.hazard_high);
-                    hazardText.setTextColor(Color.parseColor("#FA2828")); // Red
-                    hazardImageView.setBackgroundResource(R.drawable.red_hazard);
-                }
+
                 // code to find difference between dates from https://www.baeldung.com/java-date-difference
                 Date currentDate = new Date();
                 SimpleDateFormat formatter1 = new SimpleDateFormat("MMM yyyy");
