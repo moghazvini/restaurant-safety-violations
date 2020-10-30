@@ -10,6 +10,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Project">
         <activity
+            android:name=".ui.RestaurantDetails"
+            android:label="Restaurant Details" />
+        <activity
             android:name=".ui.RestaurantListActivity"
             android:label="Restaurants">
             <intent-filter>
