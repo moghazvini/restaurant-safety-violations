@@ -49,14 +49,7 @@ public class RestaurantDetails extends AppCompatActivity {
     }
 
     private void populateList() {
-        Collections.sort(inspectionManager.getInspections(), new Comparator<Inspection>() {
-            DateFormat format = new SimpleDateFormat("yyyyMMdd");
-            Date cDate = new Date();
-            @Override
-            public int compare(Inspection o1, Inspection o2) {
-                return (int) Math.max((o1.getDate().getTime()-cDate.getTime()),(o2.getDate().getTime()-cDate.getTime()));
-            }
-        });
+        Collections.sort(inspectionManager.getInspections(),Collections.reverseOrder());
         ArrayAdapter<Inspection> adapter = new InspectionListAdapter();
         ListView list = findViewById(R.id.list_insp);
         list.setAdapter(adapter);
