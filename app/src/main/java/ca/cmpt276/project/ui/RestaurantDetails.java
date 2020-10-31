@@ -13,7 +13,11 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
@@ -23,10 +27,13 @@ import ca.cmpt276.project.model.InspectionListManager;
 import ca.cmpt276.project.model.Restaurant;
 import ca.cmpt276.project.model.RestaurantListManager;
 
+import static java.lang.Math.abs;
+
 public class RestaurantDetails extends AppCompatActivity {
 
     private static String INDEX = "0";
     RestaurantListManager restaurantManager;
+    InspectionListManager inspectionManager;
     static Restaurant rest;
 
     @Override
@@ -35,7 +42,6 @@ public class RestaurantDetails extends AppCompatActivity {
         setContentView(R.layout.activity_restaurant_details);
 
         restaurantManager = RestaurantListManager.getInstance();
-
         Getdata();
         populateList();
         setValues();
@@ -43,6 +49,13 @@ public class RestaurantDetails extends AppCompatActivity {
     }
 
     private void populateList() {
+        Collections.sort(inspectionManager.getInspections(), new Comparator<Inspection>() {
+            DateFormat format = new SimpleDateFormat("yyyyMMdd");
+            @Override
+            public int compare(Inspection o1, Inspection o2) {
+                return (int) Math.max(o1.getDate().getTime(),o2.getDate().getTime());
+            }
+        });
         ArrayAdapter<Inspection> adapter = new InspectionListAdapter();
         ListView list = findViewById(R.id.list_insp);
         list.setAdapter(adapter);
@@ -50,7 +63,7 @@ public class RestaurantDetails extends AppCompatActivity {
 
     private class InspectionListAdapter extends ArrayAdapter<Inspection>{
         public InspectionListAdapter(){
-            super(RestaurantDetails.this,R.layout.inspection_list);
+            super(RestaurantDetails.this,R.layout.inspection_list,inspectionManager.getInspections());
         }
         
         @Override
@@ -59,47 +72,56 @@ public class RestaurantDetails extends AppCompatActivity {
             if(iv == null){
                 iv = getLayoutInflater().inflate(R.layout.inspection_list, parent, false);
             }
-            Inspection insp = rest.getInspections().getInspection(position);
+            InspectionListManager insplist = rest.getInspections();
+            Inspection insp = insplist.getInspection(position);
+
             ImageView hazard_img = iv.findViewById(R.id.img_hazard);
             TextView hazard_txt = iv.findViewById(R.id.txt_hazard);
             TextView critissues_txt = iv.findViewById(R.id.txt_critIssues);
             TextView Ncritissues_txt = iv.findViewById(R.id.txt_NcritIssues);
             TextView inspDate_txt = iv.findViewById(R.id.txt_inspDate);
             //setting stuff
-            critissues_txt.setText("# of Critical Issues: " + insp.getCritical());
-            Ncritissues_txt.setText("# of Non-Critical Issues: " + insp.getNonCritical());
+            if(insplist.getInspections().size()>0) {
+                critissues_txt.setText("# of Critical Issues: " + insp.getCritical());
+                Ncritissues_txt.setText("# of Non-Critical Issues: " + insp.getNonCritical());
 
-            switch (insp.getLevel()) {
-                case LOW:
-                    hazard_txt.setText(R.string.hazard_low);
-                    hazard_txt.setTextColor(Color.parseColor("#45DE08")); // Green
-                    hazard_img.setBackgroundResource(R.drawable.green_hazard);
-                    break;
-                case MODERATE:
-                    hazard_txt.setText(R.string.hazard_moderate);
-                    hazard_txt.setTextColor(Color.parseColor("#FA9009")); // Orange
-                    hazard_img.setBackgroundResource(R.drawable.orange_hazard);
-                    break;
-                case HIGH:
-                    hazard_txt.setText(R.string.hazard_high);
-                    hazard_txt.setTextColor(Color.parseColor("#FA2828")); // Red
-                    hazard_img.setBackgroundResource(R.drawable.red_hazard);
-                    break;
+                switch (insp.getLevel()) {
+                    case LOW:
+                        hazard_txt.setText(R.string.hazard_low);
+                        hazard_txt.setTextColor(Color.parseColor("#45DE08")); // Green
+                        hazard_img.setBackgroundResource(R.drawable.green_hazard);
+                        break;
+                    case MODERATE:
+                        hazard_txt.setText(R.string.hazard_moderate);
+                        hazard_txt.setTextColor(Color.parseColor("#FA9009")); // Orange
+                        hazard_img.setBackgroundResource(R.drawable.orange_hazard);
+                        break;
+                    case HIGH:
+                        hazard_txt.setText(R.string.hazard_high);
+                        hazard_txt.setTextColor(Color.parseColor("#FA2828")); // Red
+                        hazard_img.setBackgroundResource(R.drawable.red_hazard);
+                        break;
+                }
+                Date currentDate = new Date();
+                SimpleDateFormat formatter1 = new SimpleDateFormat("MMM yyyy");
+                long diffInMillies = abs(currentDate.getTime() - insp.getDate().getTime());
+                long diff = TimeUnit.DAYS.convert(diffInMillies, TimeUnit.MILLISECONDS);
+                String inspectionDateText;
+                if (diff > 365) {
+                    inspectionDateText = formatter1.format(insp.getDate());
+                } else if (diff > 30) {
+                    formatter1 = new SimpleDateFormat("MMM dd");
+                    inspectionDateText = formatter1.format(insp.getDate());
+                } else {
+                    inspectionDateText = diff + " days ago";
+                }
+                inspDate_txt.setText(inspectionDateText);
             }
-            Date currentDate = new Date();
-            SimpleDateFormat formatter1 = new SimpleDateFormat("MMM yyyy");
-            long diffInMillies = Math.abs(currentDate.getTime() - insp.getDate().getTime());
-            long diff = TimeUnit.DAYS.convert(diffInMillies, TimeUnit.MILLISECONDS);
-            String inspectionDateText;
-            if(diff > 365){
-                inspectionDateText = formatter1.format(insp.getDate());
-            } else if(diff > 30){
-                formatter1 = new SimpleDateFormat("MMM dd");
-                inspectionDateText = formatter1.format(insp.getDate());
-            } else{
-                inspectionDateText = diff + " days ago";
+            else {
+                critissues_txt.setText(R.string.no_inspection_found);
+                Ncritissues_txt.setText(R.string.no_inspection_found);
+                inspDate_txt.setText(R.string.no_inspection_found);
             }
-            inspDate_txt.setText(inspectionDateText);
             return iv;
         }
     }
@@ -124,6 +146,7 @@ public class RestaurantDetails extends AppCompatActivity {
         Intent intent = getIntent();
         int rest_index = intent.getIntExtra(INDEX,0);
         rest = restaurantManager.getRestaurant(rest_index);
+        inspectionManager = rest.getInspections();
     }
 
     public static Intent makeLaunchIntent(RestaurantListActivity restaurantListActivity, int position) {
@@ -132,3 +155,4 @@ public class RestaurantDetails extends AppCompatActivity {
         return intent;
     }
 }
+//https://www.geeksforgeeks.org/collections-sort-java-examples/
