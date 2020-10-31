@@ -1,5 +1,6 @@
 package ca.cmpt276.project.ui;
 
+import android.content.Intent;
 import android.graphics.Color;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -214,6 +215,8 @@ public class RestaurantListActivity extends AppCompatActivity {
         list.setOnItemClickListener((parent, viewClicked, position, id) -> {
             // Code to start Inspection List activity goes here, that activity does not exist yet so this is left empty for now
             Toast.makeText(RestaurantListActivity.this, "Open Inspection list activity for position: " + position, Toast.LENGTH_SHORT).show();
+            Intent i = RestaurantDetails.makeLaunchIntent(RestaurantListActivity.this,position);
+            startActivity(i);
         });
     }
 }
