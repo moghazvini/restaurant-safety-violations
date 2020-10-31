@@ -68,6 +68,11 @@ public class Restaurant implements Comparable<Restaurant>{
         this.inspections = inspections;
     }
 
+    public String getGPS(){
+        String gps = "Longitude: " + this.getGpsLong() + ", Latitude: " + this.getGpsLat();
+        return gps;
+    }
+
     @Override
     public int compareTo(Restaurant other) {
         return this.name.compareTo(other.name);
