@@ -1,0 +1,30 @@
+Index: app/src/main/res/layout/activity_restaurant_list.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<androidx.constraintlayout.widget.ConstraintLayout xmlns:android=\"http://schemas.android.com/apk/res/android\"\r\n    xmlns:app=\"http://schemas.android.com/apk/res-auto\"\r\n    xmlns:tools=\"http://schemas.android.com/tools\"\r\n    android:layout_width=\"match_parent\"\r\n    android:layout_height=\"match_parent\"\r\n    tools:context=\".RestaurantListActivity\">\r\n\r\n    <com.google.android.material.appbar.AppBarLayout\r\n        android:id=\"@+id/appBarLayout\"\r\n        android:layout_width=\"match_parent\"\r\n        android:layout_height=\"wrap_content\"\r\n        android:theme=\"@style/AppTheme.AppBarOverlay\"\r\n        app:layout_constraintStart_toStartOf=\"parent\"\r\n        app:layout_constraintTop_toTopOf=\"parent\">\r\n\r\n    <ListView\r\n        android:id=\"@+id/listViewRestaurants\"\r\n        android:layout_width=\"0dp\"\r\n        android:layout_height=\"wrap_content\"\r\n        android:layout_marginTop=\"5dp\"\r\n        <androidx.appcompat.widget.Toolbar\r\n            android:id=\"@+id/toolbar\"\r\n            android:layout_width=\"match_parent\"\r\n            android:layout_height=\"?attr/actionBarSize\"\r\n            android:background=\"?attr/colorPrimary\"\r\n            android:minHeight=\"?attr/actionBarSize\" />\r\n    </com.google.android.material.appbar.AppBarLayout>\r\n\r\n    <include\r\n        layout=\"@layout/content_restaurant_list\"\r\n        android:layout_width=\"match_parent\"\r\n        android:layout_height=\"670dp\"\r\n        android:layout_marginTop=\"0dp\"\r\n        app:layout_constraintEnd_toEndOf=\"parent\"\r\n        app:layout_constraintTop_toBottomOf=\"@+id/appBarLayout\" />\r\n        app:layout_constraintStart_toStartOf=\"@+id/txt_restaurants\"\r\n        app:layout_constraintTop_toBottomOf=\"@+id/txt_restaurants\" />\r\n</androidx.constraintlayout.widget.ConstraintLayout>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/layout/activity_restaurant_list.xml	(revision 543e62105c1656ea3e0fe26b91488cb240bcaf1b)
++++ app/src/main/res/layout/activity_restaurant_list.xml	(date 1603945566188)
+@@ -14,11 +14,6 @@
+         app:layout_constraintStart_toStartOf="parent"
+         app:layout_constraintTop_toTopOf="parent">
+ 
+-    <ListView
+-        android:id="@+id/listViewRestaurants"
+-        android:layout_width="0dp"
+-        android:layout_height="wrap_content"
+-        android:layout_marginTop="5dp"
+         <androidx.appcompat.widget.Toolbar
+             android:id="@+id/toolbar"
+             android:layout_width="match_parent"
+@@ -34,6 +29,5 @@
+         android:layout_marginTop="0dp"
+         app:layout_constraintEnd_toEndOf="parent"
+         app:layout_constraintTop_toBottomOf="@+id/appBarLayout" />
+-        app:layout_constraintStart_toStartOf="@+id/txt_restaurants"
+-        app:layout_constraintTop_toBottomOf="@+id/txt_restaurants" />
++
+ </androidx.constraintlayout.widget.ConstraintLayout>
+\ No newline at end of file
