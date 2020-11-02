@@ -30,24 +30,25 @@ import static java.lang.Math.abs;
 
 public class RestaurantDetails extends AppCompatActivity {
 
-    private static String INDEX = "0";
+    private final static String INDEX = "Inspection Report Index";
     private RestaurantListManager restaurantManager;
     private InspectionListManager inspectionManager;
     static Restaurant rest;
 
-    private Toolbar toolbar;
     private ActionBar back;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_restaurant_details);
-        toolbar  = findViewById(R.id.toolbar_restaurant_det);
+        Toolbar toolbar = findViewById(R.id.toolbar_restaurant_det);
         setSupportActionBar(toolbar);
 
         // Enable "up" on toolbar
         back = getSupportActionBar();
-        back.setDisplayHomeAsUpEnabled(true);
+        if (back != null) {
+            back.setDisplayHomeAsUpEnabled(true);
+        }
 
         restaurantManager = RestaurantListManager.getInstance();
         Getdata();
@@ -57,7 +58,7 @@ public class RestaurantDetails extends AppCompatActivity {
     }
 
     private void populateList() {
-        Collections.sort(inspectionManager.getInspections(),Collections.reverseOrder());
+        inspectionManager.getInspections().sort(Collections.reverseOrder());
         ArrayAdapter<Inspection> adapter = new InspectionListAdapter();
         ListView list = findViewById(R.id.list_insp);
         list.setAdapter(adapter);
@@ -84,8 +85,10 @@ public class RestaurantDetails extends AppCompatActivity {
             TextView inspDate_txt = iv.findViewById(R.id.txt_inspDate);
             //setting stuff
             if(insplist.getInspections().size()>0) {
-                critissues_txt.setText("# of Critical Issues: " + insp.getCritical());
-                Ncritissues_txt.setText("# of Non-Critical Issues: " + insp.getNonCritical());
+                String nonCrit = "# of Critical Issues: " + insp.getCritical();
+                String crit = "# of Non-Critical Issues: " + insp.getNonCritical();
+                critissues_txt.setText(nonCrit);
+                Ncritissues_txt.setText(crit);
 
                 switch (insp.getLevel()) {
                     case LOW:
@@ -133,7 +136,7 @@ public class RestaurantDetails extends AppCompatActivity {
         ResName_txt.setText(rest.getName());
         back.setTitle(rest.getName());
         TextView ResAdd_txt = findViewById(R.id.txt_restAdd);
-        ResAdd_txt.setText("Facility Location: \n"+rest.getAddress());
+        ResAdd_txt.setText(String.format("Facility Location: \n%s", rest.getAddress()));
         TextView ResGps_txt = findViewById(R.id.txt_gps);
         ResGps_txt.setText(rest.getGPS());
     }
