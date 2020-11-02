@@ -1,6 +1,8 @@
 package ca.cmpt276.project.ui;
 
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import android.content.Intent;
 import android.graphics.Color;
@@ -13,11 +15,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
@@ -32,14 +31,23 @@ import static java.lang.Math.abs;
 public class RestaurantDetails extends AppCompatActivity {
 
     private static String INDEX = "0";
-    RestaurantListManager restaurantManager;
-    InspectionListManager inspectionManager;
+    private RestaurantListManager restaurantManager;
+    private InspectionListManager inspectionManager;
     static Restaurant rest;
+
+    private Toolbar toolbar;
+    private ActionBar back;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_restaurant_details);
+        toolbar  = findViewById(R.id.toolbar_restaurant_det);
+        setSupportActionBar(toolbar);
+
+        // Enable "up" on toolbar
+        back = getSupportActionBar();
+        back.setDisplayHomeAsUpEnabled(true);
 
         restaurantManager = RestaurantListManager.getInstance();
         Getdata();
@@ -123,6 +131,7 @@ public class RestaurantDetails extends AppCompatActivity {
     private void setValues() {
         TextView ResName_txt = findViewById(R.id.txt_restname);
         ResName_txt.setText(rest.getName());
+        back.setTitle(rest.getName());
         TextView ResAdd_txt = findViewById(R.id.txt_restAdd);
         ResAdd_txt.setText("Facility Location: \n"+rest.getAddress());
         TextView ResGps_txt = findViewById(R.id.txt_gps);
@@ -131,9 +140,7 @@ public class RestaurantDetails extends AppCompatActivity {
 
     private void OnClick() {
         ListView insp_list = findViewById(R.id.list_insp);
-        insp_list.setOnItemClickListener(((parent, view, position, id) -> {
-            Toast.makeText(RestaurantDetails.this, "Open Inspection details activity for position: " + position, Toast.LENGTH_SHORT).show();
-        }));
+        insp_list.setOnItemClickListener(((parent, view, position, id) -> Toast.makeText(RestaurantDetails.this, "Open Inspection details activity for position: " + position, Toast.LENGTH_SHORT).show()));
     }
 
     private void Getdata() {

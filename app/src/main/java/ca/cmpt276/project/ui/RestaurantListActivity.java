@@ -42,7 +42,7 @@ public class RestaurantListActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_restaurant_list);
-        Toolbar toolbar = findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar_restaurant_list);
         setSupportActionBar(toolbar);
 
         restaurantManager = RestaurantListManager.getInstance();
