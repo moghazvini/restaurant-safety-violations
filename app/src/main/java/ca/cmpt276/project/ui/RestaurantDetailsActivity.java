@@ -132,8 +132,6 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
     }
 
     private void setValues() {
-        TextView ResName_txt = findViewById(R.id.txt_restname);
-        ResName_txt.setText(rest.getName());
         back.setTitle(rest.getName());
         TextView ResAdd_txt = findViewById(R.id.txt_restAdd);
         ResAdd_txt.setText(String.format("Facility Location: \n%s", rest.getAddress()));
