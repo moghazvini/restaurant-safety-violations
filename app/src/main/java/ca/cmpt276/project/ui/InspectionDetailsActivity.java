@@ -11,6 +11,8 @@ import ca.cmpt276.project.R;
 
 public class InspectionDetailsActivity extends AppCompatActivity {
 
+     private final static String INDEX = "Inspection Report Index";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
