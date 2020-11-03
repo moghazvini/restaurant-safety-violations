@@ -214,9 +214,6 @@ public class RestaurantListActivity extends AppCompatActivity {
         ListView list = findViewById(R.id.listViewRestaurants);
         list.setOnItemClickListener((parent, viewClicked, position, id) -> {
 
-            Intent intent = new Intent(RestaurantListActivity.this, RestaurantDetails.class);
-            startActivity(intent);
-
             Toast.makeText(RestaurantListActivity.this, "Open Inspection list activity for position: " + position, Toast.LENGTH_SHORT).show();
             Intent i = RestaurantDetails.makeLaunchIntent(RestaurantListActivity.this,position);
             startActivity(i);
