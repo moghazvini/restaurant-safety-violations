@@ -13,7 +13,7 @@ public class InspectionDetailsActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_inspection_list);
+        setContentView(R.layout.activity_inspection_details);
 
         Button backButton = findViewById(R.id.btn_back);
         backButton.setOnClickListener(new View.OnClickListener() {
