@@ -19,12 +19,7 @@ public class InspectionDetailsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_inspection_details);
 
         Button backButton = findViewById(R.id.btn_back);
-        backButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish();
-            }
-        });
+        backButton.setOnClickListener(v -> finish());
     }
        public static Intent makeLaunchIntent(RestaurantDetailsActivity restaurantDetails, int position) {
         Intent intent = new Intent(restaurantDetails, InspectionDetailsActivity.class);
