@@ -213,7 +213,10 @@ public class RestaurantListActivity extends AppCompatActivity {
     private void registerCallBack(){
         ListView list = findViewById(R.id.listViewRestaurants);
         list.setOnItemClickListener((parent, viewClicked, position, id) -> {
-            // Code to start Inspection List activity goes here, that activity does not exist yet so this is left empty for now
+
+            Intent intent = new Intent(RestaurantListActivity.this, RestaurantDetails.class);
+            startActivity(intent);
+
             Toast.makeText(RestaurantListActivity.this, "Open Inspection list activity for position: " + position, Toast.LENGTH_SHORT).show();
             Intent i = RestaurantDetails.makeLaunchIntent(RestaurantListActivity.this,position);
             startActivity(i);

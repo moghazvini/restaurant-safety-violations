@@ -21,6 +21,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
+import ca.cmpt276.project.InspectionDetailsActivity;
 import ca.cmpt276.project.R;
 import ca.cmpt276.project.model.Inspection;
 import ca.cmpt276.project.model.InspectionListManager;
@@ -132,6 +133,9 @@ public class RestaurantDetails extends AppCompatActivity {
     private void OnClick() {
         ListView insp_list = findViewById(R.id.list_insp);
         insp_list.setOnItemClickListener(((parent, view, position, id) -> {
+
+            Intent intent = new Intent(RestaurantDetails.this, InspectionDetailsActivity.class);
+            startActivity(intent);
             Toast.makeText(RestaurantDetails.this, "Open Inspection details activity for position: " + position, Toast.LENGTH_SHORT).show();
         }));
     }
