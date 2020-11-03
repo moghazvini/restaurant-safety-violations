@@ -116,6 +116,7 @@ public class RestaurantListActivity extends AppCompatActivity {
                 Restaurant restaurant = new Restaurant(
                         tokens[1].replace("\"", ""), // Restaurant name
                         tokens[2].replace("\"", ""), // Restaurant Address
+                        tokens[3].replace("\"", ""), // Restaurant city
                         Float.parseFloat(tokens[6]), // Restaurant Longitude
                         Float.parseFloat(tokens[5]), // Restaurant Latitude
                         tokens[0].replace("\"", "") // Restaurant tracking number
