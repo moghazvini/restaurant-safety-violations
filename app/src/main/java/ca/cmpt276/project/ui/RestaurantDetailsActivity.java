@@ -60,6 +60,8 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
         inspectionManager.getInspections().sort(Collections.reverseOrder());
         ArrayAdapter<Inspection> adapter = new InspectionListAdapter();
         ListView list = findViewById(R.id.list_insp);
+        TextView noInspections = findViewById(R.id.empty_inspections);
+        list.setEmptyView(noInspections);
         list.setAdapter(adapter);
     }
 
