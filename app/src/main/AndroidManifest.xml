@@ -11,6 +11,10 @@
         android:theme="@style/Theme.Project">
 
         <activity
+            android:name=".ui.InspectionDetailsActivity"
+            android:parentActivityName=".ui.RestaurantDetailsActivity"/>
+
+        <activity
             android:name=".ui.RestaurantDetailsActivity"
             android:parentActivityName=".ui.RestaurantListActivity"/>
 

@@ -143,7 +143,12 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
 
     private void OnClick() {
         ListView insp_list = findViewById(R.id.list_insp);
-        insp_list.setOnItemClickListener(((parent, view, position, id) -> Toast.makeText(RestaurantDetailsActivity.this, "Open Inspection details activity for position: " + position, Toast.LENGTH_SHORT).show()));
+        insp_list.setOnItemClickListener((parent, view, position, id) -> {
+
+            Intent i = InspectionDetailsActivity.makeLaunchIntent(RestaurantDetailsActivity.this,position);
+            startActivity(i);
+        });
+
     }
 
     private void Getdata() {
