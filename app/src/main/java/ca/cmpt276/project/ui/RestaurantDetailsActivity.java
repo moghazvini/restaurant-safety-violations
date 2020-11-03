@@ -107,6 +107,8 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
                         hazard_txt.setTextColor(Color.parseColor("#FA2828")); // Red
                         hazard_img.setBackgroundResource(R.drawable.red_hazard);
                         break;
+                    default:
+                        assert false;
                 }
                 Date currentDate = new Date();
                 SimpleDateFormat formatter1 = new SimpleDateFormat("MMM yyyy");

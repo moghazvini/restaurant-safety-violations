@@ -183,6 +183,8 @@ public class RestaurantListActivity extends AppCompatActivity {
                         hazardText.setTextColor(Color.parseColor("#FA2828")); // Red
                         hazardImageView.setBackgroundResource(R.drawable.red_hazard);
                         break;
+                    default:
+                        assert false;
                 }
 
                 // code to find difference between dates from https://www.baeldung.com/java-date-difference
@@ -205,7 +207,7 @@ public class RestaurantListActivity extends AppCompatActivity {
             }
             else{
                 issuesText.setText(R.string.no_inspection_found);
-                inspectionText.setText(R.string.no_inspection_found);
+                inspectionText.setText("");
             }
             return itemView;
         }
