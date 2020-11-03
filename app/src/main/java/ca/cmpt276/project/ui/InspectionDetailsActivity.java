@@ -23,4 +23,9 @@ public class InspectionDetailsActivity extends AppCompatActivity {
             }
         });
     }
+       public static Intent makeLaunchIntent(RestaurantDetails restaurantDetails, int position) {
+        Intent intent = new Intent(restaurantDetails, InspectionDetailsActivity.class);
+        intent.putExtra(INDEX, position);
+        return intent;
+    }
 }
