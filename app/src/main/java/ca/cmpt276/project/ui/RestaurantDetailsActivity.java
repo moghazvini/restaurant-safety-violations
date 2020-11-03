@@ -28,7 +28,7 @@ import ca.cmpt276.project.model.RestaurantListManager;
 
 import static java.lang.Math.abs;
 
-public class RestaurantDetails extends AppCompatActivity {
+public class RestaurantDetailsActivity extends AppCompatActivity {
 
     private final static String INDEX = "Inspection Report Index";
     private RestaurantListManager restaurantManager;
@@ -66,7 +66,7 @@ public class RestaurantDetails extends AppCompatActivity {
 
     private class InspectionListAdapter extends ArrayAdapter<Inspection>{
         public InspectionListAdapter(){
-            super(RestaurantDetails.this,R.layout.inspection_list,inspectionManager.getInspections());
+            super(RestaurantDetailsActivity.this,R.layout.inspection_list,inspectionManager.getInspections());
         }
         
         @Override
@@ -143,7 +143,7 @@ public class RestaurantDetails extends AppCompatActivity {
 
     private void OnClick() {
         ListView insp_list = findViewById(R.id.list_insp);
-        insp_list.setOnItemClickListener(((parent, view, position, id) -> Toast.makeText(RestaurantDetails.this, "Open Inspection details activity for position: " + position, Toast.LENGTH_SHORT).show()));
+        insp_list.setOnItemClickListener(((parent, view, position, id) -> Toast.makeText(RestaurantDetailsActivity.this, "Open Inspection details activity for position: " + position, Toast.LENGTH_SHORT).show()));
     }
 
     private void Getdata() {
@@ -154,7 +154,7 @@ public class RestaurantDetails extends AppCompatActivity {
     }
 
     public static Intent makeLaunchIntent(RestaurantListActivity restaurantListActivity, int position) {
-        Intent intent = new Intent(restaurantListActivity, RestaurantDetails.class);
+        Intent intent = new Intent(restaurantListActivity, RestaurantDetailsActivity.class);
         intent.putExtra(INDEX, position);
         return intent;
     }

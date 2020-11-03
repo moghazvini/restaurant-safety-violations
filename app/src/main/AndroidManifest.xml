@@ -11,7 +11,7 @@
         android:theme="@style/Theme.Project">
 
         <activity
-            android:name=".ui.RestaurantDetails"
+            android:name=".ui.RestaurantDetailsActivity"
             android:parentActivityName=".ui.RestaurantListActivity"/>
 
         <activity
