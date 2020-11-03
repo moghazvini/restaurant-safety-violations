@@ -1,4 +1,4 @@
-All violations icons:
+all violations icons:
 
 101-104,311-312 : ncrit establishment violations
 201-206,310 : crit food
