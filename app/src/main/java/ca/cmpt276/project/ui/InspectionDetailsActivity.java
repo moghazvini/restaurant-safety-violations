@@ -1,10 +1,12 @@
-package ca.cmpt276.project;
+package ca.cmpt276.project.ui;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+
+import ca.cmpt276.project.R;
 
 public class InspectionDetailsActivity extends AppCompatActivity {
 
