@@ -7,14 +7,16 @@ package ca.cmpt276.project.model;
 public class Restaurant implements Comparable<Restaurant>{
     private String name;
     private String address;
+    private String city;
     private float gpsLong;
     private float gpsLat;
     private String tracking;
     private InspectionListManager inspections;
 
-    public Restaurant(String name, String address, float gpsLong, float gpsLat, String tracking) {
+    public Restaurant(String name, String address, String city, float gpsLong, float gpsLat, String tracking) {
         this.name = name;
         this.address = address;
+        this.city = city;
         this.gpsLong = gpsLong;
         this.gpsLat = gpsLat;
         this.tracking = tracking;
@@ -34,6 +36,14 @@ public class Restaurant implements Comparable<Restaurant>{
 
     public void setAddress(String address) {
         this.address = address;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
     }
 
     public float getGpsLong() {

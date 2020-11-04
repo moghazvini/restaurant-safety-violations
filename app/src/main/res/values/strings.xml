@@ -2,7 +2,7 @@
     <string name="app_name">Restaurant Inspection Reports</string>
     <!--Restaurant List-->
     <string name="restaurants">Restaurants</string>
-    <string name="no_inspection_found">No inspection</string>
+    <string name="no_inspection_found">No inspections</string>
     <string name="restaurant_icon">restaurant icon</string>
     <string name="restaurant_name">restaurant name</string>
     <string name="issues_found">issues found</string>
@@ -18,4 +18,6 @@
     <string name="rest_name">Restaurant name here</string>
     <string name="restaurant_add">Rest Add here</string>
     <string name="rest_gps">Restaurant gps here</string>
+    <string name="inspections_list">List of Inspections:</string>
+    <string name="empty_inspections">No inspections available.</string>
 </resources>

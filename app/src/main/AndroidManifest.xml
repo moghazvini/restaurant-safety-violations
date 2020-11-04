@@ -12,10 +12,10 @@
 
         <activity
             android:name=".ui.InspectionDetailsActivity"
-            android:parentActivityName=".ui.RestaurantDetails"/>
-            
+            android:parentActivityName=".ui.RestaurantDetailsActivity"/>
+
         <activity
-            android:name=".ui.RestaurantDetails"
+            android:name=".ui.RestaurantDetailsActivity"
             android:parentActivityName=".ui.RestaurantListActivity"/>
 
         <activity
