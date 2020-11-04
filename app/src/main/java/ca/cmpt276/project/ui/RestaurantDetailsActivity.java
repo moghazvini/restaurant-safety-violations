@@ -13,7 +13,6 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.text.SimpleDateFormat;
 import java.util.Collections;
@@ -28,7 +27,7 @@ import ca.cmpt276.project.model.RestaurantListManager;
 
 import static java.lang.Math.abs;
 
-public class RestaurantDetails extends AppCompatActivity {
+public class RestaurantDetailsActivity extends AppCompatActivity {
 
     private final static String INDEX = "Inspection Report Index";
     private RestaurantListManager restaurantManager;
@@ -51,7 +50,7 @@ public class RestaurantDetails extends AppCompatActivity {
         }
 
         restaurantManager = RestaurantListManager.getInstance();
-        getData();
+        Getdata();
         populateList();
         setValues();
         OnClick();
@@ -61,12 +60,14 @@ public class RestaurantDetails extends AppCompatActivity {
         inspectionManager.getInspections().sort(Collections.reverseOrder());
         ArrayAdapter<Inspection> adapter = new InspectionListAdapter();
         ListView list = findViewById(R.id.list_insp);
+        TextView noInspections = findViewById(R.id.empty_inspections);
+        list.setEmptyView(noInspections);
         list.setAdapter(adapter);
     }
 
     private class InspectionListAdapter extends ArrayAdapter<Inspection>{
         public InspectionListAdapter(){
-            super(RestaurantDetails.this,R.layout.inspection_list,inspectionManager.getInspections());
+            super(RestaurantDetailsActivity.this,R.layout.inspection_list,inspectionManager.getInspections());
         }
         
         @Override
@@ -106,6 +107,8 @@ public class RestaurantDetails extends AppCompatActivity {
                         hazard_txt.setTextColor(Color.parseColor("#FA2828")); // Red
                         hazard_img.setBackgroundResource(R.drawable.red_hazard);
                         break;
+                    default:
+                        assert false;
                 }
                 Date currentDate = new Date();
                 SimpleDateFormat formatter1 = new SimpleDateFormat("MMM yyyy");
@@ -132,11 +135,12 @@ public class RestaurantDetails extends AppCompatActivity {
     }
 
     private void setValues() {
-        TextView ResName_txt = findViewById(R.id.txt_restname);
-        ResName_txt.setText(rest.getName());
         back.setTitle(rest.getName());
         TextView ResAdd_txt = findViewById(R.id.txt_restAdd);
-        ResAdd_txt.setText(String.format("Facility Location: \n%s", rest.getAddress()));
+
+        String address = "Facility Address: " + rest.getAddress() + " " + rest.getCity();
+        ResAdd_txt.setText(address);
+
         TextView ResGps_txt = findViewById(R.id.txt_gps);
         ResGps_txt.setText(rest.getGPS());
     }
@@ -145,23 +149,21 @@ public class RestaurantDetails extends AppCompatActivity {
         ListView insp_list = findViewById(R.id.list_insp);
         insp_list.setOnItemClickListener((parent, view, position, id) -> {
 
-            Toast.makeText(RestaurantDetails.this, "Open Inspection details activity for position: " + position, Toast.LENGTH_SHORT).show();
-
-            Intent i = InspectionDetailsActivity.Launch(RestaurantDetails.this,position);
+            Intent i = InspectionDetailsActivity.makeLaunchIntent(RestaurantDetailsActivity.this,position);
             startActivity(i);
         });
+
     }
 
-    private void getData() {
+    private void Getdata() {
         Intent intent = getIntent();
         int rest_index = intent.getIntExtra(INDEX,0);
         rest = restaurantManager.getRestaurant(rest_index);
         inspectionManager = rest.getInspections();
     }
 
-
     public static Intent makeLaunchIntent(RestaurantListActivity restaurantListActivity, int position) {
-        Intent intent = new Intent(restaurantListActivity, RestaurantDetails.class);
+        Intent intent = new Intent(restaurantListActivity, RestaurantDetailsActivity.class);
         intent.putExtra(INDEX, position);
         return intent;
     }

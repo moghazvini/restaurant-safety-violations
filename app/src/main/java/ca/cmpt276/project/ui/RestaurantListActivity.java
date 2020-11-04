@@ -116,6 +116,7 @@ public class RestaurantListActivity extends AppCompatActivity {
                 Restaurant restaurant = new Restaurant(
                         tokens[1].replace("\"", ""), // Restaurant name
                         tokens[2].replace("\"", ""), // Restaurant Address
+                        tokens[3].replace("\"", ""), // Restaurant city
                         Float.parseFloat(tokens[6]), // Restaurant Longitude
                         Float.parseFloat(tokens[5]), // Restaurant Latitude
                         tokens[0].replace("\"", "") // Restaurant tracking number
@@ -182,6 +183,8 @@ public class RestaurantListActivity extends AppCompatActivity {
                         hazardText.setTextColor(Color.parseColor("#FA2828")); // Red
                         hazardImageView.setBackgroundResource(R.drawable.red_hazard);
                         break;
+                    default:
+                        assert false;
                 }
 
                 // code to find difference between dates from https://www.baeldung.com/java-date-difference
@@ -204,7 +207,7 @@ public class RestaurantListActivity extends AppCompatActivity {
             }
             else{
                 issuesText.setText(R.string.no_inspection_found);
-                inspectionText.setText(R.string.no_inspection_found);
+                inspectionText.setText("");
             }
             return itemView;
         }
@@ -213,9 +216,7 @@ public class RestaurantListActivity extends AppCompatActivity {
     private void registerCallBack(){
         ListView list = findViewById(R.id.listViewRestaurants);
         list.setOnItemClickListener((parent, viewClicked, position, id) -> {
-
-            Toast.makeText(RestaurantListActivity.this, "Open Inspection list activity for position: " + position, Toast.LENGTH_SHORT).show();
-            Intent i = RestaurantDetails.makeLaunchIntent(RestaurantListActivity.this,position);
+            Intent i = RestaurantDetailsActivity.makeLaunchIntent(RestaurantListActivity.this,position);
             startActivity(i);
         });
     }

@@ -1,0 +1,12 @@
+all violations icons:
+
+101-104,311-312 : ncrit establishment violations
+201-206,310 : crit food
+207-212 : ncrit food
+301-303 : crit equipment
+304-305,313 : ncrit pest 
+306-308,315 : ncrit equipment
+309 : ncrit chems
+401-402 : crit employees 
+403-404 : ncrit employee
+314,501-502 : ncrit operator
