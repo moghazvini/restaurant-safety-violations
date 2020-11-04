@@ -51,7 +51,7 @@ public class RestaurantDetails extends AppCompatActivity {
         }
 
         restaurantManager = RestaurantListManager.getInstance();
-        Getdata();
+        getData();
         populateList();
         setValues();
         OnClick();
@@ -147,17 +147,18 @@ public class RestaurantDetails extends AppCompatActivity {
 
             Toast.makeText(RestaurantDetails.this, "Open Inspection details activity for position: " + position, Toast.LENGTH_SHORT).show();
 
-            Intent i = InspectionDetailsActivity.makeLaunchIntent(RestaurantDetails.this,position);
+            Intent i = InspectionDetailsActivity.Launch(RestaurantDetails.this,position);
             startActivity(i);
         });
     }
 
-    private void Getdata() {
+    private void getData() {
         Intent intent = getIntent();
         int rest_index = intent.getIntExtra(INDEX,0);
         rest = restaurantManager.getRestaurant(rest_index);
         inspectionManager = rest.getInspections();
     }
+
 
     public static Intent makeLaunchIntent(RestaurantListActivity restaurantListActivity, int position) {
         Intent intent = new Intent(restaurantListActivity, RestaurantDetails.class);

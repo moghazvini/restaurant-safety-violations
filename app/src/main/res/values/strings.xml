@@ -18,4 +18,5 @@
     <string name="rest_name">Restaurant name here</string>
     <string name="restaurant_add">Rest Add here</string>
     <string name="rest_gps">Restaurant gps here</string>
+
 </resources>

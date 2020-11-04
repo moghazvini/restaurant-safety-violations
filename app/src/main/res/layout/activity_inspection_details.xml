@@ -27,7 +27,6 @@
         layout="@layout/content_inspection_details"
         android:layout_width="match_parent"
         android:layout_height="670dp"
-        android:layout_marginTop="0dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/appBarLayout" />
 </androidx.constraintlayout.widget.ConstraintLayout>

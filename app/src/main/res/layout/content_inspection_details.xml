@@ -6,22 +6,22 @@
     android:layout_height="match_parent"
     android:id="@+id/relativeLayout"
     tools:context=".ui.InspectionDetailsActivity"
-    tools:showIn="@layout/activity_content_details">
+    >
 
     <TextView
-        android:id="@+id/txt_critIssues"
+        android:id="@+id/txt_num_critical"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
+        android:layout_marginTop="8dp"
         android:text="@string/critical_issue"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.051"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/txt_inspDate" />
+        app:layout_constraintTop_toBottomOf="@+id/txt_inspection_type" />
 
     <TextView
-        android:id="@+id/txt_NcritIssues"
+        android:id="@+id/txt_num_non_crtitical"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
@@ -30,7 +30,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.059"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/txt_critIssues" />
+        app:layout_constraintTop_toBottomOf="@+id/txt_num_critical" />
 
     <TextView
         android:id="@+id/txt_inspDate"
@@ -38,11 +38,10 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_alignParentEnd="true"
-        android:layout_marginTop="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
         android:text="@string/inspection_date"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.055"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -54,7 +53,7 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="20dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/txt_NcritIssues" />
+        app:layout_constraintTop_toBottomOf="@+id/txt_num_non_crtitical" />
 
     <TextView
         android:id="@+id/txt_hazard"
@@ -77,15 +76,15 @@
         app:layout_constraintTop_toBottomOf="@+id/img_hazard"
         app:layout_constraintVertical_bias="0.85" />
 
-    <Button
-        android:id="@+id/btn_back"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="152dp"
-        android:text="Back"
-        app:layout_constraintBottom_toTopOf="@+id/listView"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/txt_inspDate"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.231" />
+    <TextView
+        android:id="@+id/txt_inspection_type"
+        android:layout_width="121dp"
+        android:layout_height="25dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="4dp"
+        android:text="Type"
+        android:textSize="18sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/txt_inspDate" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
