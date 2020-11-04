@@ -138,7 +138,7 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
         back.setTitle(rest.getName());
         TextView ResAdd_txt = findViewById(R.id.txt_restAdd);
 
-        String address = "Facility Address: " + rest.getAddress() + " " + rest.getCity();
+        String address = "Facility Address: \n" + rest.getAddress() + " " + rest.getCity();
         ResAdd_txt.setText(address);
 
         TextView ResGps_txt = findViewById(R.id.txt_gps);
