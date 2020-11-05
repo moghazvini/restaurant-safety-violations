@@ -9,7 +9,7 @@
     >
 
     <TextView
-        android:id="@+id/txt_num_critical"
+        android:id="@+id/txt_brief_description"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
@@ -30,41 +30,43 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.059"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/txt_num_critical" />
+        app:layout_constraintTop_toBottomOf="@+id/txt_brief_description" />
 
     <TextView
-        android:id="@+id/txt_inspDate"
+        android:id="@+id/txt_critical_or_not"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_alignParentEnd="true"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="8dp"
         android:text="@string/inspection_date"
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.043"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <ImageView
         android:id="@+id/img_hazard"
-        android:layout_width="20dp"
-        android:layout_height="20dp"
+        android:layout_width="26dp"
+        android:layout_height="26dp"
         android:layout_centerHorizontal="true"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="12dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/txt_num_non_crtitical" />
 
     <TextView
         android:id="@+id/txt_hazard"
-        android:layout_width="2dp"
-        android:layout_height="8dp"
-        android:layout_marginStart="24dp"
+        android:layout_width="144dp"
+        android:layout_height="26dp"
+        android:layout_marginStart="8dp"
+        android:textAppearance="@style/TextAppearance.AppCompat.Large"
         app:layout_constraintBottom_toBottomOf="@+id/img_hazard"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.072"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toEndOf="@+id/img_hazard"
-        app:layout_constraintTop_toTopOf="@+id/img_hazard" />
+        app:layout_constraintTop_toTopOf="@+id/img_hazard"
+        app:layout_constraintVertical_bias="0.0" />
 
     <ListView
         android:id="@+id/listView"
@@ -80,11 +82,12 @@
         android:id="@+id/txt_inspection_type"
         android:layout_width="121dp"
         android:layout_height="25dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="4dp"
+        android:layout_marginTop="8dp"
         android:text="Type"
-        android:textSize="18sp"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.042"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/txt_inspDate" />
+        app:layout_constraintTop_toBottomOf="@+id/txt_critical_or_not" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
