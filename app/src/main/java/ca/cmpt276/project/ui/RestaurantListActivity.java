@@ -90,7 +90,7 @@ public class RestaurantListActivity extends AppCompatActivity {
                     } else if (stringHazardLevel.equals("High")) {
                         hazardLevel = HazardLevel.HIGH;
                     }
-                    Inspection inspection = new Inspection(date, type, numCritical, numNonCritical, hazardLevel);
+                    Inspection inspection = new Inspection(date, type, numCritical, numNonCritical, hazardLevel,tokens[6]);
                     inspectionList.add(inspection);
                 }
             }
