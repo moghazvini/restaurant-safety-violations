@@ -68,6 +68,10 @@ public class Inspection implements Comparable<Inspection>{
         this.level = level;
     }
 
+    public Violation getViolation(int index) {
+        return violations.get(index);
+    }
+
     @Override
     public int compareTo(Inspection other) {
         return this.date.compareTo(other.date);

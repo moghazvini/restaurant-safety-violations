@@ -74,15 +74,20 @@ public class RestaurantListActivity extends AppCompatActivity {
                 String inspectionTracking = tokens[0].replace("\"", "");
 
                 if(restaurantTracking.equals(inspectionTracking)) {
+
                     SimpleDateFormat formatter1 = new SimpleDateFormat("yyyyMMdd");
                     Date date = formatter1.parse(tokens[1]);
+
                     String stringType = tokens[2].replace("\"", "");
                     InspectionType type = InspectionType.FOLLOWUP;
                     if (stringType.equals("Routine")) {
                         type = InspectionType.ROUTINE;
                     }
+
                     int numCritical = Integer.parseInt(tokens[3]);
+
                     int numNonCritical = Integer.parseInt(tokens[4]);
+
                     String stringHazardLevel = tokens[5].replace("\"", "");
                     HazardLevel hazardLevel = HazardLevel.LOW;
                     if (stringHazardLevel.equals("Moderate")) {
@@ -90,6 +95,8 @@ public class RestaurantListActivity extends AppCompatActivity {
                     } else if (stringHazardLevel.equals("High")) {
                         hazardLevel = HazardLevel.HIGH;
                     }
+
+
                     Inspection inspection = new Inspection(date, type, numCritical, numNonCritical, hazardLevel);
                     inspectionList.add(inspection);
                 }
