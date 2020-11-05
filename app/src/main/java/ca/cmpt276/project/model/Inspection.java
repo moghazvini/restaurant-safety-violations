@@ -46,7 +46,7 @@ public class Inspection implements Comparable<Inspection>{
     private void fillViolation(String lump) {
         // parse the lump to extract the info
         String[] info = lump.split(",");
-        int code = Integer.parseInt(info[0]);
+        int code = Integer.parseInt(info[0].replace("\"",""));
 
         Severity severity;
         if (info[1].equals("Not Critical")) {

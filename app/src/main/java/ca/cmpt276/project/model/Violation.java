@@ -20,6 +20,22 @@ public class Violation {
         this.repeat = repeat;
     }
 
+    public Violation(String lump) {
+        System.out.println("lump = " + lump);
+        // parse the lump to extract the info
+        String[] info = lump.split(",");
+        code = Integer.parseInt(info[0].replace("\"",""));
+
+        Severity severity;
+        if (info[1].equals("Not Critical")) {
+            severity = Severity.NOTCRITICAL;
+        } else {
+            severity = Severity.CRITICAL;
+        }
+        longDis = info[2];
+        repeat = info[3];
+    }
+
     public int getCode() {
         return code;
     }
@@ -54,5 +70,16 @@ public class Violation {
 
     public ViolationType getType() {
         return type;
+    }
+
+    @Override
+    public String toString() {
+        return "Violation{" +
+                "code=" + code +
+                ", type=" + type +
+                ", severity=" + severity +
+                ", longDis='" + longDis + '\'' +
+                ", repeat='" + repeat + '\'' +
+                '}';
     }
 }
