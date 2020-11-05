@@ -34,4 +34,5 @@
     <string name="hazard_level">Hazard: </string>
     <string name="issue">issue</string>
     <string name="empty_violations">No violations recorded.</string>
+    <string name="violation">Violation</string>
 </resources>
