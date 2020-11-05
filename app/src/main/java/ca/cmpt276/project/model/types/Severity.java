@@ -5,7 +5,7 @@ package ca.cmpt276.project.model.types;
  */
 public enum Severity {
     CRITICAL("Critical"),
-    NOTCRITICAL("Not Critical");
+    NOTCRITICAL("Non-Critical");
 
     public final String severity;
 

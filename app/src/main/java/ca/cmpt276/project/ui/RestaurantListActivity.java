@@ -35,6 +35,9 @@ import ca.cmpt276.project.model.Violation;
 import ca.cmpt276.project.model.types.HazardLevel;
 import ca.cmpt276.project.model.types.InspectionType;
 
+/**
+ * used to display the list of all restaurants
+ */
 public class RestaurantListActivity extends AppCompatActivity {
     private RestaurantListManager restaurantManager;
 
@@ -97,13 +100,10 @@ public class RestaurantListActivity extends AppCompatActivity {
                         hazardLevel = HazardLevel.HIGH;
                     }
 
-
                     Inspection inspection;
 
-                    System.out.println("Inspection Length: " + tokens.length);
-                    String lump = "";
-
                     if (tokens.length >= 7) {
+                        String lump = "";
                         for (int i=6; i<tokens.length; i++) {
                             lump = lump + tokens[i]+",";
                         }
