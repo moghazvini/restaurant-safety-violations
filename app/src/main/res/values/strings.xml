@@ -27,4 +27,11 @@
     <string name="rest_gps">Restaurant gps here</string>
     <string name="inspections_list">List of Inspections:</string>
     <string name="empty_inspections">No inspections available.</string>
+
+    <!--Inspection-->
+    <string name="type">Type</string>
+    <string name="brief">Brief description</string>
+    <string name="hazard_level">Hazard: </string>
+    <string name="issue">issue</string>
+    <string name="empty_violations">No violations recorded.</string>
 </resources>

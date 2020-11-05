@@ -75,10 +75,12 @@ public class InspectionDetailsActivity extends AppCompatActivity {
         private void populateListView() {
 
             Collections.sort(restaurantManager.getList());
-            listView = (ListView) findViewById(R.id.listView);
+            listView = findViewById(R.id.listView);
 
             ArrayAdapter<Violation> arrayAdapter = new ViolationListAdapter();
-
+            TextView noViolations = findViewById(R.id.empty_violations);
+            listView.setEmptyView(noViolations);
+            
             listView.setAdapter(arrayAdapter);
         }
 
@@ -164,16 +166,20 @@ public class InspectionDetailsActivity extends AppCompatActivity {
             else{
                 inspectionDateText = diff + " days ago";
             }
-            back.setTitle(inspectionDateText);
+
             TextView inspectionType_txt = findViewById(R.id.txt_inspection_type);
+            TextView critissues = findViewById(R.id.txt_critissues);
+            TextView Ncritissues = findViewById(R.id.txt_num_non_crtitical);
+
+            back.setTitle(inspectionDateText);
             String type = inspection.getType().value;
             inspectionType_txt.setText(String.format(type));
             String nonCrit = "# of Critical Issues: " + inspection.getCritical();
             String crit = "# of Non-Critical Issues: " + inspection.getNonCritical();
-            TextView critissues = findViewById(R.id.txt_critissues);
-            TextView Ncritissues = findViewById(R.id.txt_num_non_crtitical);
+
             critissues.setText(nonCrit);
             Ncritissues.setText(crit);
+
             TextView hazard_txt = findViewById(R.id.txt_hazard);
             ImageView hazard_img = findViewById(R.id.img_hazard);
             switch (inspection.getLevel()) {
