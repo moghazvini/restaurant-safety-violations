@@ -31,8 +31,6 @@ import ca.cmpt276.project.model.Restaurant;
 import ca.cmpt276.project.model.RestaurantListManager;
 import ca.cmpt276.project.model.Violation;
 
-import static java.lang.Math.abs;
-
 /**
  *  used to display details of a single inspection
  */
@@ -40,12 +38,9 @@ public class InspectionDetailsActivity extends AppCompatActivity {
 
     private final static String INDEX = "Inspection Report Index";
     private final static String REST_INDEX = "Restaurant Index";
-    private ListView listView;
     private  static RestaurantListManager restaurantManager;
     private static InspectionListManager inspectionManager;
     private static Inspection inspection;
-    private static Restaurant restaurant;
-    private static Violation violation;
 
     private ActionBar back;
 
@@ -75,7 +70,7 @@ public class InspectionDetailsActivity extends AppCompatActivity {
         private void populateListView() {
 
             Collections.sort(restaurantManager.getList());
-            listView = findViewById(R.id.listView);
+            ListView listView = findViewById(R.id.listView);
 
             ArrayAdapter<Violation> arrayAdapter = new ViolationListAdapter();
             TextView noViolations = findViewById(R.id.empty_violations);
@@ -97,7 +92,7 @@ public class InspectionDetailsActivity extends AppCompatActivity {
                     itemView = getLayoutInflater().inflate(R.layout.violation_list, parent, false);
                 }
 
-                violation = inspection.getViolation(position);
+                Violation violation = inspection.getViolation(position);
 
                 ImageView violation_img = itemView.findViewById(R.id.img_hazard);
                 TextView brief_description_txt = itemView.findViewById(R.id.txt_critissues);
@@ -149,8 +144,6 @@ public class InspectionDetailsActivity extends AppCompatActivity {
         }
 
         private void setValues() {
-            TextView inspectionDate_txt = findViewById(R.id.txt_critical_or_not);
-
             Date currentDate = new Date();
             SimpleDateFormat formatter1 = new SimpleDateFormat("MMM yyyy");
             long diffInMillies = Math.abs(currentDate.getTime() - inspection.getDate().getTime());
@@ -173,7 +166,7 @@ public class InspectionDetailsActivity extends AppCompatActivity {
 
             back.setTitle(inspectionDateText);
             String type = inspection.getType().value;
-            inspectionType_txt.setText(String.format(type));
+            inspectionType_txt.setText(type);
             String nonCrit = "# of Critical Issues: " + inspection.getCritical();
             String crit = "# of Non-Critical Issues: " + inspection.getNonCritical();
 
@@ -206,9 +199,7 @@ public class InspectionDetailsActivity extends AppCompatActivity {
 
         private void onClick() {
             ListView list = findViewById(R.id.listView);
-            list.setOnItemClickListener((parent, viewClicked, position, id) -> {
-                Toast.makeText(InspectionDetailsActivity.this, inspection.getViolation(position).getLongDis(), Toast.LENGTH_LONG).show();
-            });
+            list.setOnItemClickListener((parent, viewClicked, position, id) -> Toast.makeText(InspectionDetailsActivity.this, inspection.getViolation(position).getLongDis(), Toast.LENGTH_LONG).show());
         }
         public static Intent makeLaunchIntent(RestaurantDetailsActivity restaurantDetails, int position, int rest_position) {
         Intent intent = new Intent(restaurantDetails, InspectionDetailsActivity.class);
@@ -221,7 +212,7 @@ public class InspectionDetailsActivity extends AppCompatActivity {
         Intent intent = getIntent();
         int index = intent.getIntExtra(INDEX, 0);
         int rest_index = intent.getIntExtra(REST_INDEX, 0);
-        restaurant = restaurantManager.getRestaurant(rest_index);
+        Restaurant restaurant = restaurantManager.getRestaurant(rest_index);
         inspectionManager = restaurant.getInspections();
         inspection = inspectionManager.getInspection(index);
     }
