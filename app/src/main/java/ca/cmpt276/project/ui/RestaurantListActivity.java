@@ -13,7 +13,6 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -31,7 +30,6 @@ import ca.cmpt276.project.model.Inspection;
 import ca.cmpt276.project.model.InspectionListManager;
 import ca.cmpt276.project.model.Restaurant;
 import ca.cmpt276.project.model.RestaurantListManager;
-import ca.cmpt276.project.model.Violation;
 import ca.cmpt276.project.model.types.HazardLevel;
 import ca.cmpt276.project.model.types.InspectionType;
 
@@ -103,11 +101,11 @@ public class RestaurantListActivity extends AppCompatActivity {
                     Inspection inspection;
 
                     if (tokens.length >= 7) {
-                        String lump = "";
+                        StringBuilder lump = new StringBuilder();
                         for (int i=6; i<tokens.length; i++) {
-                            lump = lump + tokens[i]+",";
+                            lump.append(tokens[i]).append(",");
                         }
-                        inspection = new Inspection(date, type, numCritical, numNonCritical, hazardLevel, lump);
+                        inspection = new Inspection(date, type, numCritical, numNonCritical, hazardLevel, lump.toString());
                     } else {
                         inspection = new Inspection(date, type, numCritical, numNonCritical, hazardLevel);
                     }
