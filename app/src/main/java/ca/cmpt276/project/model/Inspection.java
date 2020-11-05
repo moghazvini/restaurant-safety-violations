@@ -12,7 +12,7 @@ import ca.cmpt276.project.model.types.InspectionType;
 import ca.cmpt276.project.model.types.Severity;
 
 /**
- * Represents an inpsection report and
+ * Represents an inspection report and
  * contains a list of violations.
  */
 public class Inspection implements Comparable<Inspection>{
