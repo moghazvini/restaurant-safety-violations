@@ -33,7 +33,9 @@ import ca.cmpt276.project.model.Violation;
 
 import static java.lang.Math.abs;
 
-
+/**
+ *  used to display details of a single inspection
+ */
 public class InspectionDetailsActivity extends AppCompatActivity {
 
     private final static String INDEX = "Inspection Report Index";

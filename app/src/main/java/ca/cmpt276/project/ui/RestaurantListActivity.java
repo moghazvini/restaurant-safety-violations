@@ -35,6 +35,9 @@ import ca.cmpt276.project.model.Violation;
 import ca.cmpt276.project.model.types.HazardLevel;
 import ca.cmpt276.project.model.types.InspectionType;
 
+/**
+ * used to display the list of all restaurants
+ */
 public class RestaurantListActivity extends AppCompatActivity {
     private RestaurantListManager restaurantManager;
 
