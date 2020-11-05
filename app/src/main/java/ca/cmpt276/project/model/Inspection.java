@@ -45,17 +45,21 @@ public class Inspection implements Comparable<Inspection>{
 
     private void fillViolation(String lump) {
         // parse the lump to extract the info
-        String[] info = lump.split(",");
-        int code = Integer.parseInt(info[0].replace("\"",""));
+        String[] list = lump.split("\\|");
 
-        Severity severity;
-        if (info[1].equals("Not Critical")) {
-            severity = Severity.NOTCRITICAL;
-        } else {
-            severity = Severity.CRITICAL;
+        for (String s : list) {
+            String[] info = s.split(",");
+            int code = Integer.parseInt(info[0].replace("\"", ""));
+
+            Severity severity;
+            if (info[1].equals("Not Critical")) {
+                severity = Severity.NOTCRITICAL;
+            } else {
+                severity = Severity.CRITICAL;
+            }
+
+            violations.add(new Violation(code, severity, info[2], info[3]));
         }
-
-        violations.add(new Violation(code,severity,info[2],info[3]));
     }
 
     public Date getDate() {
