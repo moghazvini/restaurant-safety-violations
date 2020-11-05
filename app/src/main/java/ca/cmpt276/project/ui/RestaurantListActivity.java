@@ -97,7 +97,14 @@ public class RestaurantListActivity extends AppCompatActivity {
                     }
 
 
-                    Inspection inspection = new Inspection(date, type, numCritical, numNonCritical, hazardLevel);
+                    Inspection inspection;
+
+                    try {
+                        inspection = new Inspection(date, type, numCritical, numNonCritical, hazardLevel, tokens[6]);
+
+                    } catch (Exception e) {
+                        inspection = new Inspection(date, type, numCritical, numNonCritical, hazardLevel);
+                    }
                     inspectionList.add(inspection);
                 }
             }

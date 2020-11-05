@@ -1,5 +1,8 @@
 package ca.cmpt276.project.model;
 
+import android.util.Log;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -20,6 +23,15 @@ public class Inspection implements Comparable<Inspection>{
     private HazardLevel level;
     private List<Violation> violations;
 
+    public Inspection(Date date, InspectionType type, int critical, int nonCritical, HazardLevel level) {
+        this.date = date;
+        this.type = type;
+        this.critical = critical;
+        this.nonCritical = nonCritical;
+        this.level = level;
+        violations = new ArrayList<>();
+    }
+
     public Inspection(Date date, InspectionType type, int critical, int nonCritical, HazardLevel level, String vioLump) {
         this.date = date;
         this.type = type;
@@ -29,6 +41,7 @@ public class Inspection implements Comparable<Inspection>{
         violations = new ArrayList<>();
         fillViolation(vioLump);
     }
+
 
     private void fillViolation(String lump) {
         // parse the lump to extract the info
