@@ -51,4 +51,8 @@ public class Violation {
     public void setRepeat(String repeat) {
         this.repeat = repeat;
     }
+
+    public ViolationType getType() {
+        return type;
+    }
 }
