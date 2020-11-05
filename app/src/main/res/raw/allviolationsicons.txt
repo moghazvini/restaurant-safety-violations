@@ -7,6 +7,6 @@ all violations icons:
 304-305,313 : ncrit pest 
 306-308,315 : ncrit equipment
 309 : ncrit chems
-401-402 : crit employees 
+401-402 : crit employee
 403-404 : ncrit employee
 314,501-502 : ncrit operator

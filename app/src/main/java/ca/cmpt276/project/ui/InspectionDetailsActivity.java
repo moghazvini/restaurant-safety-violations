@@ -96,46 +96,41 @@ public class InspectionDetailsActivity extends AppCompatActivity {
                 violation = inspection.getViolation(position);
 
                 ImageView violation_img = itemView.findViewById(R.id.img_hazard);
-                TextView violation_txt = itemView.findViewById(R.id.txt_hazard);
-                TextView brief_description_txt = itemView.findViewById(R.id.txt_brief_description);
+                TextView brief_description_txt = itemView.findViewById(R.id.txt_critissues);
                 TextView crit_or_not_txt = itemView.findViewById(R.id.txt_critical_or_not);
 
                 if(inspectionManager.getInspections().size()>0) {
-                    String brief_description = "" + violation.getCode() + violation.getType().violation;
-                    String crit_or_not = violation.getSeverity().toString();
+                    String brief_description = violation.getCode() +"  "+ violation.getType().violation;
+                    String crit_or_not = violation.getSeverity().severity;
                     brief_description_txt.setText(brief_description);
+                    if(crit_or_not.equals("Critical")){
+                        crit_or_not_txt.setTextColor(Color.parseColor("#FA2828")); // Red
+                    }else {
+                        crit_or_not_txt.setTextColor(Color.parseColor("#45DE08")); // Green
+                    }
                     crit_or_not_txt.setText(crit_or_not);
 
                     switch (violation.getType()) {
                         case OPERATOR:
-                            violation_txt.setText(R.string.operator_violation);
-                            violation_txt.setTextColor(Color.parseColor("#000000"));
                             violation_img.setBackgroundResource(R.drawable.non_crit_operator_violations);
                             break;
                         case FOOD:
-                            violation_txt.setText(R.string.food_violation);
-                            violation_txt.setTextColor(Color.parseColor("#000000"));
                             violation_img.setBackgroundResource(R.drawable.crit_food_violations);
                             break;
                         case EQUIPMENT:
-                            violation_txt.setText(R.string.equipment_violation);
-                            violation_txt.setTextColor(Color.parseColor("#000000"));
                             violation_img.setBackgroundResource(R.drawable.crit_equiptment_violations);
                             break;
                         case PESTS:
-                            violation_txt.setText(R.string.pest_violation);
-                            violation_txt.setTextColor(Color.parseColor("#000000"));
                             violation_img.setBackgroundResource(R.drawable.non_crit_pest_violations);
                             break;
                         case EMPLOYEES:
-                            violation_txt.setText(R.string.employee_violation);
-                            violation_txt.setTextColor(Color.parseColor("#000000"));
                             violation_img.setBackgroundResource(R.drawable.non_crit_employee_violations);
                             break;
                         case ESTABLISHMENT:
-                            violation_txt.setText(R.string.establishment_violation);
-                            violation_txt.setTextColor(Color.parseColor("#000000"));
                             violation_img.setBackgroundResource(R.drawable.crit_employees_violations);
+                            break;
+                        case CHEMICAL:
+                            violation_img.setBackgroundResource(R.drawable._09ncrit_chems);
                             break;
                         default:
                             assert false;
@@ -167,14 +162,16 @@ public class InspectionDetailsActivity extends AppCompatActivity {
             else{
                 inspectionDateText = diff + " days ago";
             }
-            inspectionDate_txt.setText(inspectionDateText);
-            back.setTitle(restaurant.getName());
+            back.setTitle(inspectionDateText);
             TextView inspectionType_txt = findViewById(R.id.txt_inspection_type);
-            String type = inspection.getType().toString();
+            String type = inspection.getType().value;
             inspectionType_txt.setText(String.format(type));
-
-
-
+            String nonCrit = "# of Critical Issues: " + inspection.getCritical();
+            String crit = "# of Non-Critical Issues: " + inspection.getNonCritical();
+            TextView critissues = findViewById(R.id.txt_critissues);
+            TextView Ncritissues = findViewById(R.id.txt_num_non_crtitical);
+            critissues.setText(nonCrit);
+            Ncritissues.setText(crit);
             TextView hazard_txt = findViewById(R.id.txt_hazard);
             ImageView hazard_img = findViewById(R.id.img_hazard);
             switch (inspection.getLevel()) {
