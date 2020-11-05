@@ -102,6 +102,10 @@ public class Inspection implements Comparable<Inspection>{
         return violations.get(index);
     }
 
+    public List<Violation> getViolations() {
+        return violations;
+    }
+
     @Override
     public int compareTo(Inspection other) {
         return this.date.compareTo(other.date);

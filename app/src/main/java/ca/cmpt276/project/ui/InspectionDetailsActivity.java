@@ -74,16 +74,15 @@ public class InspectionDetailsActivity extends AppCompatActivity {
 
             Collections.sort(restaurantManager.getList());
             listView = (ListView) findViewById(R.id.listView);
-            InspectionListManager inspectionMgr = new InspectionListManager();
 
-            ArrayAdapter<Inspection> arrayAdapter = new ViolationListAdapter();
+            ArrayAdapter<Violation> arrayAdapter = new ViolationListAdapter();
 
             listView.setAdapter(arrayAdapter);
         }
 
-        private class ViolationListAdapter extends ArrayAdapter<Inspection> {
+        private class ViolationListAdapter extends ArrayAdapter<Violation> {
                     public ViolationListAdapter () {
-                        super(InspectionDetailsActivity.this, R.layout.violation_list);
+                        super(InspectionDetailsActivity.this, R.layout.violation_list, inspection.getViolations());
                     }
 
             @NonNull
@@ -102,7 +101,7 @@ public class InspectionDetailsActivity extends AppCompatActivity {
                 TextView crit_or_not_txt = itemView.findViewById(R.id.txt_critical_or_not);
 
                 if(inspectionManager.getInspections().size()>0) {
-                    String brief_description = violation.getCode() + violation.getType().toString();
+                    String brief_description = violation.getCode() + violation.getType().violation;
                     String crit_or_not = violation.getSeverity().toString();
                     brief_description_txt.setText(brief_description);
                     crit_or_not_txt.setText(crit_or_not);
