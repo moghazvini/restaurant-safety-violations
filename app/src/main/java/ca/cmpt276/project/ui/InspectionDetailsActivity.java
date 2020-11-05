@@ -199,7 +199,7 @@ public class InspectionDetailsActivity extends AppCompatActivity {
         private void onClick() {
             ListView list = findViewById(R.id.listView);
             list.setOnItemClickListener((parent, viewClicked, position, id) -> {
-                Toast.makeText(InspectionDetailsActivity.this, " full violation text goes here ", Toast.LENGTH_SHORT).show();
+                Toast.makeText(InspectionDetailsActivity.this, inspection.getViolation(position).getLongDis(), Toast.LENGTH_LONG).show();
             });
         }
         public static Intent makeLaunchIntent(RestaurantDetailsActivity restaurantDetails, int position, int rest_position) {
