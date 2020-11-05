@@ -18,22 +18,34 @@ public class Violation {
         this.severity = severity;
         this.longDis = longDis;
         this.repeat = repeat;
+        getViolationType(code);
     }
 
-    public Violation(String lump) {
-        System.out.println("lump = " + lump);
-        // parse the lump to extract the info
-        String[] info = lump.split(",");
-        code = Integer.parseInt(info[0].replace("\"",""));
-
-        Severity severity;
-        if (info[1].equals("Not Critical")) {
-            severity = Severity.NOTCRITICAL;
-        } else {
-            severity = Severity.CRITICAL;
+    private void getViolationType(int code) {
+        if ((code >= 101 && code <= 104)
+                || (code >=311 && code <=312)) {
+            type = ViolationType.ESTABLISHMENT;
         }
-        longDis = info[2];
-        repeat = info[3];
+        else if ((code >= 201 && code <= 212)
+                    || code == 310) {
+            type = ViolationType.FOOD;
+        }
+        else if ((code >= 301 && code <= 303)
+                || (code >= 306 && code <= 308)
+                || code == 315) {
+            type = ViolationType.EQUIPMENT;
+        }
+        else if ((code >= 304 && code <= 305)
+                || code == 313) {
+            type = ViolationType.PESTS;
+        }
+        else if (code >= 401 && code <= 404) {
+            type = ViolationType.EMPLOYEES;
+        }
+        else if ((code >= 501 && code <= 502)
+                || code == 314) {
+            type = ViolationType.OPERATOR;
+        }
     }
 
     public int getCode() {
