@@ -45,6 +45,8 @@ public class Violation {
         else if ((code >= 501 && code <= 502)
                 || code == 314) {
             type = ViolationType.OPERATOR;
+        } else if (code == 309) {
+            type = ViolationType.CHEMICAL;
         }
     }
 
