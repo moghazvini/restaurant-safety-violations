@@ -27,6 +27,9 @@ import ca.cmpt276.project.model.RestaurantListManager;
 
 import static java.lang.Math.abs;
 
+/**
+ * used to display details of a single restaurant
+ */
 public class RestaurantDetailsActivity extends AppCompatActivity {
 
     private final static String INDEX = "Inspection Report Index";
@@ -169,4 +172,3 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
         return intent;
     }
 }
-//https://www.geeksforgeeks.org/collections-sort-java-examples/
