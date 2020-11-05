@@ -31,6 +31,7 @@ import ca.cmpt276.project.model.Inspection;
 import ca.cmpt276.project.model.InspectionListManager;
 import ca.cmpt276.project.model.Restaurant;
 import ca.cmpt276.project.model.RestaurantListManager;
+import ca.cmpt276.project.model.Violation;
 import ca.cmpt276.project.model.types.HazardLevel;
 import ca.cmpt276.project.model.types.InspectionType;
 
@@ -74,15 +75,20 @@ public class RestaurantListActivity extends AppCompatActivity {
                 String inspectionTracking = tokens[0].replace("\"", "");
 
                 if(restaurantTracking.equals(inspectionTracking)) {
+
                     SimpleDateFormat formatter1 = new SimpleDateFormat("yyyyMMdd");
                     Date date = formatter1.parse(tokens[1]);
+
                     String stringType = tokens[2].replace("\"", "");
                     InspectionType type = InspectionType.FOLLOWUP;
                     if (stringType.equals("Routine")) {
                         type = InspectionType.ROUTINE;
                     }
+
                     int numCritical = Integer.parseInt(tokens[3]);
+
                     int numNonCritical = Integer.parseInt(tokens[4]);
+
                     String stringHazardLevel = tokens[5].replace("\"", "");
                     HazardLevel hazardLevel = HazardLevel.LOW;
                     if (stringHazardLevel.equals("Moderate")) {
@@ -90,7 +96,21 @@ public class RestaurantListActivity extends AppCompatActivity {
                     } else if (stringHazardLevel.equals("High")) {
                         hazardLevel = HazardLevel.HIGH;
                     }
-                    Inspection inspection = new Inspection(date, type, numCritical, numNonCritical, hazardLevel);
+
+
+                    Inspection inspection;
+
+                    System.out.println("Inspection Length: " + tokens.length);
+                    String lump = "";
+
+                    if (tokens.length >= 7) {
+                        for (int i=6; i<tokens.length; i++) {
+                            lump = lump + tokens[i]+",";
+                        }
+                        inspection = new Inspection(date, type, numCritical, numNonCritical, hazardLevel, lump);
+                    } else {
+                        inspection = new Inspection(date, type, numCritical, numNonCritical, hazardLevel);
+                    }
                     inspectionList.add(inspection);
                 }
             }

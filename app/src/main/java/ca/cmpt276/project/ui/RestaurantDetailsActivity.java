@@ -33,6 +33,7 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
     private RestaurantListManager restaurantManager;
     private InspectionListManager inspectionManager;
     static Restaurant rest;
+    private int rest_index;
 
     private ActionBar back;
 
@@ -149,7 +150,7 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
         ListView insp_list = findViewById(R.id.list_insp);
         insp_list.setOnItemClickListener((parent, view, position, id) -> {
 
-            Intent i = InspectionDetailsActivity.makeLaunchIntent(RestaurantDetailsActivity.this,position);
+            Intent i = InspectionDetailsActivity.makeLaunchIntent(RestaurantDetailsActivity.this, position, rest_index);
             startActivity(i);
         });
 
@@ -157,7 +158,7 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
 
     private void Getdata() {
         Intent intent = getIntent();
-        int rest_index = intent.getIntExtra(INDEX,0);
+        rest_index = intent.getIntExtra(INDEX,0);
         rest = restaurantManager.getRestaurant(rest_index);
         inspectionManager = rest.getInspections();
     }

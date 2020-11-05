@@ -18,6 +18,36 @@ public class Violation {
         this.severity = severity;
         this.longDis = longDis;
         this.repeat = repeat;
+        getViolationType(code);
+    }
+
+    private void getViolationType(int code) {
+        if ((code >= 101 && code <= 104)
+                || (code >=311 && code <=312)) {
+            type = ViolationType.ESTABLISHMENT;
+        }
+        else if ((code >= 201 && code <= 212)
+                    || code == 310) {
+            type = ViolationType.FOOD;
+        }
+        else if ((code >= 301 && code <= 303)
+                || (code >= 306 && code <= 308)
+                || code == 315) {
+            type = ViolationType.EQUIPMENT;
+        }
+        else if ((code >= 304 && code <= 305)
+                || code == 313) {
+            type = ViolationType.PESTS;
+        }
+        else if (code >= 401 && code <= 404) {
+            type = ViolationType.EMPLOYEES;
+        }
+        else if ((code >= 501 && code <= 502)
+                || code == 314) {
+            type = ViolationType.OPERATOR;
+        } else if (code == 309) {
+            type = ViolationType.CHEMICAL;
+        }
     }
 
     public int getCode() {
@@ -50,5 +80,20 @@ public class Violation {
 
     public void setRepeat(String repeat) {
         this.repeat = repeat;
+    }
+
+    public ViolationType getType() {
+        return type;
+    }
+
+    @Override
+    public String toString() {
+        return "Violation{" +
+                "code=" + code +
+                ", type=" + type +
+                ", severity=" + severity +
+                ", longDis='" + longDis + '\'' +
+                ", repeat='" + repeat + '\'' +
+                '}';
     }
 }

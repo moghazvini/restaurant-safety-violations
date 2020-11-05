@@ -9,7 +9,8 @@ public enum ViolationType {
     EQUIPMENT("equipment"),
     PESTS("pests"),
     EMPLOYEES("employees"),
-    ESTABLISHMENT("establishment violation");
+    ESTABLISHMENT("establishment violation"),
+    CHEMICAL("chemical");
 
     public final String violation;
 
