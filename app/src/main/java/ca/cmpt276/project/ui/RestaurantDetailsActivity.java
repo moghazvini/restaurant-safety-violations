@@ -14,10 +14,9 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
-import java.util.Date;
-import java.util.concurrent.TimeUnit;
 
 import ca.cmpt276.project.R;
 import ca.cmpt276.project.model.Inspection;
@@ -25,10 +24,8 @@ import ca.cmpt276.project.model.InspectionListManager;
 import ca.cmpt276.project.model.Restaurant;
 import ca.cmpt276.project.model.RestaurantListManager;
 
-import static java.lang.Math.abs;
-
 /**
- * used to display details of a single restaurant
+ * Displays the details of a single restaurant and lists any inspections.
  */
 public class RestaurantDetailsActivity extends AppCompatActivity {
 
@@ -114,18 +111,19 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
                     default:
                         assert false;
                 }
-                Date currentDate = new Date();
-                SimpleDateFormat formatter1 = new SimpleDateFormat("MMM yyyy");
-                long diffInMillies = abs(currentDate.getTime() - insp.getDate().getTime());
-                long diff = TimeUnit.DAYS.convert(diffInMillies, TimeUnit.MILLISECONDS);
+                LocalDate currentDate = LocalDate.now();
+
                 String inspectionDateText;
-                if (diff > 365) {
-                    inspectionDateText = formatter1.format(insp.getDate());
-                } else if (diff > 30) {
-                    formatter1 = new SimpleDateFormat("MMM dd");
-                    inspectionDateText = formatter1.format(insp.getDate());
-                } else {
-                    inspectionDateText = diff + " days ago";
+                if(Math.abs(currentDate.getYear() - insp.getDate().getYear()) != 0){
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM yyyy");
+                    inspectionDateText = formatter.format(insp.getDate());
+                }
+                else if(Math.abs(currentDate.getMonthValue() - insp.getDate().getMonthValue()) != 0){
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM dd");
+                    inspectionDateText = formatter.format(insp.getDate());
+                }
+                else{
+                    inspectionDateText = insp.getDate().getDayOfMonth() + " days ago";
                 }
                 inspDate_txt.setText(inspectionDateText);
             }

@@ -19,11 +19,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
-import java.util.Date;
-import java.util.concurrent.TimeUnit;
 
 import ca.cmpt276.project.R;
 import ca.cmpt276.project.model.Inspection;
@@ -77,9 +75,10 @@ public class RestaurantListActivity extends AppCompatActivity {
 
                 if(restaurantTracking.equals(inspectionTracking)) {
 
-                    SimpleDateFormat formatter1 = new SimpleDateFormat("yyyyMMdd");
-                    Date date = formatter1.parse(tokens[1]);
-
+                    //SimpleDateFormat formatter1 = new SimpleDateFormat("yyyyMMdd");
+                    //Date date = formatter1.parse(tokens[1]);
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+                    LocalDate date = LocalDate.parse(tokens[1], formatter);
                     String stringType = tokens[2].replace("\"", "");
                     InspectionType type = InspectionType.FOLLOWUP;
                     if (stringType.equals("Routine")) {
@@ -112,7 +111,7 @@ public class RestaurantListActivity extends AppCompatActivity {
                     inspectionList.add(inspection);
                 }
             }
-        } catch(IOException | ParseException e){
+        } catch(IOException e){
             Log.wtf("RestaurantListActivity", "error reading data file on line " + line, e);
         }
         return inspectionList;
@@ -205,21 +204,19 @@ public class RestaurantListActivity extends AppCompatActivity {
                         assert false;
                 }
 
-                // code to find difference between dates from https://www.baeldung.com/java-date-difference
-                Date currentDate = new Date();
-                SimpleDateFormat formatter1 = new SimpleDateFormat("MMM yyyy");
-                long diffInMillies = Math.abs(currentDate.getTime() - latestInspection.getDate().getTime());
-                long diff = TimeUnit.DAYS.convert(diffInMillies, TimeUnit.MILLISECONDS);
+                LocalDate currentDate = LocalDate.now();
+
                 String inspectionDateText;
-                if(diff > 365){
-                    inspectionDateText = formatter1.format(latestInspection.getDate());
+                if(Math.abs(currentDate.getYear() - latestInspection.getDate().getYear()) != 0){
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM yyyy");
+                    inspectionDateText = formatter.format(latestInspection.getDate());
                 }
-                else if(diff > 30){
-                    formatter1 = new SimpleDateFormat("MMM dd");
-                    inspectionDateText = formatter1.format(latestInspection.getDate());
+                else if(Math.abs(currentDate.getMonthValue() - latestInspection.getDate().getMonthValue()) != 0){
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM dd");
+                    inspectionDateText = formatter.format(latestInspection.getDate());
                 }
                 else{
-                    inspectionDateText = diff + " days ago";
+                    inspectionDateText = latestInspection.getDate().getDayOfMonth() + " days ago";
                 }
                 inspectionText.setText(inspectionDateText);
             }

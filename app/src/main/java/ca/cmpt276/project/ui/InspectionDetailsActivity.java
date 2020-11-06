@@ -17,11 +17,9 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
-import java.util.Date;
-import java.util.concurrent.TimeUnit;
 
 
 import ca.cmpt276.project.R;
@@ -144,20 +142,18 @@ public class InspectionDetailsActivity extends AppCompatActivity {
         }
 
         private void setValues() {
-            Date currentDate = new Date();
-            SimpleDateFormat formatter1 = new SimpleDateFormat("MMM yyyy");
-            long diffInMillies = Math.abs(currentDate.getTime() - inspection.getDate().getTime());
-            long diff = TimeUnit.DAYS.convert(diffInMillies, TimeUnit.MILLISECONDS);
+            LocalDate currentDate = LocalDate.now();
             String inspectionDateText;
-            if(diff > 365){
-                inspectionDateText = formatter1.format(inspection.getDate());
+            if(Math.abs(currentDate.getYear() - inspection.getDate().getYear()) != 0){
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM yyyy");
+                inspectionDateText = formatter.format(inspection.getDate());
             }
-            else if(diff > 30){
-                formatter1 = new SimpleDateFormat("MMM dd");
-                inspectionDateText = formatter1.format(inspection.getDate());
+            else if(Math.abs(currentDate.getMonthValue() - inspection.getDate().getMonthValue()) != 0){
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM dd");
+                inspectionDateText = formatter.format(inspection.getDate());
             }
             else{
-                inspectionDateText = diff + " days ago";
+                inspectionDateText = inspection.getDate().getDayOfMonth() + " days ago";
             }
 
             TextView inspectionType_txt = findViewById(R.id.txt_inspection_type);

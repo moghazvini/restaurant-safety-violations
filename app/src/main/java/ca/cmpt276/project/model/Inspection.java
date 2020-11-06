@@ -1,8 +1,6 @@
 package ca.cmpt276.project.model;
 
-import android.util.Log;
-
-import java.io.IOException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -16,14 +14,14 @@ import ca.cmpt276.project.model.types.Severity;
  * contains a list of violations.
  */
 public class Inspection implements Comparable<Inspection>{
-    private Date date;
+    private LocalDate date;
     private InspectionType type;
     private int critical;
     private int nonCritical;
     private HazardLevel level;
     private List<Violation> violations;
 
-    public Inspection(Date date, InspectionType type, int critical, int nonCritical, HazardLevel level) {
+    public Inspection(LocalDate date, InspectionType type, int critical, int nonCritical, HazardLevel level) {
         this.date = date;
         this.type = type;
         this.critical = critical;
@@ -32,7 +30,7 @@ public class Inspection implements Comparable<Inspection>{
         violations = new ArrayList<>();
     }
 
-    public Inspection(Date date, InspectionType type, int critical, int nonCritical, HazardLevel level, String vioLump) {
+    public Inspection(LocalDate date, InspectionType type, int critical, int nonCritical, HazardLevel level, String vioLump) {
         this.date = date;
         this.type = type;
         this.critical = critical;
@@ -62,11 +60,11 @@ public class Inspection implements Comparable<Inspection>{
         }
     }
 
-    public Date getDate() {
+    public LocalDate getDate() {
         return date;
     }
 
-    public void setDate(Date date) {
+    public void setDate(LocalDate date) {
         this.date = date;
     }
 
