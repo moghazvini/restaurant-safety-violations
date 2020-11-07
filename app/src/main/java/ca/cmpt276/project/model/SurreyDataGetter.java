@@ -2,6 +2,7 @@ package ca.cmpt276.project.model;
 
 import android.util.Log;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -10,14 +11,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-
-import javax.net.ssl.HttpsURLConnection;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 
 // Android Programming: The Big Nerd Ranch Guide Chapter 25
 public class SurreyDataGetter {
-    private final String url_restaurant = "https://data.surrey.ca/api/3/action/package_show?id=restaurants";
-    private final String url_inspections = "https://data.surrey.ca/api/3/action/package_show?id=fraser-health-restaurant-inspection-reports";
-
     public byte[] getUrlBytes(String urlSpec) throws IOException {
         URL url = new URL (urlSpec);
         HttpURLConnection connection = (HttpURLConnection)url.openConnection();
@@ -32,7 +31,7 @@ public class SurreyDataGetter {
                                         urlSpec);
             }
 
-            int bytesRead = 0;
+            int bytesRead;
             byte[] buffer = new byte[1024];
             while ((bytesRead = in.read(buffer)) > 0) {
                 out.write(buffer, 0, bytesRead);
@@ -48,13 +47,33 @@ public class SurreyDataGetter {
         return new String(getUrlBytes(urlSpec));
     }
 
-    public void getData(String url) {
+    public SurreyData getData(String url) {
+        SurreyData data = new SurreyData();
         try {
             String jsonString = getUrlString(url);
             Log.i("API Request", "Received JSON: " + jsonString);
             JSONObject jsonBody = new JSONObject(jsonString);
+            parseData(data, jsonBody);
         } catch (IOException | JSONException e) {
             Log.e("API Request", "Failed to get data", e);
         }
+        return data;
+    }
+
+    private void parseData(SurreyData data, JSONObject jsonBody) throws JSONException {
+        JSONObject  resultJsonObject = jsonBody.getJSONObject("result");
+        JSONArray resourcesJsonArray = resultJsonObject.getJSONArray("resources");
+
+        // need the first index for all required information
+        JSONObject resourcesJsonObject = resourcesJsonArray.getJSONObject(0);
+
+        // csv datalink
+        data.setUrl(resourcesJsonObject.getString("url"));
+
+        // format last modified string into a Date
+        String time = resourcesJsonObject.getString("last_modified");
+        time = time.substring(0,10);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        data.setLast_modified(LocalDate.parse(time, formatter));
     }
 }

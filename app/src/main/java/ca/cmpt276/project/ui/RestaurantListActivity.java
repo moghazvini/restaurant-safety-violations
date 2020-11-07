@@ -29,6 +29,7 @@ import ca.cmpt276.project.model.Inspection;
 import ca.cmpt276.project.model.InspectionListManager;
 import ca.cmpt276.project.model.Restaurant;
 import ca.cmpt276.project.model.RestaurantListManager;
+import ca.cmpt276.project.model.SurreyData;
 import ca.cmpt276.project.model.SurreyDataGetter;
 import ca.cmpt276.project.model.types.HazardLevel;
 import ca.cmpt276.project.model.types.InspectionType;
@@ -38,6 +39,7 @@ import ca.cmpt276.project.model.types.InspectionType;
  */
 public class RestaurantListActivity extends AppCompatActivity {
     private RestaurantListManager restaurantManager;
+    private SurreyData restaurantUpdate;
 
     private final String url_restaurant = "https://data.surrey.ca/api/3/action/package_show?id=restaurants";
     private final String url_inspections = "https://data.surrey.ca/api/3/action/package_show?id=fraser-health-restaurant-inspection-reports";
@@ -62,11 +64,15 @@ public class RestaurantListActivity extends AppCompatActivity {
         new GetDataTask().execute();
     }
 
-    private class GetDataTask extends AsyncTask<Void,Void,Void> {
+    private class GetDataTask extends AsyncTask<Void,Void,SurreyData> {
         @Override
-        protected Void doInBackground(Void... voids) {
-            new SurreyDataGetter().getData(url_restaurant);
-            return null;
+        protected SurreyData doInBackground(Void... voids) {
+            return new SurreyDataGetter().getData(url_restaurant);
+        }
+
+        @Override
+        protected void onPostExecute(SurreyData data) {
+            restaurantUpdate = data;
         }
     }
 
