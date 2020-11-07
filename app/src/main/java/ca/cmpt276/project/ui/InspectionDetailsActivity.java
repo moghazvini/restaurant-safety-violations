@@ -50,18 +50,18 @@ public class InspectionDetailsActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar_inspection_det);
         setSupportActionBar(toolbar);
 
-            back = getSupportActionBar();
+        back = getSupportActionBar();
         if (back != null) {
-                back.setDisplayHomeAsUpEnabled(true);
-            }
+            back.setDisplayHomeAsUpEnabled(true);
+        }
 
 
-            restaurantManager = RestaurantListManager.getInstance();
+        restaurantManager = RestaurantListManager.getInstance();
 
-            getData();
-            setValues();
-            populateListView();
-            onClick();
+        getData();
+        setValues();
+        populateListView();
+        onClick();
 
     }
 
