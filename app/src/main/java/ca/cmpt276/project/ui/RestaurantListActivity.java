@@ -5,6 +5,7 @@ import android.graphics.Color;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -28,14 +29,18 @@ import ca.cmpt276.project.model.Inspection;
 import ca.cmpt276.project.model.InspectionListManager;
 import ca.cmpt276.project.model.Restaurant;
 import ca.cmpt276.project.model.RestaurantListManager;
+import ca.cmpt276.project.model.SurreyDataGetter;
 import ca.cmpt276.project.model.types.HazardLevel;
 import ca.cmpt276.project.model.types.InspectionType;
 
 /**
- * used to display the list of all restaurants
+ * Displays the list of all restaurants in alphabetical order
  */
 public class RestaurantListActivity extends AppCompatActivity {
     private RestaurantListManager restaurantManager;
+
+    private final String url_restaurant = "https://data.surrey.ca/api/3/action/package_show?id=restaurants";
+    private final String url_inspections = "https://data.surrey.ca/api/3/action/package_show?id=fraser-health-restaurant-inspection-reports";
 
     private static boolean read = false;
     @Override
@@ -54,9 +59,16 @@ public class RestaurantListActivity extends AppCompatActivity {
 
         populateListView();
         registerCallBack();
+        new GetDataTask().execute();
     }
 
-
+    private class GetDataTask extends AsyncTask<Void,Void,Void> {
+        @Override
+        protected Void doInBackground(Void... voids) {
+            new SurreyDataGetter().getData(url_restaurant);
+            return null;
+        }
+    }
 
     private InspectionListManager fillInspectionManager(String restaurantTracking) {
         InspectionListManager inspectionList = new InspectionListManager();
