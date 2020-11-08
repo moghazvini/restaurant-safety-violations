@@ -55,7 +55,7 @@ public class RestaurantListActivity extends AppCompatActivity {
         restaurantManager = RestaurantListManager.getInstance();
 
         if(!read){
-            fillRestaurantManager();
+            fillInitialRestaurantList();
             read = true;
         }
 
@@ -67,12 +67,32 @@ public class RestaurantListActivity extends AppCompatActivity {
     private class GetDataTask extends AsyncTask<Void,Void,SurreyData> {
         @Override
         protected SurreyData doInBackground(Void... voids) {
-            return new SurreyDataGetter().getData(url_restaurant);
+            return new SurreyDataGetter().getDataLink(url_restaurant);
         }
 
         @Override
         protected void onPostExecute(SurreyData data) {
             restaurantUpdate = data;
+            // TODO: Dialog Box for updating
+            new GetCSVDataTask().execute();
+        }
+    }
+
+    private class GetCSVDataTask extends AsyncTask<Void,Void,BufferedReader> {
+        @Override
+        protected BufferedReader doInBackground(Void... voids) {
+            try {
+                return new SurreyDataGetter().getCSVData(restaurantUpdate.getUrl());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(BufferedReader data) {
+            // TODO: Dialog Box for updating
+            fillRestaurantManager(data);
         }
     }
 
@@ -135,35 +155,54 @@ public class RestaurantListActivity extends AppCompatActivity {
         return inspectionList;
     }
 
-    private void fillRestaurantManager() {
-        InputStream is = getResources().openRawResource(R.raw.restaurants_itr1);
+    private void fillInitialRestaurantList() {
+        InputStream inputStream = getResources().openRawResource(R.raw.restaurants_itr1);
         BufferedReader reader = new BufferedReader(
-                new InputStreamReader(is, StandardCharsets.UTF_8)
+                new InputStreamReader(inputStream, StandardCharsets.UTF_8)
         );
+
+        fillRestaurantManager(reader);
+    }
+
+    private void fillRestaurantManager(BufferedReader reader) {
         String line = "";
         try {
             reader.readLine();
             while ((line = reader.readLine()) != null) {
-                //split by ','
-                String[] tokens = line.split(",");
+                System.out.println(line);
+                line = line.replace("\"", "");
+                String[] attributes = line.split(",");
+                String tracking = attributes[0];
+                String name = attributes[1];
+
+                int addrIndex = attributes.length - 5;
+                for (int i = 2; i < addrIndex; i++) {
+                    name = name.concat(attributes[i]);
+                }
+                String addr = attributes[addrIndex];
+                String city = attributes[addrIndex + 1];
+                float gpsLong = Float.parseFloat(attributes[addrIndex + 3]);
+                float gpsLat = Float.parseFloat(attributes[addrIndex + 4]);
 
                 //read data
                 Restaurant restaurant = new Restaurant(
-                        tokens[1].replace("\"", ""), // Restaurant name
-                        tokens[2].replace("\"", ""), // Restaurant Address
-                        tokens[3].replace("\"", ""), // Restaurant city
-                        Float.parseFloat(tokens[6]), // Restaurant Longitude
-                        Float.parseFloat(tokens[5]), // Restaurant Latitude
-                        tokens[0].replace("\"", "") // Restaurant tracking number
+                        tracking,
+                        name,
+                        addr,
+                        city,
+                        gpsLong, // Restaurant Longitude
+                        gpsLat // Restaurant Latitude
                 );
                 String restaurantTracking = restaurant.getTracking();
-                InspectionListManager filled = fillInspectionManager(restaurantTracking);
-                restaurant.setInspections(filled);
+                //InspectionListManager filled = fillInspectionManager(restaurantTracking);
+                //restaurant.setInspections(filled);
                 restaurantManager.add(restaurant);
             }
         } catch(IOException e){
             Log.wtf("RestaurantListActivity", "error reading data file on line " + line, e);
         }
+        // REFRESH LISTVIEW
+        populateListView();
     }
 
     private void populateListView() {
@@ -187,11 +226,12 @@ public class RestaurantListActivity extends AppCompatActivity {
             }
             // find restaurant
             Restaurant currentRestaurant = restaurantManager.getRestaurant(position);
-            InspectionListManager currentInspectionList = currentRestaurant.getInspections();
+            //InspectionListManager currentInspectionList = currentRestaurant.getInspections();
 
-            ImageView hazardImageView = itemView.findViewById(R.id.item_hazard_icon);
+            //ImageView hazardImageView = itemView.findViewById(R.id.item_hazard_icon);
             TextView nameText = itemView.findViewById(R.id.item_txt_restaurant_name);
-            TextView issuesText = itemView.findViewById(R.id.item_txt_issues_found);
+            nameText.setText(currentRestaurant.getName());
+           /* TextView issuesText = itemView.findViewById(R.id.item_txt_issues_found);
             TextView inspectionText = itemView.findViewById(R.id.item_txt_latest_inspection);
             TextView hazardText = itemView.findViewById(R.id.item_txt_hazard);
             nameText.setText(currentRestaurant.getName());
@@ -241,7 +281,7 @@ public class RestaurantListActivity extends AppCompatActivity {
             else{
                 issuesText.setText(R.string.no_inspection_found);
                 inspectionText.setText("");
-            }
+            }*/
             return itemView;
         }
     }

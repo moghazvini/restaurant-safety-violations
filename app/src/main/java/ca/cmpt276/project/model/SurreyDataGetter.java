@@ -6,11 +6,16 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.io.StringReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.Buffer;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
@@ -47,7 +52,19 @@ public class SurreyDataGetter {
         return new String(getUrlBytes(urlSpec));
     }
 
-    public SurreyData getData(String url) {
+    public BufferedReader getCSVData(String urlSpec) throws IOException{
+        try {
+            String csvString = getUrlString(urlSpec);
+            Reader csvReader = new StringReader(csvString);
+            return new BufferedReader(csvReader);
+            //return new BufferedReader(csvData);
+        } catch (IOException e) {
+            Log.e("API Request", "Failed to get CSV data", e);
+        }
+        return null;
+    }
+
+    public SurreyData getDataLink(String url) {
         SurreyData data = new SurreyData();
         try {
             String jsonString = getUrlString(url);

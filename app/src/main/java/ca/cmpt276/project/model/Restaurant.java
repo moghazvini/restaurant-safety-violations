@@ -13,7 +13,7 @@ public class Restaurant implements Comparable<Restaurant>{
     private String tracking;
     private InspectionListManager inspections;
 
-    public Restaurant(String name, String address, String city, float gpsLong, float gpsLat, String tracking) {
+    public Restaurant(String tracking, String name, String address, String city, float gpsLong, float gpsLat) {
         this.name = name;
         this.address = address;
         this.city = city;
