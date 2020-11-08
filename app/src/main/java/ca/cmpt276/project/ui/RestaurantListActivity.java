@@ -22,7 +22,9 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 import ca.cmpt276.project.R;
 import ca.cmpt276.project.model.Inspection;
@@ -39,10 +41,9 @@ import ca.cmpt276.project.model.types.InspectionType;
  */
 public class RestaurantListActivity extends AppCompatActivity {
     private RestaurantListManager restaurantManager;
-    private SurreyData restaurantUpdate;
-
-    private final String url_restaurant = "https://data.surrey.ca/api/3/action/package_show?id=restaurants";
-    private final String url_inspections = "https://data.surrey.ca/api/3/action/package_show?id=fraser-health-restaurant-inspection-reports";
+    private List<SurreyData> restaurantUpdate;
+    private BufferedReader updatedInspections;
+    private BufferedReader updatedRestaurants;
 
     private static boolean read = false;
     @Override
@@ -64,89 +65,107 @@ public class RestaurantListActivity extends AppCompatActivity {
         new GetDataTask().execute();
     }
 
-    private class GetDataTask extends AsyncTask<Void,Void,SurreyData> {
+    private class GetDataTask extends AsyncTask<Void,Void,List<SurreyData>> {
         @Override
-        protected SurreyData doInBackground(Void... voids) {
-            return new SurreyDataGetter().getDataLink(url_restaurant);
+        protected List<SurreyData> doInBackground(Void... voids) {
+            return new SurreyDataGetter().getDataLink();
         }
 
         @Override
-        protected void onPostExecute(SurreyData data) {
+        protected void onPostExecute(List<SurreyData> data) {
             restaurantUpdate = data;
             // TODO: Dialog Box for updating
-            new GetCSVDataTask().execute();
+            new InspectionUpdateTask().execute();
         }
     }
 
-    private class GetCSVDataTask extends AsyncTask<Void,Void,BufferedReader> {
+    private class RestaurantUpdateTask extends AsyncTask<Void,Void,BufferedReader> {
         @Override
         protected BufferedReader doInBackground(Void... voids) {
-            try {
-                return new SurreyDataGetter().getCSVData(restaurantUpdate.getUrl());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            return null;
+            // TODO: Dialog Box for updating
+            return new SurreyDataGetter().getCSVData(restaurantUpdate.get(0).getUrl());
         }
 
         @Override
         protected void onPostExecute(BufferedReader data) {
-            // TODO: Dialog Box for updating
-            fillRestaurantManager(data);
+            updatedRestaurants = data;
+            fillRestaurantManager(updatedRestaurants);
+        }
+    }
+
+    private class InspectionUpdateTask extends AsyncTask<Void,Void,BufferedReader> {
+        @Override
+        protected BufferedReader doInBackground(Void... voids) {
+            return new SurreyDataGetter().getCSVData(restaurantUpdate.get(1).getUrl());
+        }
+
+        @Override
+        protected void onPostExecute(BufferedReader bufferedReader) {
+            updatedInspections = bufferedReader;
+            new RestaurantUpdateTask().execute();
         }
     }
 
     private InspectionListManager fillInspectionManager(String restaurantTracking) {
         InspectionListManager inspectionList = new InspectionListManager();
-        InputStream is = getResources().openRawResource(R.raw.inspectionreports_itr1);
-        BufferedReader reader = new BufferedReader(
-                new InputStreamReader(is, StandardCharsets.UTF_8)
-        );
+        BufferedReader reader;
+        if (!read) {
+            InputStream is = getResources().openRawResource(R.raw.inspectionreports_itr1);
+            reader = new BufferedReader(
+                    new InputStreamReader(is, StandardCharsets.UTF_8)
+            );
+        } else {
+            reader = updatedInspections;
+        }
+
         String line = "";
         try {
             reader.readLine();
             while ((line = reader.readLine()) != null) {
+                line = line.replace("\"", "");
+
                 //split by ','
+                //System.out.println("line in inspections: " + line);
                 String[] tokens = line.split(",");
                 //read data
-                String inspectionTracking = tokens[0].replace("\"", "");
+                if (tokens.length > 0) {
+                    String inspectionTracking = tokens[0];
 
-                if(restaurantTracking.equals(inspectionTracking)) {
-
-                    //SimpleDateFormat formatter1 = new SimpleDateFormat("yyyyMMdd");
-                    //Date date = formatter1.parse(tokens[1]);
-                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
-                    LocalDate date = LocalDate.parse(tokens[1], formatter);
-                    String stringType = tokens[2].replace("\"", "");
-                    InspectionType type = InspectionType.FOLLOWUP;
-                    if (stringType.equals("Routine")) {
-                        type = InspectionType.ROUTINE;
-                    }
-
-                    int numCritical = Integer.parseInt(tokens[3]);
-
-                    int numNonCritical = Integer.parseInt(tokens[4]);
-
-                    String stringHazardLevel = tokens[5].replace("\"", "");
-                    HazardLevel hazardLevel = HazardLevel.LOW;
-                    if (stringHazardLevel.equals("Moderate")) {
-                        hazardLevel = HazardLevel.MODERATE;
-                    } else if (stringHazardLevel.equals("High")) {
-                        hazardLevel = HazardLevel.HIGH;
-                    }
-
-                    Inspection inspection;
-
-                    if (tokens.length >= 7) {
-                        StringBuilder lump = new StringBuilder();
-                        for (int i=6; i<tokens.length; i++) {
-                            lump.append(tokens[i]).append(",");
+                    if (restaurantTracking.equals(inspectionTracking)) {
+                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+                        LocalDate date = LocalDate.parse(tokens[1], formatter);
+                        String stringType = tokens[2];
+                        InspectionType type = InspectionType.FOLLOWUP;
+                        if (stringType.equals("Routine")) {
+                            type = InspectionType.ROUTINE;
                         }
-                        inspection = new Inspection(date, type, numCritical, numNonCritical, hazardLevel, lump.toString());
-                    } else {
-                        inspection = new Inspection(date, type, numCritical, numNonCritical, hazardLevel);
+
+                        int numCritical = Integer.parseInt(tokens[3]);
+
+                        int numNonCritical = Integer.parseInt(tokens[4]);
+
+                        String stringHazardLevel = tokens[tokens.length-1];
+                        HazardLevel hazardLevel = HazardLevel.LOW;
+                        if (stringHazardLevel.equals("Moderate")) {
+                            hazardLevel = HazardLevel.MODERATE;
+                        } else if (stringHazardLevel.equals("High")) {
+                            hazardLevel = HazardLevel.HIGH;
+                        }
+
+                        Inspection inspection;
+
+                        if (tokens[5].length() > 0) {
+                            StringBuilder lump = new StringBuilder();
+                            for (int i = 5; i < tokens.length - 1; i++) {
+                                lump.append(tokens[i]).append(",");
+                            }
+                            System.out.println(lump);
+                            inspection = new Inspection(date, type, numCritical, numNonCritical, hazardLevel, lump.toString());
+                        } else {
+                            inspection = new Inspection(date, type, numCritical, numNonCritical, hazardLevel);
+                        }
+                        inspectionList.add(inspection);
                     }
-                    inspectionList.add(inspection);
                 }
             }
         } catch(IOException e){
@@ -169,7 +188,7 @@ public class RestaurantListActivity extends AppCompatActivity {
         try {
             reader.readLine();
             while ((line = reader.readLine()) != null) {
-                System.out.println(line);
+                //System.out.println(line);
                 line = line.replace("\"", "");
                 String[] attributes = line.split(",");
                 String tracking = attributes[0];
@@ -194,8 +213,8 @@ public class RestaurantListActivity extends AppCompatActivity {
                         gpsLat // Restaurant Latitude
                 );
                 String restaurantTracking = restaurant.getTracking();
-                //InspectionListManager filled = fillInspectionManager(restaurantTracking);
-                //restaurant.setInspections(filled);
+                InspectionListManager filled = fillInspectionManager(restaurantTracking);
+                restaurant.setInspections(filled);
                 restaurantManager.add(restaurant);
             }
         } catch(IOException e){
@@ -226,12 +245,11 @@ public class RestaurantListActivity extends AppCompatActivity {
             }
             // find restaurant
             Restaurant currentRestaurant = restaurantManager.getRestaurant(position);
-            //InspectionListManager currentInspectionList = currentRestaurant.getInspections();
+            InspectionListManager currentInspectionList = currentRestaurant.getInspections();
 
-            //ImageView hazardImageView = itemView.findViewById(R.id.item_hazard_icon);
+            ImageView hazardImageView = itemView.findViewById(R.id.item_hazard_icon);
             TextView nameText = itemView.findViewById(R.id.item_txt_restaurant_name);
-            nameText.setText(currentRestaurant.getName());
-           /* TextView issuesText = itemView.findViewById(R.id.item_txt_issues_found);
+            TextView issuesText = itemView.findViewById(R.id.item_txt_issues_found);
             TextView inspectionText = itemView.findViewById(R.id.item_txt_latest_inspection);
             TextView hazardText = itemView.findViewById(R.id.item_txt_hazard);
             nameText.setText(currentRestaurant.getName());
@@ -281,7 +299,7 @@ public class RestaurantListActivity extends AppCompatActivity {
             else{
                 issuesText.setText(R.string.no_inspection_found);
                 inspectionText.setText("");
-            }*/
+            }
             return itemView;
         }
     }

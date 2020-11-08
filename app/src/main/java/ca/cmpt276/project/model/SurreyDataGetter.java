@@ -1,5 +1,6 @@
 package ca.cmpt276.project.model;
 
+import android.net.Uri;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -10,18 +11,21 @@ import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.nio.Buffer;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
+import java.util.ArrayList;
+import java.util.List;
 
 // Android Programming: The Big Nerd Ranch Guide Chapter 25
 public class SurreyDataGetter {
+    private final String url = "https://data.surrey.ca/api/3/action/";
+    private final String id_restaurant = "restaurants";
+    private final String id_inspections = "fraser-health-restaurant-inspection-reports";
+
     public byte[] getUrlBytes(String urlSpec) throws IOException {
         URL url = new URL (urlSpec);
         HttpURLConnection connection = (HttpURLConnection)url.openConnection();
@@ -52,8 +56,9 @@ public class SurreyDataGetter {
         return new String(getUrlBytes(urlSpec));
     }
 
-    public BufferedReader getCSVData(String urlSpec) throws IOException{
+    public BufferedReader getCSVData(String urlSpec){
         try {
+            System.out.println(urlSpec);
             String csvString = getUrlString(urlSpec);
             Reader csvReader = new StringReader(csvString);
             return new BufferedReader(csvReader);
@@ -64,13 +69,33 @@ public class SurreyDataGetter {
         return null;
     }
 
-    public SurreyData getDataLink(String url) {
-        SurreyData data = new SurreyData();
+    public List<SurreyData> getDataLink() {
+        List<SurreyData> data = new ArrayList<>();
         try {
-            String jsonString = getUrlString(url);
-            Log.i("API Request", "Received JSON: " + jsonString);
-            JSONObject jsonBody = new JSONObject(jsonString);
-            parseData(data, jsonBody);
+            // Get restaurant list
+            String restaurantUrl = Uri.parse(url)
+                    .buildUpon()
+                    .appendPath("package_show")
+                    .appendQueryParameter("id", id_restaurant)
+                    .build().toString();
+            String jsonRestaurant = getUrlString(restaurantUrl);
+            JSONObject jsonBodyRestaurant = new JSONObject(jsonRestaurant);
+            SurreyData restaurant = new SurreyData();
+
+            // Get Inspection list
+            String inspectionUrl = Uri.parse(url)
+                    .buildUpon()
+                    .appendPath("package_show")
+                    .appendQueryParameter("id", id_inspections)
+                    .build().toString();
+            String jsonInspection = getUrlString(inspectionUrl);
+            JSONObject jsonBodyInspection = new JSONObject(jsonInspection);
+            SurreyData inspection = new SurreyData();
+
+            parseData(restaurant, jsonBodyRestaurant);
+            parseData(inspection, jsonBodyInspection);
+            data.add(restaurant);
+            data.add(inspection);
         } catch (IOException | JSONException e) {
             Log.e("API Request", "Failed to get data", e);
         }
