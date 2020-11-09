@@ -9,6 +9,7 @@ import androidx.appcompat.widget.Toolbar;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -212,5 +213,17 @@ public class InspectionDetailsActivity extends AppCompatActivity {
         Restaurant restaurant = restaurantManager.getRestaurant(rest_index);
         inspectionManager = restaurant.getInspections();
         inspection = inspectionManager.getInspection(index);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch(item.getItemId()) {
+            case android.R.id.home:
+                finish();
+                return true;
+
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 }

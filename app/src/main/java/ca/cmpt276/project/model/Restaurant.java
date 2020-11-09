@@ -11,7 +11,7 @@ public class Restaurant implements Comparable<Restaurant>{
     private float gpsLong;
     private float gpsLat;
     private String tracking;
-    private InspectionListManager inspections;
+    private final InspectionListManager inspections;
 
     public Restaurant(String tracking, String name, String address, String city, float gpsLong, float gpsLat) {
         this.name = name;
@@ -20,6 +20,7 @@ public class Restaurant implements Comparable<Restaurant>{
         this.gpsLong = gpsLong;
         this.gpsLat = gpsLat;
         this.tracking = tracking;
+        this.inspections = new InspectionListManager();
     }
 
     public String getName() {
@@ -74,13 +75,8 @@ public class Restaurant implements Comparable<Restaurant>{
         return inspections;
     }
 
-    public void setInspections(InspectionListManager inspections) {
-        this.inspections = inspections;
-    }
-
     public String getGPS(){
-        String gps = "Longitude: " + this.getGpsLong() + ", Latitude: " + this.getGpsLat();
-        return gps;
+        return "Longitude: " + this.getGpsLong() + ", Latitude: " + this.getGpsLat();
     }
 
     @Override

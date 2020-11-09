@@ -55,8 +55,7 @@ public class Inspection implements Comparable<Inspection>{
             } else {
                 severity = Severity.CRITICAL;
             }
-
-            violations.add(new Violation(code, severity, info[2], info[3]));
+            violations.add(new Violation(code, severity, info[2]));
         }
     }
 

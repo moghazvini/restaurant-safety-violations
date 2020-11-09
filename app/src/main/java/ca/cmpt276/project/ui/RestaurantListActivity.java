@@ -23,6 +23,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -46,6 +47,7 @@ public class RestaurantListActivity extends AppCompatActivity {
     private BufferedReader updatedRestaurants;
 
     private static boolean read = false;
+    private static boolean downloaded = false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -62,7 +64,11 @@ public class RestaurantListActivity extends AppCompatActivity {
 
         populateListView();
         registerCallBack();
-        new GetDataTask().execute();
+        if (!downloaded) {
+            new GetDataTask().execute();
+            downloaded = true;
+        }
+
     }
 
     private class GetDataTask extends AsyncTask<Void,Void,List<SurreyData>> {
@@ -106,8 +112,7 @@ public class RestaurantListActivity extends AppCompatActivity {
         }
     }
 
-    private InspectionListManager fillInspectionManager(String restaurantTracking) {
-        InspectionListManager inspectionList = new InspectionListManager();
+    private void fillInspectionManager() {
         BufferedReader reader;
         if (!read) {
             InputStream is = getResources().openRawResource(R.raw.inspectionreports_itr1);
@@ -120,18 +125,24 @@ public class RestaurantListActivity extends AppCompatActivity {
 
         String line = "";
         try {
+            Restaurant restaurant = restaurantManager.getRestaurant(0);
+
             reader.readLine();
             while ((line = reader.readLine()) != null) {
                 line = line.replace("\"", "");
-
                 //split by ','
-                //System.out.println("line in inspections: " + line);
                 String[] tokens = line.split(",");
+
                 //read data
                 if (tokens.length > 0) {
+                    // Get the restaurant that matches the tracking number of the inspection
                     String inspectionTracking = tokens[0];
+                    if (!restaurant.getTracking().equals(inspectionTracking)) {
+                        restaurant = restaurantManager.find(inspectionTracking);
+                    }
+                    if (restaurant != null) {
+                        InspectionListManager inspectionList = restaurant.getInspections();
 
-                    if (restaurantTracking.equals(inspectionTracking)) {
                         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
                         LocalDate date = LocalDate.parse(tokens[1], formatter);
                         String stringType = tokens[2];
@@ -153,25 +164,29 @@ public class RestaurantListActivity extends AppCompatActivity {
                         }
 
                         Inspection inspection;
-
-                        if (tokens[5].length() > 0) {
-                            StringBuilder lump = new StringBuilder();
-                            for (int i = 5; i < tokens.length - 1; i++) {
-                                lump.append(tokens[i]).append(",");
+                        if (tokens.length > 5) {
+                            if (tokens[5].length() > 0) {
+                                StringBuilder lump = new StringBuilder();
+                                for (int i = 5; i < tokens.length - 1; i++) {
+                                    lump.append(tokens[i]).append(",");
+                                }
+                                inspection = new Inspection(date, type, numCritical, numNonCritical, hazardLevel, lump.toString());
+                            } else {
+                                inspection = new Inspection(date, type, numCritical, numNonCritical, hazardLevel);
                             }
-                            System.out.println(lump);
-                            inspection = new Inspection(date, type, numCritical, numNonCritical, hazardLevel, lump.toString());
                         } else {
                             inspection = new Inspection(date, type, numCritical, numNonCritical, hazardLevel);
                         }
                         inspectionList.add(inspection);
+                    } else {
+                        restaurant = restaurantManager.getRestaurant(0);
                     }
                 }
             }
+            populateListView();
         } catch(IOException e){
             Log.wtf("RestaurantListActivity", "error reading data file on line " + line, e);
         }
-        return inspectionList;
     }
 
     private void fillInitialRestaurantList() {
@@ -190,6 +205,7 @@ public class RestaurantListActivity extends AppCompatActivity {
             while ((line = reader.readLine()) != null) {
                 //System.out.println(line);
                 line = line.replace("\"", "");
+                line = line.replace(" ", "");
                 String[] attributes = line.split(",");
                 String tracking = attributes[0];
                 String name = attributes[1];
@@ -212,16 +228,12 @@ public class RestaurantListActivity extends AppCompatActivity {
                         gpsLong, // Restaurant Longitude
                         gpsLat // Restaurant Latitude
                 );
-                String restaurantTracking = restaurant.getTracking();
-                InspectionListManager filled = fillInspectionManager(restaurantTracking);
-                restaurant.setInspections(filled);
                 restaurantManager.add(restaurant);
             }
+            fillInspectionManager();
         } catch(IOException e){
             Log.wtf("RestaurantListActivity", "error reading data file on line " + line, e);
         }
-        // REFRESH LISTVIEW
-        populateListView();
     }
 
     private void populateListView() {
