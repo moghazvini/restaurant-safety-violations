@@ -202,12 +202,14 @@ public class RestaurantListActivity extends AppCompatActivity {
         String line = "";
         try {
             reader.readLine();
+            restaurantManager.getList().clear();
             while ((line = reader.readLine()) != null) {
                 //System.out.println(line);
                 line = line.replace("\"", "");
-                line = line.replace(" ", "");
+
                 String[] attributes = line.split(",");
                 String tracking = attributes[0];
+                tracking.replace(" ", "");
                 String name = attributes[1];
 
                 int addrIndex = attributes.length - 5;
