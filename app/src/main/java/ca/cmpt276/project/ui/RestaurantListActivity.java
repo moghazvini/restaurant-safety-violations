@@ -2,6 +2,7 @@ package ca.cmpt276.project.ui;
 
 import android.content.Intent;
 import android.graphics.Color;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
@@ -22,8 +23,6 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -48,6 +47,7 @@ public class RestaurantListActivity extends AppCompatActivity {
 
     private static boolean read = false;
     private static boolean downloaded = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -183,7 +183,6 @@ public class RestaurantListActivity extends AppCompatActivity {
                     }
                 }
             }
-            populateListView();
         } catch(IOException e){
             Log.wtf("RestaurantListActivity", "error reading data file on line " + line, e);
         }
@@ -209,7 +208,7 @@ public class RestaurantListActivity extends AppCompatActivity {
 
                 String[] attributes = line.split(",");
                 String tracking = attributes[0];
-                tracking.replace(" ", "");
+                tracking = tracking.replace(" ", "");
                 String name = attributes[1];
 
                 int addrIndex = attributes.length - 5;
@@ -233,6 +232,7 @@ public class RestaurantListActivity extends AppCompatActivity {
                 restaurantManager.add(restaurant);
             }
             fillInspectionManager();
+            populateListView();
         } catch(IOException e){
             Log.wtf("RestaurantListActivity", "error reading data file on line " + line, e);
         }
@@ -325,4 +325,5 @@ public class RestaurantListActivity extends AppCompatActivity {
             startActivity(i);
         });
     }
+
 }
