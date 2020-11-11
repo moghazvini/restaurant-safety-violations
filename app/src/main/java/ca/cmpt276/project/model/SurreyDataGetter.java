@@ -1,5 +1,6 @@
 package ca.cmpt276.project.model;
 
+import android.content.Context;
 import android.net.Uri;
 import android.util.Log;
 
@@ -9,19 +10,26 @@ import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
+import ca.cmpt276.project.ui.RestaurantListActivity;
+
 // Android Programming: The Big Nerd Ranch Guide Chapter 25
 public class SurreyDataGetter {
+    public static final String DOWNLOAD_RESTAURANTS = "dl_restaurants";
+    public static final String DOWNLOAD_INSPECTIONS = "dl_inspections";
     private final String url = "https://data.surrey.ca/api/3/action/";
     private final String id_restaurant = "restaurants";
     private final String id_inspections = "fraser-health-restaurant-inspection-reports";
@@ -56,17 +64,26 @@ public class SurreyDataGetter {
         return new String(getUrlBytes(urlSpec));
     }
 
-    public BufferedReader getCSVData(String urlSpec){
+    public boolean getCSVData(List<SurreyData> csvLinks, Context context){
         try {
-            System.out.println(urlSpec);
-            String csvString = getUrlString(urlSpec);
-            Reader csvReader = new StringReader(csvString);
-            return new BufferedReader(csvReader);
-            //return new BufferedReader(csvData);
+            //System.out.println(urlSpec);
+            String csvRestaurant = getUrlString(csvLinks.get(0).getUrl());
+            String csvInspection = getUrlString(csvLinks.get(1).getUrl());
+
+            // Save CSV files for downloaded restaurant and inspection lists
+            try(FileOutputStream outputStream = context.openFileOutput(DOWNLOAD_RESTAURANTS, Context.MODE_PRIVATE)) {
+                outputStream.write(csvRestaurant.getBytes(StandardCharsets.UTF_8));
+            }
+            try(FileOutputStream outputStream = context.openFileOutput(DOWNLOAD_INSPECTIONS, Context.MODE_PRIVATE)) {
+                outputStream.write(csvInspection.getBytes(StandardCharsets.UTF_8));
+            }
+
+            return true;
+            
         } catch (IOException e) {
             Log.e("API Request", "Failed to get CSV data", e);
         }
-        return null;
+        return false;
     }
 
     public List<SurreyData> getDataLink() {

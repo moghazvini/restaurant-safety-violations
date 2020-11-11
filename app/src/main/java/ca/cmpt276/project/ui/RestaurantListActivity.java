@@ -17,6 +17,9 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -43,7 +46,6 @@ public class RestaurantListActivity extends AppCompatActivity {
     private RestaurantListManager restaurantManager;
     private List<SurreyData> restaurantUpdate;
     private BufferedReader updatedInspections;
-    private BufferedReader updatedRestaurants;
 
     private static boolean read = false;
     private static boolean downloaded = false;
@@ -80,35 +82,25 @@ public class RestaurantListActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(List<SurreyData> data) {
             restaurantUpdate = data;
-            // TODO: Dialog Box for updating
-            new InspectionUpdateTask().execute();
+            // TODO: Dialog Box for updating if update is available
+            // Want update? Execute function
+            new ListUpdateTask().execute();
         }
     }
 
-    private class RestaurantUpdateTask extends AsyncTask<Void,Void,BufferedReader> {
+    private class ListUpdateTask extends AsyncTask<Void,Void, Boolean> {
         @Override
-        protected BufferedReader doInBackground(Void... voids) {
+        protected Boolean doInBackground(Void... voids) {
             // TODO: Dialog Box for updating
-            return new SurreyDataGetter().getCSVData(restaurantUpdate.get(0).getUrl());
+            return new SurreyDataGetter().getCSVData(restaurantUpdate, RestaurantListActivity.this);
         }
 
         @Override
-        protected void onPostExecute(BufferedReader data) {
-            updatedRestaurants = data;
-            fillRestaurantManager(updatedRestaurants);
-        }
-    }
-
-    private class InspectionUpdateTask extends AsyncTask<Void,Void,BufferedReader> {
-        @Override
-        protected BufferedReader doInBackground(Void... voids) {
-            return new SurreyDataGetter().getCSVData(restaurantUpdate.get(1).getUrl());
-        }
-
-        @Override
-        protected void onPostExecute(BufferedReader bufferedReader) {
-            updatedInspections = bufferedReader;
-            new RestaurantUpdateTask().execute();
+        protected void onPostExecute(Boolean receivedUpdate) {
+            boolean update = receivedUpdate;
+            if (update) {
+                getUpdatedFiles();
+            }
         }
     }
 
@@ -195,6 +187,21 @@ public class RestaurantListActivity extends AppCompatActivity {
         );
 
         fillRestaurantManager(reader);
+    }
+
+    private void getUpdatedFiles() {
+        FileInputStream inputStream_rest = null;
+        FileInputStream inputStream_insp = null;
+        try {
+            inputStream_rest = RestaurantListActivity.this.openFileInput(SurreyDataGetter.DOWNLOAD_RESTAURANTS);
+            inputStream_insp = RestaurantListActivity.this.openFileInput(SurreyDataGetter.DOWNLOAD_INSPECTIONS);
+        } catch (FileNotFoundException e) {
+            Log.e("File", "Downloaded file not found");
+        }
+        InputStreamReader inputReader_rest = new InputStreamReader(inputStream_rest, StandardCharsets.UTF_8);
+        InputStreamReader inputReader_insp = new InputStreamReader(inputStream_insp, StandardCharsets.UTF_8);
+        updatedInspections = new BufferedReader(inputReader_insp);
+        fillRestaurantManager(new BufferedReader(inputReader_rest));
     }
 
     private void fillRestaurantManager(BufferedReader reader) {
