@@ -25,6 +25,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
@@ -48,7 +49,6 @@ public class RestaurantListActivity extends AppCompatActivity {
     private BufferedReader updatedInspections;
 
     private static boolean read = false;
-    private static boolean downloaded = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,10 +66,21 @@ public class RestaurantListActivity extends AppCompatActivity {
 
         populateListView();
         registerCallBack();
-        if (!downloaded) {
+        boolean update = checkLastUpdate();
+
+        if (update) {
+            System.out.println("UPDATING-----------------");
             new GetDataTask().execute();
-            downloaded = true;
         }
+
+    }
+
+    private boolean checkLastUpdate() {
+        LocalDateTime previous = new SurreyDataGetter().getLastUpdate(RestaurantListActivity.this);
+        LocalDateTime current = LocalDateTime.now();
+
+        new SurreyDataGetter().writeLastUpdated(RestaurantListActivity.this);
+        return current.minusHours(20).isBefore(previous) || current.minusHours(20).isEqual(previous);
 
     }
 
