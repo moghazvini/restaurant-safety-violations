@@ -78,13 +78,6 @@ public class RestaurantListActivity extends AppCompatActivity {
 
     }
 
-    private boolean past20Hours() {
-        surreyDataGetter = SurreyDataGetter.getInstance(RestaurantListActivity.this);
-        LocalDateTime previous = surreyDataGetter.getLastCheck();
-        LocalDateTime current = LocalDateTime.now();
-        return current.minusHours(20).isAfter(previous) || current.minusHours(20).isEqual(previous);
-    }
-
     private class GetDataTask extends AsyncTask<Void,Void,List<SurreyData>> {
         @Override
         protected List<SurreyData> doInBackground(Void... voids) {
@@ -138,9 +131,15 @@ public class RestaurantListActivity extends AppCompatActivity {
         } catch (FileNotFoundException e) {
             //Log.e("File", "Downloaded file not found");
             // No update files downloaded
-            System.out.println("NO FILES FOUND LOL");
             Toast.makeText(this, "CAN'T FIND FILES",Toast.LENGTH_LONG).show();
         }
+    }
+
+    private boolean past20Hours() {
+        surreyDataGetter = SurreyDataGetter.getInstance(RestaurantListActivity.this);
+        LocalDateTime previous = surreyDataGetter.getLastCheck();
+        LocalDateTime current = LocalDateTime.now();
+        return current.minusHours(20).isAfter(previous) || current.minusHours(20).isEqual(previous);
     }
 
     private void fillRestaurantManager(BufferedReader reader) {
@@ -209,40 +208,27 @@ public class RestaurantListActivity extends AppCompatActivity {
                 if (tokens.length > 0) {
                     // Get the restaurant that matches the tracking number of the inspection
                     String inspectionTracking = tokens[0];
+                    // find the restaurant that has the same tracking number
                     if (!restaurant.getTracking().equals(inspectionTracking)) {
                         restaurant = restaurantManager.find(inspectionTracking);
                     }
                     if (restaurant != null) {
                         InspectionListManager inspectionList = restaurant.getInspections();
 
+                        // Format string date
                         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
                         LocalDate date = LocalDate.parse(tokens[1], formatter);
-                        String stringType = tokens[2];
-                        InspectionType type = InspectionType.FOLLOWUP;
-                        if (stringType.equals("Routine")) {
-                            type = InspectionType.ROUTINE;
-                        }
 
+                        InspectionType type = getInspectionType(tokens[2]);
                         int numCritical = Integer.parseInt(tokens[3]);
-
                         int numNonCritical = Integer.parseInt(tokens[4]);
-
-                        String stringHazardLevel = tokens[tokens.length-1];
-                        HazardLevel hazardLevel = HazardLevel.LOW;
-                        if (stringHazardLevel.equals("Moderate")) {
-                            hazardLevel = HazardLevel.MODERATE;
-                        } else if (stringHazardLevel.equals("High")) {
-                            hazardLevel = HazardLevel.HIGH;
-                        }
+                        HazardLevel hazardLevel = getHazardLevel(tokens[tokens.length-1]);
 
                         Inspection inspection;
                         if (tokens.length > 5) {
                             if (tokens[5].length() > 0) {
-                                StringBuilder lump = new StringBuilder();
-                                for (int i = 5; i < tokens.length - 1; i++) {
-                                    lump.append(tokens[i]).append(",");
-                                }
-                                inspection = new Inspection(date, type, numCritical, numNonCritical, hazardLevel, lump.toString());
+                                String violationLump = getVioLump(tokens);
+                                inspection = new Inspection(date, type, numCritical, numNonCritical, hazardLevel, violationLump);
                             } else {
                                 inspection = new Inspection(date, type, numCritical, numNonCritical, hazardLevel);
                             }
@@ -251,6 +237,8 @@ public class RestaurantListActivity extends AppCompatActivity {
                         }
                         inspectionList.add(inspection);
                     } else {
+                        // reset restaurant if restaurant wasn't found
+                        // otherwise restaurant would be null for next iteration
                         restaurant = restaurantManager.getRestaurant(0);
                     }
                 }
@@ -258,6 +246,32 @@ public class RestaurantListActivity extends AppCompatActivity {
         } catch(IOException e){
             Log.wtf("RestaurantListActivity", "error reading data file on line " + line, e);
         }
+    }
+
+    private InspectionType getInspectionType(String type) {
+        if (type.equals("Routine")) {
+            return InspectionType.ROUTINE;
+        } else {
+            return InspectionType.FOLLOWUP;
+        }
+    }
+
+    private HazardLevel getHazardLevel(String hazard) {
+        if (hazard.equals("High")) {
+            return HazardLevel.HIGH;
+        } else if (hazard.equals("Moderate")) {
+            return HazardLevel.MODERATE;
+        } else {
+            return HazardLevel.LOW;
+        }
+    }
+
+    private String getVioLump(String[] inspectionRow) {
+        StringBuilder lump = new StringBuilder();
+        for (int i = 5; i < inspectionRow.length - 1; i++) {
+            lump.append(inspectionRow[i]).append(",");
+        }
+        return lump.toString();
     }
 
     private void populateListView() {
