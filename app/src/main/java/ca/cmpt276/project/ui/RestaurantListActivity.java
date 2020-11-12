@@ -15,6 +15,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -45,6 +46,7 @@ import ca.cmpt276.project.model.types.InspectionType;
  */
 public class RestaurantListActivity extends AppCompatActivity {
     private RestaurantListManager restaurantManager;
+    private SurreyDataGetter surreyDataGetter;
     private List<SurreyData> restaurantUpdate;
     private BufferedReader updatedInspections;
 
@@ -62,32 +64,31 @@ public class RestaurantListActivity extends AppCompatActivity {
         if(!read){
             fillInitialRestaurantList();
             read = true;
+            getUpdatedFiles();
         }
 
         populateListView();
         registerCallBack();
-        boolean update = checkLastUpdate();
 
-        if (update) {
-            System.out.println("UPDATING-----------------");
+        // Check if it has been 20 hours since last check
+        if (past20Hours()) {
+            Toast.makeText(this, "Checking for Update", Toast.LENGTH_LONG).show();
             new GetDataTask().execute();
         }
 
     }
 
-    private boolean checkLastUpdate() {
-        LocalDateTime previous = new SurreyDataGetter().getLastUpdate(RestaurantListActivity.this);
+    private boolean past20Hours() {
+        surreyDataGetter = SurreyDataGetter.getInstance(RestaurantListActivity.this);
+        LocalDateTime previous = surreyDataGetter.getLastCheck();
         LocalDateTime current = LocalDateTime.now();
-
-        new SurreyDataGetter().writeLastUpdated(RestaurantListActivity.this);
-        return current.minusHours(20).isBefore(previous) || current.minusHours(20).isEqual(previous);
-
+        return current.minusHours(20).isAfter(previous) || current.minusHours(20).isEqual(previous);
     }
 
     private class GetDataTask extends AsyncTask<Void,Void,List<SurreyData>> {
         @Override
         protected List<SurreyData> doInBackground(Void... voids) {
-            return new SurreyDataGetter().getDataLink();
+            return surreyDataGetter.getDataLink();
         }
 
         @Override
@@ -103,7 +104,7 @@ public class RestaurantListActivity extends AppCompatActivity {
         @Override
         protected Boolean doInBackground(Void... voids) {
             // TODO: Dialog Box for updating
-            return new SurreyDataGetter().getCSVData(restaurantUpdate, RestaurantListActivity.this);
+            return surreyDataGetter.getCSVData(restaurantUpdate, RestaurantListActivity.this);
         }
 
         @Override
@@ -112,6 +113,74 @@ public class RestaurantListActivity extends AppCompatActivity {
             if (update) {
                 getUpdatedFiles();
             }
+        }
+    }
+
+    private void fillInitialRestaurantList() {
+        InputStream inputStream = getResources().openRawResource(R.raw.restaurants_itr1);
+        BufferedReader reader = new BufferedReader(
+                new InputStreamReader(inputStream, StandardCharsets.UTF_8)
+        );
+
+        fillRestaurantManager(reader);
+    }
+
+    private void getUpdatedFiles() {
+        FileInputStream inputStream_rest;
+        FileInputStream inputStream_insp;
+        try {
+            inputStream_rest = RestaurantListActivity.this.openFileInput(SurreyDataGetter.DOWNLOAD_RESTAURANTS);
+            inputStream_insp = RestaurantListActivity.this.openFileInput(SurreyDataGetter.DOWNLOAD_INSPECTIONS);
+            InputStreamReader inputReader_rest = new InputStreamReader(inputStream_rest, StandardCharsets.UTF_8);
+            InputStreamReader inputReader_insp = new InputStreamReader(inputStream_insp, StandardCharsets.UTF_8);
+            updatedInspections = new BufferedReader(inputReader_insp);
+            fillRestaurantManager(new BufferedReader(inputReader_rest));
+        } catch (FileNotFoundException e) {
+            //Log.e("File", "Downloaded file not found");
+            // No update files downloaded
+            System.out.println("NO FILES FOUND LOL");
+            Toast.makeText(this, "CAN'T FIND FILES",Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void fillRestaurantManager(BufferedReader reader) {
+        String line = "";
+        try {
+            reader.readLine();
+            restaurantManager.getList().clear();
+            while ((line = reader.readLine()) != null) {
+                //System.out.println(line);
+                line = line.replace("\"", "");
+
+                String[] attributes = line.split(",");
+                String tracking = attributes[0];
+                tracking = tracking.replace(" ", "");
+                String name = attributes[1];
+
+                int addrIndex = attributes.length - 5;
+                for (int i = 2; i < addrIndex; i++) {
+                    name = name.concat(attributes[i]);
+                }
+                String addr = attributes[addrIndex];
+                String city = attributes[addrIndex + 1];
+                float gpsLong = Float.parseFloat(attributes[addrIndex + 3]);
+                float gpsLat = Float.parseFloat(attributes[addrIndex + 4]);
+
+                //read data
+                Restaurant restaurant = new Restaurant(
+                        tracking,
+                        name,
+                        addr,
+                        city,
+                        gpsLong, // Restaurant Longitude
+                        gpsLat // Restaurant Latitude
+                );
+                restaurantManager.add(restaurant);
+            }
+            fillInspectionManager();
+            populateListView();
+        } catch(IOException e){
+            Log.wtf("RestaurantListActivity", "error reading data file on line " + line, e);
         }
     }
 
@@ -186,71 +255,6 @@ public class RestaurantListActivity extends AppCompatActivity {
                     }
                 }
             }
-        } catch(IOException e){
-            Log.wtf("RestaurantListActivity", "error reading data file on line " + line, e);
-        }
-    }
-
-    private void fillInitialRestaurantList() {
-        InputStream inputStream = getResources().openRawResource(R.raw.restaurants_itr1);
-        BufferedReader reader = new BufferedReader(
-                new InputStreamReader(inputStream, StandardCharsets.UTF_8)
-        );
-
-        fillRestaurantManager(reader);
-    }
-
-    private void getUpdatedFiles() {
-        FileInputStream inputStream_rest = null;
-        FileInputStream inputStream_insp = null;
-        try {
-            inputStream_rest = RestaurantListActivity.this.openFileInput(SurreyDataGetter.DOWNLOAD_RESTAURANTS);
-            inputStream_insp = RestaurantListActivity.this.openFileInput(SurreyDataGetter.DOWNLOAD_INSPECTIONS);
-        } catch (FileNotFoundException e) {
-            Log.e("File", "Downloaded file not found");
-        }
-        InputStreamReader inputReader_rest = new InputStreamReader(inputStream_rest, StandardCharsets.UTF_8);
-        InputStreamReader inputReader_insp = new InputStreamReader(inputStream_insp, StandardCharsets.UTF_8);
-        updatedInspections = new BufferedReader(inputReader_insp);
-        fillRestaurantManager(new BufferedReader(inputReader_rest));
-    }
-
-    private void fillRestaurantManager(BufferedReader reader) {
-        String line = "";
-        try {
-            reader.readLine();
-            restaurantManager.getList().clear();
-            while ((line = reader.readLine()) != null) {
-                //System.out.println(line);
-                line = line.replace("\"", "");
-
-                String[] attributes = line.split(",");
-                String tracking = attributes[0];
-                tracking = tracking.replace(" ", "");
-                String name = attributes[1];
-
-                int addrIndex = attributes.length - 5;
-                for (int i = 2; i < addrIndex; i++) {
-                    name = name.concat(attributes[i]);
-                }
-                String addr = attributes[addrIndex];
-                String city = attributes[addrIndex + 1];
-                float gpsLong = Float.parseFloat(attributes[addrIndex + 3]);
-                float gpsLat = Float.parseFloat(attributes[addrIndex + 4]);
-
-                //read data
-                Restaurant restaurant = new Restaurant(
-                        tracking,
-                        name,
-                        addr,
-                        city,
-                        gpsLong, // Restaurant Longitude
-                        gpsLat // Restaurant Latitude
-                );
-                restaurantManager.add(restaurant);
-            }
-            fillInspectionManager();
-            populateListView();
         } catch(IOException e){
             Log.wtf("RestaurantListActivity", "error reading data file on line " + line, e);
         }

@@ -31,12 +31,29 @@ import java.util.List;
 public class SurreyDataGetter {
     public static final String DOWNLOAD_RESTAURANTS = "dl_restaurants";
     public static final String DOWNLOAD_INSPECTIONS = "dl_inspections";
-
     private static final String LAST_UPDATED = "last updated";
 
-    public LocalDateTime getLastUpdate(Context context) {
+    private LocalDateTime lastCheck;
+
+    private static SurreyDataGetter instance;
+    private SurreyDataGetter(Context context) {
+        lastCheck = getLastUpdate(context);
+    }
+
+    public static SurreyDataGetter getInstance(Context context) {
+        if (instance == null) {
+            instance = new SurreyDataGetter(context);
+        }
+        return instance;
+    }
+
+    private LocalDateTime getLastUpdate(Context context) {
         long defaultTime = getDefaultTime();
         long lastUpdated = readLastUpdated(context, defaultTime);
+
+        // Update
+        writeLastUpdated(context);
+
         // convert long to LocalTimeDate
         return Instant.ofEpochMilli(lastUpdated).atZone(ZoneId.systemDefault()).toLocalDateTime();
     }
@@ -46,7 +63,7 @@ public class SurreyDataGetter {
         return stored.getLong(LAST_UPDATED, defaultTime);
     }
 
-    public void writeLastUpdated(Context context) {
+    private void writeLastUpdated(Context context) {
         SharedPreferences stored = context.getSharedPreferences("AppPrefs", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = stored.edit();
 
@@ -61,10 +78,15 @@ public class SurreyDataGetter {
         return zdt.toInstant().toEpochMilli();
     }
 
+    public LocalDateTime getLastCheck() {
+        return lastCheck;
+    }
+
+
     // https://www.javaguides.net/2020/03/convert-localdatetime-to-long-in-java.html
     // Convert LocalDateTime to a Long
     private long getDefaultTime() {
-        LocalDateTime yesterday = LocalDateTime.now().plusDays(-1);
+        LocalDateTime yesterday = LocalDateTime.now().minusDays(1);
         ZonedDateTime zdt = ZonedDateTime.of(yesterday, ZoneId.systemDefault());
 
         return zdt.toInstant().toEpochMilli();
@@ -107,14 +129,15 @@ public class SurreyDataGetter {
             String csvInspection = getUrlString(csvLinks.get(1).getUrl());
 
             // Save CSV files for downloaded restaurant and inspection lists
-            try(FileOutputStream outputStream = context.openFileOutput(DOWNLOAD_RESTAURANTS, Context.MODE_PRIVATE)) {
-                outputStream.write(csvRestaurant.getBytes(StandardCharsets.UTF_8));
+            try {
+                FileOutputStream outputRestaurant = context.openFileOutput(DOWNLOAD_RESTAURANTS, Context.MODE_PRIVATE);
+                FileOutputStream outputInspection = context.openFileOutput(DOWNLOAD_INSPECTIONS, Context.MODE_PRIVATE);
+                outputRestaurant.write(csvRestaurant.getBytes(StandardCharsets.UTF_8));
+                outputInspection.write(csvInspection.getBytes(StandardCharsets.UTF_8));
+                return true;
+            } catch (IOException e) {
+                Log.e("File Failure", "Failed to save file", e);
             }
-            try(FileOutputStream outputStream = context.openFileOutput(DOWNLOAD_INSPECTIONS, Context.MODE_PRIVATE)) {
-                outputStream.write(csvInspection.getBytes(StandardCharsets.UTF_8));
-            }
-
-            return true;
             
         } catch (IOException e) {
             Log.e("API Request", "Failed to get CSV data", e);
