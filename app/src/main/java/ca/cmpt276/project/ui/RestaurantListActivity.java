@@ -34,6 +34,7 @@ import java.util.List;
 import ca.cmpt276.project.R;
 import ca.cmpt276.project.model.Inspection;
 import ca.cmpt276.project.model.InspectionListManager;
+import ca.cmpt276.project.model.LastModified;
 import ca.cmpt276.project.model.Restaurant;
 import ca.cmpt276.project.model.RestaurantListManager;
 import ca.cmpt276.project.model.SurreyData;
@@ -46,7 +47,7 @@ import ca.cmpt276.project.model.types.InspectionType;
  */
 public class RestaurantListActivity extends AppCompatActivity {
     private RestaurantListManager restaurantManager;
-    private SurreyDataGetter surreyDataGetter;
+    private LastModified lastModified;
     private List<SurreyData> restaurantUpdate;
     private BufferedReader updatedInspections;
 
@@ -81,15 +82,18 @@ public class RestaurantListActivity extends AppCompatActivity {
     private class GetDataTask extends AsyncTask<Void,Void,List<SurreyData>> {
         @Override
         protected List<SurreyData> doInBackground(Void... voids) {
-            return surreyDataGetter.getDataLink();
+            return new SurreyDataGetter().getDataLink(RestaurantListActivity.this);
         }
 
         @Override
         protected void onPostExecute(List<SurreyData> data) {
             restaurantUpdate = data;
             // TODO: Dialog Box for updating if update is available
-            // Want update? Execute function
-            new ListUpdateTask().execute();
+            if (data.get(0).getChanged() // check if restaurant list changed
+                    || data.get(1).getChanged()) { // if inspection list changed
+                // Want update? Execute function
+                new ListUpdateTask().execute();
+            }
         }
     }
 
@@ -97,7 +101,7 @@ public class RestaurantListActivity extends AppCompatActivity {
         @Override
         protected Boolean doInBackground(Void... voids) {
             // TODO: Dialog Box for updating
-            return surreyDataGetter.getCSVData(restaurantUpdate, RestaurantListActivity.this);
+            return new SurreyDataGetter().getCSVData(restaurantUpdate, RestaurantListActivity.this);
         }
 
         @Override
@@ -119,6 +123,7 @@ public class RestaurantListActivity extends AppCompatActivity {
     }
 
     private void getUpdatedFiles() {
+        Toast.makeText(this, "THERE'S AN UPDATE", Toast.LENGTH_SHORT).show();
         FileInputStream inputStream_rest;
         FileInputStream inputStream_insp;
         try {
@@ -136,8 +141,8 @@ public class RestaurantListActivity extends AppCompatActivity {
     }
 
     private boolean past20Hours() {
-        surreyDataGetter = SurreyDataGetter.getInstance(RestaurantListActivity.this);
-        LocalDateTime previous = surreyDataGetter.getLastCheck();
+        lastModified = LastModified.getInstance(RestaurantListActivity.this);
+        LocalDateTime previous = lastModified.getLastCheck();
         LocalDateTime current = LocalDateTime.now();
         return current.minusHours(20).isAfter(previous) || current.minusHours(20).isEqual(previous);
     }

@@ -16,7 +16,6 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.security.acl.LastOwnerException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -24,73 +23,14 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
+
+import ca.cmpt276.project.ui.RestaurantListActivity;
 
 // Android Programming: The Big Nerd Ranch Guide Chapter 25
 public class SurreyDataGetter {
     public static final String DOWNLOAD_RESTAURANTS = "dl_restaurants";
     public static final String DOWNLOAD_INSPECTIONS = "dl_inspections";
-    private static final String LAST_UPDATED = "last updated";
-
-    private LocalDateTime lastCheck;
-
-    private static SurreyDataGetter instance;
-    private SurreyDataGetter(Context context) {
-        lastCheck = getLastUpdate(context);
-    }
-
-    public static SurreyDataGetter getInstance(Context context) {
-        if (instance == null) {
-            instance = new SurreyDataGetter(context);
-        }
-        return instance;
-    }
-
-    private LocalDateTime getLastUpdate(Context context) {
-        long defaultTime = getDefaultTime();
-        long lastUpdated = readLastUpdated(context, defaultTime);
-
-        // Update
-        writeLastUpdated(context);
-
-        // convert long to LocalTimeDate
-        return Instant.ofEpochMilli(lastUpdated).atZone(ZoneId.systemDefault()).toLocalDateTime();
-    }
-
-    private static Long readLastUpdated(Context context, long defaultTime) {
-        SharedPreferences stored = context.getSharedPreferences("AppPrefs",Context.MODE_PRIVATE);
-        return stored.getLong(LAST_UPDATED, defaultTime);
-    }
-
-    private void writeLastUpdated(Context context) {
-        SharedPreferences stored = context.getSharedPreferences("AppPrefs", Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = stored.edit();
-
-        long save = convertToLong(LocalDateTime.now());
-
-        editor.putLong(LAST_UPDATED, save);
-        editor.apply();
-    }
-
-    private long convertToLong(LocalDateTime date) {
-        ZonedDateTime zdt = ZonedDateTime.of(date, ZoneId.systemDefault());
-        return zdt.toInstant().toEpochMilli();
-    }
-
-    public LocalDateTime getLastCheck() {
-        return lastCheck;
-    }
-
-
-    // https://www.javaguides.net/2020/03/convert-localdatetime-to-long-in-java.html
-    // Convert LocalDateTime to a Long
-    private long getDefaultTime() {
-        LocalDateTime yesterday = LocalDateTime.now().minusDays(1);
-        ZonedDateTime zdt = ZonedDateTime.of(yesterday, ZoneId.systemDefault());
-
-        return zdt.toInstant().toEpochMilli();
-    }
 
     public byte[] getUrlBytes(String urlSpec) throws IOException {
         URL url = new URL (urlSpec);
@@ -145,7 +85,7 @@ public class SurreyDataGetter {
         return false;
     }
 
-    public List<SurreyData> getDataLink() {
+    public List<SurreyData> getDataLink(Context context) {
         List<SurreyData> data = new ArrayList<>();
         try {
             String url = "https://data.surrey.ca/api/3/action/";
@@ -175,6 +115,8 @@ public class SurreyDataGetter {
             parseData(inspection, jsonBodyInspection);
             data.add(restaurant);
             data.add(inspection);
+
+            checkModified(data, context);
         } catch (IOException | JSONException e) {
             Log.e("API Request", "Failed to get data", e);
         }
@@ -193,8 +135,27 @@ public class SurreyDataGetter {
 
         // format last modified string into a Date
         String time = resourcesJsonObject.getString("last_modified");
-        time = time.substring(0,10);
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        data.setLast_modified(LocalDate.parse(time, formatter));
+        time = time.substring(0,19);
+        time = time.replace("T","");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-ddHH:mm:ss");
+        data.setLast_modified(LocalDateTime.parse(time, formatter));
+    }
+
+    private void checkModified(List<SurreyData> data, Context context) {
+        LastModified lastModified = LastModified.getInstance(context);
+        SurreyData restaurant = data.get(0);
+        SurreyData inspection = data.get(1);
+
+        if (restaurant.getLast_modified().isAfter(lastModified.getLast_mod_restaurants())) {
+            restaurant.setChanged(true);
+        } else {
+            restaurant.setChanged(false);
+        }
+
+        if (inspection.getLast_modified().isAfter(lastModified.getLast_mod_inspections())) {
+            inspection.setChanged(true);
+        } else {
+            restaurant.setChanged(false);
+        }
     }
 }

@@ -1,16 +1,17 @@
 package ca.cmpt276.project.model;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public class SurreyData {
-    private LocalDate last_modified;
+    private LocalDateTime last_modified;
     private String url;
+    private Boolean changed;
 
-    public LocalDate getLast_modified() {
+    public LocalDateTime getLast_modified() {
         return last_modified;
     }
 
-    public void setLast_modified(LocalDate last_modified) {
+    public void setLast_modified(LocalDateTime last_modified) {
         this.last_modified = last_modified;
     }
 
@@ -20,5 +21,13 @@ public class SurreyData {
 
     public void setUrl(String url) {
         this.url = url;
+    }
+
+    public Boolean getChanged() {
+        return changed;
+    }
+
+    public void setChanged(Boolean changed) {
+        this.changed = changed;
     }
 }
