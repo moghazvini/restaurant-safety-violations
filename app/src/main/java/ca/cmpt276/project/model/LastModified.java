@@ -8,6 +8,10 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
+/**
+ * Stores the timestamp of when the app last checked for updates and the
+ * timestamp of the current restaurant and inspection list modification.
+ */
 public class LastModified {
     private static final String LAST_CHECKED = "last checked";
     private static final String LAST_MODIFIED_REST = "last modified restaurant list";

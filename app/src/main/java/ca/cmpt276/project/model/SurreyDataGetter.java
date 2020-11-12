@@ -1,7 +1,6 @@
 package ca.cmpt276.project.model;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.net.Uri;
 import android.util.Log;
 
@@ -16,18 +15,17 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.time.Instant;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
-import ca.cmpt276.project.ui.RestaurantListActivity;
-
-// Android Programming: The Big Nerd Ranch Guide Chapter 25
+/**
+ * Connects to the Surrey data api and parses and stores the data received.
+ *
+ * Referenced the textbook for most of the API connection code:
+ * Android Programming: The Big Nerd Ranch Guide Chapter 25
+ */
 public class SurreyDataGetter {
     public static final String DOWNLOAD_RESTAURANTS = "dl_restaurants";
     public static final String DOWNLOAD_INSPECTIONS = "dl_inspections";
