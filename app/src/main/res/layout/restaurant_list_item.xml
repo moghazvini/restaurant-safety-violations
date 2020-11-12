@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/relativeLayout2"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
@@ -8,60 +9,63 @@
         android:id="@+id/item_txt_latest_inspection"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/item_restaurantIcon"
-        android:layout_alignParentEnd="true"
         android:layout_marginEnd="5dp"
-        android:layout_marginBottom="5dp"
-        android:text="@string/latest_inspection" />
+        android:text="@string/latest_inspection"
+        app:layout_constraintBottom_toBottomOf="@+id/item_txt_issues_found"
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <ImageView
         android:id="@+id/item_restaurantIcon"
         android:layout_width="50dp"
         android:layout_height="50dp"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginStart="0dp"
-        android:layout_marginTop="14dp"
-        android:adjustViewBounds="true"
+        android:layout_marginStart="5dp"
         android:contentDescription="@string/restaurant_icon"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/food2" />
 
     <TextView
         android:id="@+id/item_txt_issues_found"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/item_restaurantIcon"
         android:layout_marginStart="5dp"
-        android:layout_marginBottom="5dp"
-        android:layout_toEndOf="@+id/item_restaurantIcon"
-        android:text="@string/issues_found" />
+        android:text="@string/issues_found"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/item_restaurantIcon"
+        app:layout_constraintTop_toBottomOf="@+id/item_txt_restaurant_name" />
 
     <ImageView
         android:id="@+id/item_hazard_icon"
         android:layout_width="20dp"
         android:layout_height="20dp"
-        android:layout_alignBottom="@+id/item_restaurantIcon"
         android:layout_marginStart="8dp"
-        android:layout_marginBottom="4dp"
-        android:layout_toEndOf="@+id/item_txt_issues_found" />
+        android:layout_marginTop="8dp"
+        app:layout_constraintBottom_toBottomOf="@+id/item_txt_issues_found"
+        app:layout_constraintStart_toEndOf="@+id/item_txt_issues_found"
+        app:layout_constraintTop_toBottomOf="@+id/item_txt_restaurant_name" />
 
     <TextView
         android:id="@+id/item_txt_restaurant_name"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/item_restaurantIcon"
         android:layout_marginStart="5dp"
-        android:layout_marginBottom="30dp"
-        android:layout_toEndOf="@+id/item_restaurantIcon"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="5dp"
         android:text="@string/restaurant_name"
-        android:textSize="18sp" />
+        android:textSize="18sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toEndOf="@+id/item_restaurantIcon"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/item_txt_hazard"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/item_hazard_icon"
         android:layout_marginStart="12dp"
         android:layout_marginBottom="0dp"
-        android:layout_toEndOf="@+id/item_hazard_icon" />
-</RelativeLayout>
+        app:layout_constraintBottom_toBottomOf="@+id/item_hazard_icon"
+        app:layout_constraintStart_toEndOf="@+id/item_hazard_icon" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
