@@ -18,7 +18,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -37,7 +36,7 @@ import ca.cmpt276.project.model.InspectionListManager;
 import ca.cmpt276.project.model.LastModified;
 import ca.cmpt276.project.model.Restaurant;
 import ca.cmpt276.project.model.RestaurantListManager;
-import ca.cmpt276.project.model.SurreyData;
+import ca.cmpt276.project.model.CsvInfo;
 import ca.cmpt276.project.model.SurreyDataGetter;
 import ca.cmpt276.project.model.types.HazardLevel;
 import ca.cmpt276.project.model.types.InspectionType;
@@ -48,7 +47,7 @@ import ca.cmpt276.project.model.types.InspectionType;
 public class RestaurantListActivity extends AppCompatActivity {
     private RestaurantListManager restaurantManager;
     private LastModified lastModified;
-    private List<SurreyData> restaurantUpdate;
+    private List<CsvInfo> restaurantUpdate;
     private BufferedReader updatedInspections;
 
     private static boolean read = false;
@@ -79,14 +78,14 @@ public class RestaurantListActivity extends AppCompatActivity {
 
     }
 
-    private class GetDataTask extends AsyncTask<Void,Void,List<SurreyData>> {
+    private class GetDataTask extends AsyncTask<Void,Void,List<CsvInfo>> {
         @Override
-        protected List<SurreyData> doInBackground(Void... voids) {
+        protected List<CsvInfo> doInBackground(Void... voids) {
             return new SurreyDataGetter().getDataLink(RestaurantListActivity.this);
         }
 
         @Override
-        protected void onPostExecute(List<SurreyData> data) {
+        protected void onPostExecute(List<CsvInfo> data) {
             restaurantUpdate = data;
             // TODO: Dialog Box for updating if update is available
             if (data.get(0).getChanged() // check if restaurant list changed

@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
  * Contains the information needed to download the CSV file and
  * its modification date.
  */
-public class SurreyData {
+public class CsvInfo {
     private LocalDateTime last_modified;
     private String url;
     private Boolean changed;

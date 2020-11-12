@@ -30,6 +30,12 @@ public class SurreyDataGetter {
     public static final String DOWNLOAD_RESTAURANTS = "dl_restaurants";
     public static final String DOWNLOAD_INSPECTIONS = "dl_inspections";
 
+    /**
+     * Connects to the URL and receives the data in a byte array.
+     * @param urlSpec The URl to connect to
+     * @return The byte array received from the API
+     * @throws IOException
+     */
     public byte[] getUrlBytes(String urlSpec) throws IOException {
         URL url = new URL (urlSpec);
         HttpURLConnection connection = (HttpURLConnection)url.openConnection();
@@ -60,7 +66,14 @@ public class SurreyDataGetter {
         return new String(getUrlBytes(urlSpec));
     }
 
-    public boolean getCSVData(List<SurreyData> csvLinks, Context context){
+    /**
+     * Downloads the CSV file from the link provided and saves it as a
+     * File in internal storage.
+     * @param csvLinks
+     * @param context
+     * @return True, if files are properly saved
+     */
+    public boolean getCSVData(List<CsvInfo> csvLinks, Context context){
         try {
             //System.out.println(urlSpec);
             String csvRestaurant = getUrlString(csvLinks.get(0).getUrl());
@@ -83,8 +96,14 @@ public class SurreyDataGetter {
         return false;
     }
 
-    public List<SurreyData> getDataLink(Context context) {
-        List<SurreyData> data = new ArrayList<>();
+    /**
+     * Builds the URL for the restaurant and inspection list and gets the
+     * JsonBody, ready to be parsed for information.
+     * @param context
+     * @return
+     */
+    public List<CsvInfo> getDataLink(Context context) {
+        List<CsvInfo> data = new ArrayList<>();
         try {
             String url = "https://data.surrey.ca/api/3/action/";
             // Get restaurant list
@@ -96,7 +115,7 @@ public class SurreyDataGetter {
                     .build().toString();
             String jsonRestaurant = getUrlString(restaurantUrl);
             JSONObject jsonBodyRestaurant = new JSONObject(jsonRestaurant);
-            SurreyData restaurant = new SurreyData();
+            CsvInfo restaurant = new CsvInfo();
 
             // Get Inspection list
             String id_inspections = "fraser-health-restaurant-inspection-reports";
@@ -107,7 +126,7 @@ public class SurreyDataGetter {
                     .build().toString();
             String jsonInspection = getUrlString(inspectionUrl);
             JSONObject jsonBodyInspection = new JSONObject(jsonInspection);
-            SurreyData inspection = new SurreyData();
+            CsvInfo inspection = new CsvInfo();
 
             parseData(restaurant, jsonBodyRestaurant);
             parseData(inspection, jsonBodyInspection);
@@ -121,7 +140,13 @@ public class SurreyDataGetter {
         return data;
     }
 
-    private void parseData(SurreyData data, JSONObject jsonBody) throws JSONException {
+    /**
+     * Parses the data received from the API call into a CsvData class
+     * @param data
+     * @param jsonBody
+     * @throws JSONException
+     */
+    private void parseData(CsvInfo data, JSONObject jsonBody) throws JSONException {
         JSONObject  resultJsonObject = jsonBody.getJSONObject("result");
         JSONArray resourcesJsonArray = resultJsonObject.getJSONArray("resources");
 
@@ -139,10 +164,15 @@ public class SurreyDataGetter {
         data.setLast_modified(LocalDateTime.parse(time, formatter));
     }
 
-    private void checkModified(List<SurreyData> data, Context context) {
+    /**
+     * Checks if the CSV data have been modified
+     * @param data List of CSV file information to be filled
+     * @param context
+     */
+    private void checkModified(List<CsvInfo> data, Context context) {
         LastModified lastModified = LastModified.getInstance(context);
-        SurreyData restaurant = data.get(0);
-        SurreyData inspection = data.get(1);
+        CsvInfo restaurant = data.get(0);
+        CsvInfo inspection = data.get(1);
 
         if (restaurant.getLast_modified().isAfter(lastModified.getLast_mod_restaurants())) {
             restaurant.setChanged(true);
