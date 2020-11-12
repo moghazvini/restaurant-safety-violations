@@ -11,13 +11,11 @@ public class Violation {
     private ViolationType type;
     private Severity severity;
     private String longDis;
-    private String repeat;
 
-    public Violation(int code, Severity severity, String longDis, String repeat) {
+    public Violation(int code, Severity severity, String longDis) {
         this.code = code;
         this.severity = severity;
         this.longDis = longDis;
-        this.repeat = repeat;
         getViolationType(code);
     }
 
@@ -74,14 +72,6 @@ public class Violation {
         this.longDis = longDis;
     }
 
-    public String getRepeat() {
-        return repeat;
-    }
-
-    public void setRepeat(String repeat) {
-        this.repeat = repeat;
-    }
-
     public ViolationType getType() {
         return type;
     }
@@ -93,7 +83,6 @@ public class Violation {
                 ", type=" + type +
                 ", severity=" + severity +
                 ", longDis='" + longDis + '\'' +
-                ", repeat='" + repeat + '\'' +
                 '}';
     }
 }
