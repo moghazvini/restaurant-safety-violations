@@ -78,6 +78,7 @@ public class RestaurantListActivity extends AppCompatActivity {
 
     }
 
+    // Get the CSV links and timestmps
     private class GetDataTask extends AsyncTask<Void,Void,List<CsvInfo>> {
         @Override
         protected List<CsvInfo> doInBackground(Void... voids) {
@@ -96,6 +97,7 @@ public class RestaurantListActivity extends AppCompatActivity {
         }
     }
 
+    // Download CSV files
     private class ListUpdateTask extends AsyncTask<Void,Void, Boolean> {
         @Override
         protected Boolean doInBackground(Void... voids) {
@@ -133,7 +135,6 @@ public class RestaurantListActivity extends AppCompatActivity {
             updatedInspections = new BufferedReader(inputReader_insp);
             fillRestaurantManager(new BufferedReader(inputReader_rest));
         } catch (FileNotFoundException e) {
-            //Log.e("File", "Downloaded file not found");
             // No update files downloaded
             Toast.makeText(this, "CAN'T FIND FILES",Toast.LENGTH_LONG).show();
         }
