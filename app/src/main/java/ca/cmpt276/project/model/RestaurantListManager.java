@@ -36,4 +36,13 @@ public class RestaurantListManager {
         }
         return restaurants.get(index);
     }
+
+    public Restaurant find(String tracking) {
+        for (Restaurant restaurant : restaurants) {
+            if (restaurant.getTracking().equals(tracking)) {
+                return restaurant;
+            }
+        }
+        return null;
+    }
 }
