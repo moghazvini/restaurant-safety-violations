@@ -11,6 +11,9 @@ import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
@@ -24,17 +27,23 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import ca.cmpt276.project.R;
+import ca.cmpt276.project.model.Inspection;
 import ca.cmpt276.project.model.Restaurant;
 import ca.cmpt276.project.model.RestaurantListManager;
+import ca.cmpt276.project.model.types.HazardLevel;
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
 
@@ -42,14 +51,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private GoogleMap mMap;
     private Boolean loc_Permission = false;
     private RestaurantListManager restaurantManager;
-    List<LatLng> restaurantlatlag;
+    List<Marker> restMarker;
     private Location currentloc;
     //permissions
-    //https://www.youtube.com/watch?v=Vt6H9TOmsuo&list=PLgCYzUzKIBE-vInwQhGSdnbyJ62nixHCt&index=4
+    /*//https://www.youtube.com/watch?v=Vt6H9TOmsuo&list=PLgCYzUzKIBE-vInwQhGSdnbyJ62nixHCt&index=4
     private static final String FINE_LOCATION = Manifest.permission.ACCESS_FINE_LOCATION;
     private static final String COURSE_LOCATION = Manifest.permission.ACCESS_COARSE_LOCATION;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 2000;
-    private FusedLocationProviderClient mlocationClient;
+    private FusedLocationProviderClient mlocationClient;*/
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,10 +68,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         setSupportActionBar(toolbar);
 
         restaurantManager = RestaurantListManager.getInstance();
-        getUserLocal();
+        SetupMap();
+        //getUserLocal();
     }
 
-    private void getUserLocal() {
+    /*private void getUserLocal() {
         String[] permissions = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION};
         if(ContextCompat.checkSelfPermission(this.getApplicationContext(),FINE_LOCATION)== PackageManager.PERMISSION_GRANTED){
             if(ContextCompat.checkSelfPermission(this.getApplicationContext(),COURSE_LOCATION)== PackageManager.PERMISSION_GRANTED){
@@ -73,8 +83,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }else{
             ActivityCompat.requestPermissions(this,permissions,LOCATION_PERMISSION_REQUEST_CODE);
         }
-    }
-
+    }*/
+/*
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         loc_Permission = false;
@@ -88,12 +98,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         }
                     }
                     loc_Permission = true;
-                    //initialize our map
+                    //initialize map
                     SetupMap();
                 }
             }
         }
-    }
+    }*/
 
     private void SetupMap() {
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
@@ -118,20 +128,19 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap.getUiSettings().setZoomControlsEnabled(true);
         mMap.getUiSettings().setZoomGesturesEnabled(true);
         mMap.getUiSettings().setCompassEnabled(true);
-        popLatlong();
-        addMarkers(googleMap);
-        if (loc_Permission==true) {
+        setMarkers(mMap);
+        /*if (loc_Permission==true) {
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                     != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this,
                     Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 return;
             }
-                deviceLocation();
-                mMap.setMyLocationEnabled(true);
-        }
+            deviceLocation();
+            mMap.setMyLocationEnabled(true);
+        }*/
     }
 
-    private void deviceLocation() {
+    /*private void deviceLocation() {
         mlocationClient = LocationServices.getFusedLocationProviderClient(this);
         try{
             if(loc_Permission){
@@ -151,24 +160,42 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }catch (SecurityException e){
             Log.e("user location failure", "getDeviceLocation: SecurityException: " + e.getMessage() );
         }
-    }
+    }*/
 
-    private void popLatlong() {
-        restaurantlatlag = new ArrayList<>();
-        for (Restaurant current : restaurantManager.getList()){
-            LatLng temp = new LatLng(current.getGpsLat(),current.getGpsLong());
-            restaurantlatlag.add(temp);
-        }
-    }
-
-    private void addMarkers(GoogleMap googleMap) {
+    private void setMarkers(GoogleMap googleMap) {
         mMap = googleMap;
-        int pos = 0 ;
-        for (LatLng current : restaurantlatlag){
-            mMap.addMarker(new MarkerOptions().position(current).title(restaurantManager.getRestaurant(pos).getName()));
-            pos++;
+        restMarker = new ArrayList<>();
+        BitmapDescriptor marker_low = BitmapDescriptorFactory.fromResource(R.drawable.green_hazard);
+        BitmapDescriptor marker_med = BitmapDescriptorFactory.fromResource(R.drawable.orange_hazard);
+        BitmapDescriptor marker_high = BitmapDescriptorFactory.fromResource(R.drawable.red_hazard);
+        for (Restaurant current : restaurantManager.getList()){
+            Inspection latestInspection = Collections.max(current.getInspections().getInspections());
+            if(latestInspection.getLevel() == HazardLevel.LOW) {
+                restMarker.add(mMap.addMarker(new MarkerOptions()
+                        .position(new LatLng(current.getGpsLat(), current.getGpsLong()))
+                        .title(current.getName())
+                        .snippet("Severity Level: LOW")
+                        .icon(marker_low)));
+            }else if(latestInspection.getLevel() == HazardLevel.MODERATE){
+                restMarker.add(mMap.addMarker(new MarkerOptions()
+                        .position(new LatLng(current.getGpsLat(), current.getGpsLong()))
+                        .title(current.getName())
+                        .snippet("Severity Level: MODERATE")
+                        .icon(marker_med)));
+            }else if(latestInspection.getLevel() == HazardLevel.HIGH){
+                restMarker.add(mMap.addMarker(new MarkerOptions()
+                        .position(new LatLng(current.getGpsLat(), current.getGpsLong()))
+                        .title(current.getName())
+                        .snippet("Severity Level: HIGH")
+                        .icon(marker_high)));
+            }
+            //mMap.setOnMarkerClickListener(restMarker.get(this));
         }
-    }
+    }/*
+    @Override
+    public boolean onMarkerClick(final Marker marker) {
+
+    }*/
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu){
