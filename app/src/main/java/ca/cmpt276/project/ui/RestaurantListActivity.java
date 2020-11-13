@@ -3,6 +3,7 @@ package ca.cmpt276.project.ui;
 import android.content.Intent;
 import android.graphics.Color;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.FragmentManager;
@@ -10,6 +11,8 @@ import androidx.fragment.app.FragmentManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -52,7 +55,7 @@ public class RestaurantListActivity extends AppCompatActivity {
     private BufferedReader updatedInspections;
 
     private static boolean read = false;
-
+    private static boolean map = false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -69,6 +72,12 @@ public class RestaurantListActivity extends AppCompatActivity {
         }
 
         populateListView();
+        if (!map) {
+            startActivity(new Intent(this, MapsActivity.class));
+            map = true;
+        } else{
+            map = false;
+        }
         registerCallBack();
         /*FragmentManager manager = getSupportFragmentManager();
         DialogFragment dialog = new DialogFragment();
@@ -79,6 +88,24 @@ public class RestaurantListActivity extends AppCompatActivity {
             new GetDataTask().execute();
         }
 
+    }
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu){
+        getMenuInflater().inflate(R.menu.menu_list,menu);
+        return true;
+    }
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item){
+        switch (item.getItemId()){
+            case R.id.action_map:
+                if(!map) {
+                    startActivity(new Intent(this, MapsActivity.class));
+                    map = true;
+                }
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     // Get the CSV links and timestmps

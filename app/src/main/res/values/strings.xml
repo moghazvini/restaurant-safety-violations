@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Restaurant Inspection Reports</string>
+    <string name="app_name">Restaurant Inspector</string>
     <!--Restaurant List-->
     <string name="restaurants">Restaurants</string>
     <string name="no_inspection_found">No inspections</string>
@@ -35,4 +35,5 @@
     <string name="issue">issue</string>
     <string name="empty_violations">No violations recorded.</string>
     <string name="violation">Violation</string>
+    <string name="title_activity_maps">Restaurant Inspector</string>
 </resources>
