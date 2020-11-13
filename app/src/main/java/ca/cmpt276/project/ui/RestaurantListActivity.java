@@ -5,6 +5,7 @@ import android.graphics.Color;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.FragmentManager;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -69,7 +70,9 @@ public class RestaurantListActivity extends AppCompatActivity {
 
         populateListView();
         registerCallBack();
-
+        /*FragmentManager manager = getSupportFragmentManager();
+        DialogFragment dialog = new DialogFragment();
+        dialog.show(manager, "MessageDialog");*/
         // Check if it has been 20 hours since last check
         if (past20Hours()) {
             Toast.makeText(this, "Checking for Update", Toast.LENGTH_LONG).show();
@@ -89,6 +92,10 @@ public class RestaurantListActivity extends AppCompatActivity {
         protected void onPostExecute(List<CsvInfo> data) {
             restaurantUpdate = data;
             // TODO: Dialog Box for updating if update is available
+
+            FragmentManager manager = getSupportFragmentManager();
+            DialogFragment dialog = new DialogFragment();
+            dialog.show(manager, "MessageDialog");
             if (data.get(0).getChanged() // check if restaurant list changed
                     || data.get(1).getChanged()) { // if inspection list changed
                 // Want update? Execute function
