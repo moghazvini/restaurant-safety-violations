@@ -3,26 +3,17 @@ package ca.cmpt276.project.ui;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
 
-import android.Manifest;
-import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
-import android.location.Location;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -32,8 +23,6 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -49,16 +38,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     //SupportMapFragment mapFragment;
     private GoogleMap mMap;
-    private Boolean loc_Permission = false;
     private RestaurantListManager restaurantManager;
-    List<Marker> restMarker;
-    private Location currentloc;
-    //permissions
-    /*//https://www.youtube.com/watch?v=Vt6H9TOmsuo&list=PLgCYzUzKIBE-vInwQhGSdnbyJ62nixHCt&index=4
-    private static final String FINE_LOCATION = Manifest.permission.ACCESS_FINE_LOCATION;
-    private static final String COURSE_LOCATION = Manifest.permission.ACCESS_COARSE_LOCATION;
-    private static final int LOCATION_PERMISSION_REQUEST_CODE = 2000;
-    private FusedLocationProviderClient mlocationClient;*/
+    List<LatLng> restaurantlatlag;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,48 +53,22 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mapFragment.getMapAsync(this);
 
         restaurantManager = RestaurantListManager.getInstance();
-        //getUserLocal();
     }
-
-    /*private void getUserLocal() {
-        String[] permissions = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION};
-        if(ContextCompat.checkSelfPermission(this.getApplicationContext(),FINE_LOCATION)== PackageManager.PERMISSION_GRANTED){
-            if(ContextCompat.checkSelfPermission(this.getApplicationContext(),COURSE_LOCATION)== PackageManager.PERMISSION_GRANTED){
-                loc_Permission = true;
-            }else{
-                ActivityCompat.requestPermissions(this,permissions,LOCATION_PERMISSION_REQUEST_CODE);
-            }
-        }else{
-            ActivityCompat.requestPermissions(this,permissions,LOCATION_PERMISSION_REQUEST_CODE);
-        }
-    }*/
-/*
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        loc_Permission = false;
-        switch(requestCode){
-            case LOCATION_PERMISSION_REQUEST_CODE:{
-                if(grantResults.length > 0){
-                    for(int i = 0; i < grantResults.length; i++){
-                        if(grantResults[i] != PackageManager.PERMISSION_GRANTED){
-                            loc_Permission = false;
-                            return;
-                        }
-                    }
-                    loc_Permission = true;
-                    //initialize map
-                    SetupMap();
-                }
-            }
+    public boolean onCreateOptionsMenu(Menu menu){
+        getMenuInflater().inflate(R.menu.menu_map,menu);
+        return true;
+    }
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item){
+        switch (item.getItemId()){
+            case R.id.action_list:
+                startActivity(new Intent(this,RestaurantListActivity.class));
+                return  true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
-    }*/
-
-    /*private void SetupMap() {
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
-    }*/
+    }
 
     /**
      * Manipulates the map once available.
@@ -131,88 +86,62 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap.getUiSettings().setZoomControlsEnabled(true);
         mMap.getUiSettings().setZoomGesturesEnabled(true);
         mMap.getUiSettings().setCompassEnabled(true);
-        setMarkers(googleMap);
-        /*if (loc_Permission==true) {
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                    != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this,
-                    Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                return;
-            }
-            deviceLocation();
-            mMap.setMyLocationEnabled(true);
-        }*/
+        popLatlong();
+        addMarkers(googleMap);
+        // Add a marker in Sydney and move the camera
+        /*LatLng sydney = new LatLng(-34, 151);
+        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));*/
     }
 
-    /*private void deviceLocation() {
-        mlocationClient = LocationServices.getFusedLocationProviderClient(this);
-        try{
-            if(loc_Permission){
-
-                final Task location = mlocationClient.getLastLocation();
-                location.addOnCompleteListener(task -> {
-                    if(task.isSuccessful()){
-                        currentloc = (Location) task.getResult();
-                        LatLng curr = new LatLng(currentloc.getLatitude(),currentloc.getLongitude());
-                        mMap.moveCamera(CameraUpdateFactory.newLatLng(curr));
-                        mMap.animateCamera(CameraUpdateFactory.zoomTo(11));
-                    }else{
-                        Toast.makeText(MapsActivity.this, "unable to get current location", Toast.LENGTH_SHORT).show();
-                    }
-                });
-            }
-        }catch (SecurityException e){
-            Log.e("user location failure", "getDeviceLocation: SecurityException: " + e.getMessage() );
-        }
-    }*/
-
-    private void setMarkers(GoogleMap googleMap) {
-        mMap = googleMap;
-        restMarker = new ArrayList<>();
-        BitmapDescriptor marker_low = BitmapDescriptorFactory.fromResource(R.drawable.green_hazard);
-        BitmapDescriptor marker_med = BitmapDescriptorFactory.fromResource(R.drawable.orange_hazard);
-        BitmapDescriptor marker_high = BitmapDescriptorFactory.fromResource(R.drawable.red_hazard);
+    private void popLatlong() {
+        restaurantlatlag = new ArrayList<>();
         for (Restaurant current : restaurantManager.getList()){
-            Inspection latestInspection = Collections.max(current.getInspections().getInspections());
-            if(latestInspection.getLevel() == HazardLevel.LOW) {
-                mMap.addMarker(new MarkerOptions()
-                        .position(new LatLng(current.getGpsLat(), current.getGpsLong()))
-                        .title(current.getName())
-                        .snippet("Severity Level: LOW")
-                        .icon(marker_low));
-            }else if(latestInspection.getLevel() == HazardLevel.MODERATE){
-                mMap.addMarker(new MarkerOptions()
-                        .position(new LatLng(current.getGpsLat(), current.getGpsLong()))
-                        .title(current.getName())
-                        .snippet("Severity Level: MODERATE")
-                        .icon(marker_med));
-            }else if(latestInspection.getLevel() == HazardLevel.HIGH){
-                mMap.addMarker(new MarkerOptions()
-                        .position(new LatLng(current.getGpsLat(), current.getGpsLong()))
-                        .title(current.getName())
-                        .snippet("Severity Level: HIGH")
-                        .icon(marker_high));
+            LatLng temp = new LatLng(current.getGpsLat(),current.getGpsLong());
+            restaurantlatlag.add(temp);
+        }
+    }
+
+    private void addMarkers(GoogleMap googleMap) {
+        mMap = googleMap;
+        int pos = 0 ;/*
+        Drawable Hazard_low = getResources().getDrawable(R.drawable.green_hazard);
+        BitmapDescriptor marker_low = getMarkerIconFromDrawable(Hazard_low);
+        Drawable Hazard_med = getResources().getDrawable(R.drawable.orange_hazard);
+        BitmapDescriptor marker_med = getMarkerIconFromDrawable(Hazard_med);
+        Drawable Hazard_high = getResources().getDrawable(R.drawable.red_hazard);
+        BitmapDescriptor marker_high= getMarkerIconFromDrawable(Hazard_high);*/
+        for (LatLng current : restaurantlatlag){
+            if(restaurantManager.getRestaurant(pos).getInspections().getInspections().size()>0) {
+                Inspection latestInspection = Collections.max(restaurantManager.getRestaurant(pos).getInspections().getInspections());
+                if (latestInspection.getLevel() == HazardLevel.LOW) {
+                    mMap.addMarker(new MarkerOptions().position(current).title(restaurantManager.getRestaurant(pos).getName()).snippet("SEVERITY LEVEL: LOW").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+                }else if (latestInspection.getLevel() == HazardLevel.MODERATE) {
+                    mMap.addMarker(new MarkerOptions().position(current).title(restaurantManager.getRestaurant(pos).getName()).snippet("SEVERITY LEVEL: MODERATE").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));
+                }else if (latestInspection.getLevel() == HazardLevel.HIGH) {
+                    mMap.addMarker(new MarkerOptions().position(current).title(restaurantManager.getRestaurant(pos).getName()).snippet("SEVERITY LEVEL: HIGH").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
+                }
             }
-            //mMap.setOnMarkerClickListener(restMarker.get(this));
+            pos++;
+            int finalPos = pos;
+            /*mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+                @Override
+                public boolean onMarkerClick(Marker marker) {
+                    Toast.makeText(MapsActivity.this,"Launching Restaurant detail for" + restaurantManager.getRestaurant(finalPos).getName(),Toast.LENGTH_LONG).show();
+                    return false;
+                }
+            });*/
         }
-    }/*
-    @Override
-    public boolean onMarkerClick(final Marker marker) {
-
+        //change to user location
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(restaurantlatlag.get(5)));
+        mMap.animateCamera(CameraUpdateFactory.zoomTo(11));
+    }
+    /*private BitmapDescriptor getMarkerIconFromDrawable(Drawable drawable) {
+        Canvas canvas = new Canvas();
+        Bitmap bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+        canvas.setBitmap(bitmap);
+        drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+        drawable.draw(canvas);
+        return BitmapDescriptorFactory.fromBitmap(bitmap);
     }*/
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu){
-        getMenuInflater().inflate(R.menu.menu_map,menu);
-        return true;
-    }
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item){
-        switch (item.getItemId()){
-            case R.id.action_list:
-                startActivity(new Intent(this,RestaurantListActivity.class));
-                return  true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-    }
 }
