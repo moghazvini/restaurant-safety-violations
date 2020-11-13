@@ -66,9 +66,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         setContentView(R.layout.activity_maps);
         Toolbar toolbar = findViewById(R.id.map_toolbar);
         setSupportActionBar(toolbar);
+        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
 
         restaurantManager = RestaurantListManager.getInstance();
-        SetupMap();
         //getUserLocal();
     }
 
@@ -105,12 +108,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }*/
 
-    private void SetupMap() {
+    /*private void SetupMap() {
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-    }
+    }*/
 
     /**
      * Manipulates the map once available.
@@ -128,7 +131,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap.getUiSettings().setZoomControlsEnabled(true);
         mMap.getUiSettings().setZoomGesturesEnabled(true);
         mMap.getUiSettings().setCompassEnabled(true);
-        setMarkers(mMap);
+        setMarkers(googleMap);
         /*if (loc_Permission==true) {
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                     != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this,
@@ -171,23 +174,23 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         for (Restaurant current : restaurantManager.getList()){
             Inspection latestInspection = Collections.max(current.getInspections().getInspections());
             if(latestInspection.getLevel() == HazardLevel.LOW) {
-                restMarker.add(mMap.addMarker(new MarkerOptions()
+                mMap.addMarker(new MarkerOptions()
                         .position(new LatLng(current.getGpsLat(), current.getGpsLong()))
                         .title(current.getName())
                         .snippet("Severity Level: LOW")
-                        .icon(marker_low)));
+                        .icon(marker_low));
             }else if(latestInspection.getLevel() == HazardLevel.MODERATE){
-                restMarker.add(mMap.addMarker(new MarkerOptions()
+                mMap.addMarker(new MarkerOptions()
                         .position(new LatLng(current.getGpsLat(), current.getGpsLong()))
                         .title(current.getName())
                         .snippet("Severity Level: MODERATE")
-                        .icon(marker_med)));
+                        .icon(marker_med));
             }else if(latestInspection.getLevel() == HazardLevel.HIGH){
-                restMarker.add(mMap.addMarker(new MarkerOptions()
+                mMap.addMarker(new MarkerOptions()
                         .position(new LatLng(current.getGpsLat(), current.getGpsLong()))
                         .title(current.getName())
                         .snippet("Severity Level: HIGH")
-                        .icon(marker_high)));
+                        .icon(marker_high));
             }
             //mMap.setOnMarkerClickListener(restMarker.get(this));
         }
