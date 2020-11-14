@@ -253,11 +253,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         lastModified = LastModified.getInstance(MapsActivity.this);
         LocalDateTime previous = lastModified.getLastCheck();
         LocalDateTime current = LocalDateTime.now();
-        if (current.minusHours(20).isAfter(previous) || current.minusHours(20).isEqual(previous)) {
-            Toast.makeText(this, "time to update", Toast.LENGTH_LONG).show();
-        } else {
-            Toast.makeText(this, "time isn't up yet", Toast.LENGTH_LONG).show();
-        }
         return current.minusHours(20).isAfter(previous) || current.minusHours(20).isEqual(previous);
     }
 }
