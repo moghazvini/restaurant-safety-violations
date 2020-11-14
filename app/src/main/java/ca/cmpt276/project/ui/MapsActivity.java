@@ -53,8 +53,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private RestaurantListManager restaurantManager;
     private LastModified lastModified;
     private List<CsvInfo> restaurantUpdate;
-    private BufferedReader updatedInspections;
     List<LatLng> restaurantlatlag;
+
+    private static boolean read = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,6 +69,17 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mapFragment.getMapAsync(this);
 
         restaurantManager = RestaurantListManager.getInstance();
+
+        if(!read){
+            fillInitialRestaurantList();
+            read = true;
+            getUpdatedFiles();
+        }
+
+        if (past20Hours()) {
+            Toast.makeText(this, "Checking for Update", Toast.LENGTH_LONG).show();
+            new GetDataTask().execute();
+        }
     }
 
     @Override
@@ -80,6 +92,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         switch (item.getItemId()){
             case R.id.action_list:
                 startActivity(new Intent(this,RestaurantListActivity.class));
+                finish();
                 return  true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -161,7 +174,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         return BitmapDescriptorFactory.fromBitmap(bitmap);
     }*/
 
-    // Get the CSV links and timestmps
+    // Get the CSV links and timestamps
     private class GetDataTask extends AsyncTask<Void,Void,List<CsvInfo>> {
         @Override
         protected List<CsvInfo> doInBackground(Void... voids) {
@@ -172,14 +185,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         protected void onPostExecute(List<CsvInfo> data) {
             restaurantUpdate = data;
             // TODO: Dialog Box for updating if update is available
-
-            FragmentManager manager = getSupportFragmentManager();
-            DialogFragment dialog = new DialogFragment();
-            dialog.show(manager, "MessageDialog");
             if (data.get(0).getChanged() // check if restaurant list changed
                     || data.get(1).getChanged()) { // if inspection list changed
                 // Want update? Execute function
                 System.out.println("FOUND AN UPDATE!!!!--------------");
+                FragmentManager manager = getSupportFragmentManager();
+                DialogFragment dialog = new DialogFragment();
+                dialog.show(manager, "MessageDialog");
+
                 new ListUpdateTask().execute();
             }
         }
@@ -209,6 +222,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         );
 
         restaurantManager.fillRestaurantManager(reader);
+        InputStream is = getResources().openRawResource(R.raw.inspectionreports_itr1);
+        BufferedReader inspectionReader = new BufferedReader(
+                new InputStreamReader(is, StandardCharsets.UTF_8)
+        );
+        restaurantManager.fillInspectionManager(inspectionReader);
     }
 
     private void getUpdatedFiles() {
@@ -219,8 +237,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             inputStream_insp = MapsActivity.this.openFileInput(SurreyDataGetter.DOWNLOAD_INSPECTIONS);
             InputStreamReader inputReader_rest = new InputStreamReader(inputStream_rest, StandardCharsets.UTF_8);
             InputStreamReader inputReader_insp = new InputStreamReader(inputStream_insp, StandardCharsets.UTF_8);
-            updatedInspections = new BufferedReader(inputReader_insp);
+
             restaurantManager.fillRestaurantManager(new BufferedReader(inputReader_rest));
+            restaurantManager.fillInspectionManager(new BufferedReader(inputReader_insp));
         } catch (FileNotFoundException e) {
             // No update files downloaded
             Toast.makeText(this, "CAN'T FIND FILES",Toast.LENGTH_LONG).show();
@@ -231,6 +250,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         lastModified = LastModified.getInstance(MapsActivity.this);
         LocalDateTime previous = lastModified.getLastCheck();
         LocalDateTime current = LocalDateTime.now();
+        if (current.minusHours(20).isAfter(previous) || current.minusHours(20).isEqual(previous)) {
+            Toast.makeText(this, "time to update", Toast.LENGTH_LONG).show();
+        }
         return current.minusHours(20).isAfter(previous) || current.minusHours(20).isEqual(previous);
     }
 }
