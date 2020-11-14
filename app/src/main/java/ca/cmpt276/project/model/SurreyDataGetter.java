@@ -183,7 +183,7 @@ public class SurreyDataGetter {
         if (inspection.getLast_modified().isAfter(lastModified.getLast_mod_inspections())) {
             inspection.setChanged(true);
         } else {
-            restaurant.setChanged(false);
+            inspection.setChanged(false);
         }
     }
 }

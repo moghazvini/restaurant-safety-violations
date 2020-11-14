@@ -185,6 +185,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         protected void onPostExecute(List<CsvInfo> data) {
             restaurantUpdate = data;
             // TODO: Dialog Box for updating if update is available
+
+            System.out.println(data.get(0));
+            System.out.println(data.get(1));
             if (data.get(0).getChanged() // check if restaurant list changed
                     || data.get(1).getChanged()) { // if inspection list changed
                 // Want update? Execute function
@@ -252,6 +255,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         LocalDateTime current = LocalDateTime.now();
         if (current.minusHours(20).isAfter(previous) || current.minusHours(20).isEqual(previous)) {
             Toast.makeText(this, "time to update", Toast.LENGTH_LONG).show();
+        } else {
+            Toast.makeText(this, "time isn't up yet", Toast.LENGTH_LONG).show();
         }
         return current.minusHours(20).isAfter(previous) || current.minusHours(20).isEqual(previous);
     }
