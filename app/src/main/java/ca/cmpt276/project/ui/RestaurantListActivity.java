@@ -201,8 +201,8 @@ public class RestaurantListActivity extends AppCompatActivity {
                 }
                 String addr = attributes[addrIndex];
                 String city = attributes[addrIndex + 1];
-                float gpsLong = Float.parseFloat(attributes[addrIndex + 3]);
-                float gpsLat = Float.parseFloat(attributes[addrIndex + 4]);
+                float gpsLat = Float.parseFloat(attributes[addrIndex + 3]);
+                float gpsLong = Float.parseFloat(attributes[addrIndex + 4]);
 
                 //read data
                 Restaurant restaurant = new Restaurant(
