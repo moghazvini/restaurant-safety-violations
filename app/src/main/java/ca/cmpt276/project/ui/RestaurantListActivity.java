@@ -33,8 +33,6 @@ import ca.cmpt276.project.model.RestaurantListManager;
 public class RestaurantListActivity extends AppCompatActivity {
     private RestaurantListManager restaurantManager;
 
-    //private static boolean read = false;
-    private static boolean map = false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -51,25 +49,6 @@ public class RestaurantListActivity extends AppCompatActivity {
         dialog.show(manager, "MessageDialog");*/
         // Check if it has been 20 hours since last check
 
-    }
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu){
-        getMenuInflater().inflate(R.menu.menu_list,menu);
-        return true;
-    }
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item){
-        switch (item.getItemId()){
-            case R.id.action_map:
-                if(!map) {
-                    startActivity(new Intent(this, MapsActivity.class));
-                    finish();
-                    map = true;
-                }
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
     }
 
     private void populateListView() {
@@ -158,6 +137,23 @@ public class RestaurantListActivity extends AppCompatActivity {
             Intent i = RestaurantDetailsActivity.makeLaunchIntent(RestaurantListActivity.this,position);
             startActivity(i);
         });
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu){
+        getMenuInflater().inflate(R.menu.menu_list,menu);
+        return true;
+    }
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item){
+        switch (item.getItemId()){
+            case R.id.action_map:
+                startActivity(new Intent(this, MapsActivity.class));
+                finish();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
 }

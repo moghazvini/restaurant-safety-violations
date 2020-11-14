@@ -91,7 +91,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public boolean onOptionsItemSelected(@NonNull MenuItem item){
         switch (item.getItemId()){
             case R.id.action_list:
-                startActivity(new Intent(this,RestaurantListActivity.class));
+                startActivity(new Intent(MapsActivity.this,RestaurantListActivity.class));
                 finish();
                 return  true;
             default:
@@ -189,9 +189,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     || data.get(1).getChanged()) { // if inspection list changed
                 // Want update? Execute function
                 System.out.println("FOUND AN UPDATE!!!!--------------");
-                FragmentManager manager = getSupportFragmentManager();
-                DialogFragment dialog = new DialogFragment();
-                dialog.show(manager, "MessageDialog");
+                //FragmentManager manager = getSupportFragmentManager();
+                //DialogFragment dialog = new DialogFragment();
+                //dialog.show(manager, "MessageDialog");
 
                 new ListUpdateTask().execute();
             }
