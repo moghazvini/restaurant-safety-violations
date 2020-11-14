@@ -4,11 +4,13 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentManager;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -24,14 +26,24 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import ca.cmpt276.project.R;
+import ca.cmpt276.project.model.CsvInfo;
 import ca.cmpt276.project.model.Inspection;
+import ca.cmpt276.project.model.LastModified;
 import ca.cmpt276.project.model.Restaurant;
 import ca.cmpt276.project.model.RestaurantListManager;
+import ca.cmpt276.project.model.SurreyDataGetter;
 import ca.cmpt276.project.model.types.HazardLevel;
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
@@ -39,6 +51,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     //SupportMapFragment mapFragment;
     private GoogleMap mMap;
     private RestaurantListManager restaurantManager;
+    private LastModified lastModified;
+    private List<CsvInfo> restaurantUpdate;
+    private BufferedReader updatedInspections;
     List<LatLng> restaurantlatlag;
 
     @Override
@@ -54,6 +69,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         restaurantManager = RestaurantListManager.getInstance();
     }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu){
         getMenuInflater().inflate(R.menu.menu_map,menu);
@@ -144,4 +160,77 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         drawable.draw(canvas);
         return BitmapDescriptorFactory.fromBitmap(bitmap);
     }*/
+
+    // Get the CSV links and timestmps
+    private class GetDataTask extends AsyncTask<Void,Void,List<CsvInfo>> {
+        @Override
+        protected List<CsvInfo> doInBackground(Void... voids) {
+            return new SurreyDataGetter().getDataLink(MapsActivity.this);
+        }
+
+        @Override
+        protected void onPostExecute(List<CsvInfo> data) {
+            restaurantUpdate = data;
+            // TODO: Dialog Box for updating if update is available
+
+            FragmentManager manager = getSupportFragmentManager();
+            DialogFragment dialog = new DialogFragment();
+            dialog.show(manager, "MessageDialog");
+            if (data.get(0).getChanged() // check if restaurant list changed
+                    || data.get(1).getChanged()) { // if inspection list changed
+                // Want update? Execute function
+                System.out.println("FOUND AN UPDATE!!!!--------------");
+                new ListUpdateTask().execute();
+            }
+        }
+    }
+
+    // Download CSV files
+    private class ListUpdateTask extends AsyncTask<Void,Void, Boolean> {
+        @Override
+        protected Boolean doInBackground(Void... voids) {
+            // TODO: Dialog Box for updating
+            return new SurreyDataGetter().getCSVData(restaurantUpdate, MapsActivity.this);
+        }
+
+        @Override
+        protected void onPostExecute(Boolean receivedUpdate) {
+            boolean update = receivedUpdate;
+            if (update) {
+                getUpdatedFiles();
+            }
+        }
+    }
+
+    private void fillInitialRestaurantList() {
+        InputStream inputStream = getResources().openRawResource(R.raw.restaurants_itr1);
+        BufferedReader reader = new BufferedReader(
+                new InputStreamReader(inputStream, StandardCharsets.UTF_8)
+        );
+
+        restaurantManager.fillRestaurantManager(reader);
+    }
+
+    private void getUpdatedFiles() {
+        FileInputStream inputStream_rest;
+        FileInputStream inputStream_insp;
+        try {
+            inputStream_rest = MapsActivity.this.openFileInput(SurreyDataGetter.DOWNLOAD_RESTAURANTS);
+            inputStream_insp = MapsActivity.this.openFileInput(SurreyDataGetter.DOWNLOAD_INSPECTIONS);
+            InputStreamReader inputReader_rest = new InputStreamReader(inputStream_rest, StandardCharsets.UTF_8);
+            InputStreamReader inputReader_insp = new InputStreamReader(inputStream_insp, StandardCharsets.UTF_8);
+            updatedInspections = new BufferedReader(inputReader_insp);
+            restaurantManager.fillRestaurantManager(new BufferedReader(inputReader_rest));
+        } catch (FileNotFoundException e) {
+            // No update files downloaded
+            Toast.makeText(this, "CAN'T FIND FILES",Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private boolean past20Hours() {
+        lastModified = LastModified.getInstance(MapsActivity.this);
+        LocalDateTime previous = lastModified.getLastCheck();
+        LocalDateTime current = LocalDateTime.now();
+        return current.minusHours(20).isAfter(previous) || current.minusHours(20).isEqual(previous);
+    }
 }

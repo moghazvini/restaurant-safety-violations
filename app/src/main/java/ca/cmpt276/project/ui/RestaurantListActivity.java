@@ -126,6 +126,7 @@ public class RestaurantListActivity extends AppCompatActivity {
             if (data.get(0).getChanged() // check if restaurant list changed
                     || data.get(1).getChanged()) { // if inspection list changed
                 // Want update? Execute function
+                System.out.println("FOUND AN UPDATE!!!!--------------");
                 new ListUpdateTask().execute();
             }
         }
@@ -154,11 +155,15 @@ public class RestaurantListActivity extends AppCompatActivity {
                 new InputStreamReader(inputStream, StandardCharsets.UTF_8)
         );
 
-        fillRestaurantManager(reader);
+        restaurantManager.fillRestaurantManager(reader);
+        InputStream is = getResources().openRawResource(R.raw.inspectionreports_itr1);
+        BufferedReader inspectionReader = new BufferedReader(
+                new InputStreamReader(is, StandardCharsets.UTF_8)
+        );
+        restaurantManager.fillInspectionManager(inspectionReader);
     }
 
     private void getUpdatedFiles() {
-        Toast.makeText(this, "THERE'S AN UPDATE", Toast.LENGTH_SHORT).show();
         FileInputStream inputStream_rest;
         FileInputStream inputStream_insp;
         try {
@@ -166,8 +171,9 @@ public class RestaurantListActivity extends AppCompatActivity {
             inputStream_insp = RestaurantListActivity.this.openFileInput(SurreyDataGetter.DOWNLOAD_INSPECTIONS);
             InputStreamReader inputReader_rest = new InputStreamReader(inputStream_rest, StandardCharsets.UTF_8);
             InputStreamReader inputReader_insp = new InputStreamReader(inputStream_insp, StandardCharsets.UTF_8);
-            updatedInspections = new BufferedReader(inputReader_insp);
-            fillRestaurantManager(new BufferedReader(inputReader_rest));
+
+            restaurantManager.fillRestaurantManager(new BufferedReader(inputReader_rest));
+            restaurantManager.fillInspectionManager(new BufferedReader(inputReader_insp));
         } catch (FileNotFoundException e) {
             // No update files downloaded
             Toast.makeText(this, "CAN'T FIND FILES",Toast.LENGTH_LONG).show();
@@ -179,138 +185,6 @@ public class RestaurantListActivity extends AppCompatActivity {
         LocalDateTime previous = lastModified.getLastCheck();
         LocalDateTime current = LocalDateTime.now();
         return current.minusHours(20).isAfter(previous) || current.minusHours(20).isEqual(previous);
-    }
-
-    private void fillRestaurantManager(BufferedReader reader) {
-        String line = "";
-        try {
-            reader.readLine();
-            restaurantManager.getList().clear();
-            while ((line = reader.readLine()) != null) {
-                //System.out.println(line);
-                line = line.replace("\"", "");
-
-                String[] attributes = line.split(",");
-                String tracking = attributes[0];
-                tracking = tracking.replace(" ", "");
-                String name = attributes[1];
-
-                int addrIndex = attributes.length - 5;
-                for (int i = 2; i < addrIndex; i++) {
-                    name = name.concat(attributes[i]);
-                }
-                String addr = attributes[addrIndex];
-                String city = attributes[addrIndex + 1];
-                float gpsLong = Float.parseFloat(attributes[addrIndex + 3]);
-                float gpsLat = Float.parseFloat(attributes[addrIndex + 4]);
-
-                //read data
-                Restaurant restaurant = new Restaurant(
-                        tracking,
-                        name,
-                        addr,
-                        city,
-                        gpsLong, // Restaurant Longitude
-                        gpsLat // Restaurant Latitude
-                );
-                restaurantManager.add(restaurant);
-            }
-            fillInspectionManager();
-            populateListView();
-        } catch(IOException e){
-            Log.wtf("RestaurantListActivity", "error reading data file on line " + line, e);
-        }
-    }
-
-    private void fillInspectionManager() {
-        BufferedReader reader;
-        if (!read) {
-            InputStream is = getResources().openRawResource(R.raw.inspectionreports_itr1);
-            reader = new BufferedReader(
-                    new InputStreamReader(is, StandardCharsets.UTF_8)
-            );
-        } else {
-            reader = updatedInspections;
-        }
-
-        String line = "";
-        try {
-            Restaurant restaurant = restaurantManager.getRestaurant(0);
-
-            reader.readLine();
-            while ((line = reader.readLine()) != null) {
-                line = line.replace("\"", "");
-                //split by ','
-                String[] tokens = line.split(",");
-
-                //read data
-                if (tokens.length > 0) {
-                    // Get the restaurant that matches the tracking number of the inspection
-                    String inspectionTracking = tokens[0];
-                    // find the restaurant that has the same tracking number
-                    if (!restaurant.getTracking().equals(inspectionTracking)) {
-                        restaurant = restaurantManager.find(inspectionTracking);
-                    }
-                    if (restaurant != null) {
-                        InspectionListManager inspectionList = restaurant.getInspections();
-
-                        // Format string date
-                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
-                        LocalDate date = LocalDate.parse(tokens[1], formatter);
-
-                        InspectionType type = getInspectionType(tokens[2]);
-                        int numCritical = Integer.parseInt(tokens[3]);
-                        int numNonCritical = Integer.parseInt(tokens[4]);
-                        HazardLevel hazardLevel = getHazardLevel(tokens[tokens.length-1]);
-
-                        Inspection inspection;
-                        if (tokens.length > 5) {
-                            if (tokens[5].length() > 0) {
-                                String violationLump = getVioLump(tokens);
-                                inspection = new Inspection(date, type, numCritical, numNonCritical, hazardLevel, violationLump);
-                            } else {
-                                inspection = new Inspection(date, type, numCritical, numNonCritical, hazardLevel);
-                            }
-                        } else {
-                            inspection = new Inspection(date, type, numCritical, numNonCritical, hazardLevel);
-                        }
-                        inspectionList.add(inspection);
-                    } else {
-                        // reset restaurant if restaurant wasn't found
-                        // otherwise restaurant would be null for next iteration
-                        restaurant = restaurantManager.getRestaurant(0);
-                    }
-                }
-            }
-        } catch(IOException e){
-            Log.wtf("RestaurantListActivity", "error reading data file on line " + line, e);
-        }
-    }
-
-    private InspectionType getInspectionType(String type) {
-        if (type.equals("Routine")) {
-            return InspectionType.ROUTINE;
-        } else {
-            return InspectionType.FOLLOWUP;
-        }
-    }
-
-    private HazardLevel getHazardLevel(String hazard) {
-        if (hazard.equals("High")) {
-            return HazardLevel.HIGH;
-        } else if (hazard.equals("Moderate")) {
-            return HazardLevel.MODERATE;
-        } else {
-            return HazardLevel.LOW;
-        }
-    }
-
-    private String getVioLump(String[] inspectionRow) {
-        StringBuilder lump = new StringBuilder();
-        for (int i = 5; i < inspectionRow.length - 1; i++) {
-            lump.append(inspectionRow[i]).append(",");
-        }
-        return lump.toString();
     }
 
     private void populateListView() {
