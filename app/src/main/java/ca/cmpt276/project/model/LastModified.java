@@ -13,35 +13,33 @@ import java.time.ZonedDateTime;
  * timestamp of the current restaurant and inspection list modification.
  */
 public class LastModified {
-    private static final String LAST_CHECKED = "last checked";
-    private static final String LAST_MODIFIED_REST = "last modified restaurant list";
-    private static final String LAST_MODIFIED_INSP = "last modified inspection list";
-    private final LocalDateTime lastCheck;
-    private final LocalDateTime last_mod_restaurants;
-    private final LocalDateTime last_mod_inspections;
+    public static final String LAST_CHECKED = "last checked";
+    public static final String LAST_MODIFIED_REST = "last modified restaurant list";
+    public static final String LAST_MODIFIED_INSP = "last modified inspection list";
+    private LocalDateTime lastCheck;
+    private LocalDateTime last_mod_restaurants;
+    private LocalDateTime last_mod_inspections;
 
     // Singleton Support
     private static LastModified instance;
 
     private LastModified(Context context) {
-        lastCheck = getLastUpdate(context, getDefaultTime(LocalDateTime.now().minusDays(1)), LAST_CHECKED);
-        last_mod_restaurants = getLastUpdate(context, 0, LAST_MODIFIED_REST);
-        last_mod_inspections = getLastUpdate(context, 0, LAST_MODIFIED_INSP);
+        lastCheck = getLastUpdate(context, LAST_CHECKED);
+        last_mod_restaurants = getLastUpdate(context, LAST_MODIFIED_REST);
+        last_mod_inspections = getLastUpdate(context, LAST_MODIFIED_INSP);
     }
 
     public static LastModified getInstance(Context context) {
         if (instance == null) {
             instance = new LastModified(context);
+            System.out.println("last modified NOT CREATED YET *******************");
         }
         return instance;
     }
 
     // Shared Preferences to store last time checked
-    private LocalDateTime getLastUpdate(Context context, long defaultTime, String modified) {
-        long lastUpdated = readLastUpdated(context, defaultTime, modified);
-
-        // Update
-        writeLastUpdated(context, modified);
+    private LocalDateTime getLastUpdate(Context context, String modified) {
+        long lastUpdated = readLastUpdated(context, 0, modified);
 
         // convert long to LocalTimeDate
         if (lastUpdated == 0) {
@@ -55,14 +53,15 @@ public class LastModified {
         return stored.getLong(modified, defaultTime);
     }
 
-    private void writeLastUpdated(Context context, String modified) {
+    public void writeLastUpdated(Context context, LocalDateTime time, String modified) {
         SharedPreferences stored = context.getSharedPreferences("AppPrefs", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = stored.edit();
 
-        long save = convertToLong(LocalDateTime.now());
+        long save = convertToLong(time);
 
         editor.putLong(modified, save);
         editor.apply();
+        System.out.println("************SAVEDDDDDD " + modified + ": " + time + "*******_-------------");
     }
 
     private long convertToLong(LocalDateTime date) {
@@ -70,12 +69,12 @@ public class LastModified {
         return zdt.toInstant().toEpochMilli();
     }
 
-    // https://www.javaguides.net/2020/03/convert-localdatetime-to-long-in-java.html
+/*    // https://www.javaguides.net/2020/03/convert-localdatetime-to-long-in-java.html
     // Convert LocalDateTime to a Long
     private long getDefaultTime(LocalDateTime time) {
         ZonedDateTime zdt = ZonedDateTime.of(time, ZoneId.systemDefault());
         return zdt.toInstant().toEpochMilli();
-    }
+    }*/
 
     public LocalDateTime getLastCheck() {
         return lastCheck;
@@ -87,5 +86,20 @@ public class LastModified {
 
     public LocalDateTime getLast_mod_inspections() {
         return last_mod_inspections;
+    }
+
+    public void setLastCheck(Context context, LocalDateTime lastCheck) {
+        writeLastUpdated(context, lastCheck, LAST_CHECKED);
+        this.lastCheck = lastCheck;
+    }
+
+    public void setLast_mod_restaurants(Context context, LocalDateTime last_mod_restaurants) {
+        writeLastUpdated(context, lastCheck, LAST_MODIFIED_REST);
+        this.last_mod_restaurants = last_mod_restaurants;
+    }
+
+    public void setLast_mod_inspections(Context context, LocalDateTime last_mod_inspections) {
+        writeLastUpdated(context, last_mod_inspections, LAST_MODIFIED_INSP);
+        this.last_mod_inspections = last_mod_inspections;
     }
 }
