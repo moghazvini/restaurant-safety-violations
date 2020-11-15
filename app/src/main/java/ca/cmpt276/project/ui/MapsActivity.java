@@ -56,7 +56,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private LastModified lastModified;
     private List<CsvInfo> restaurantUpdate;
     List<LatLng> restaurantlatlag;
-    private static boolean upToDate = false;
     private static boolean read = false;
     private static final String KEY = "KEY";
     private LoadingDialogFragment loadingDialog;
@@ -236,7 +235,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             if (update) {
                 getUpdatedFiles();
             }
-            Log.d(KEY, "updated, add markers?");
             setupMap();
             loadingDialog.dismiss();
 
