@@ -44,11 +44,7 @@ public class RestaurantListActivity extends AppCompatActivity {
 
         populateListView();
         registerCallBack();
-        /*FragmentManager manager = getSupportFragmentManager();
-        DialogFragment dialog = new DialogFragment();
-        dialog.show(manager, "MessageDialog");*/
         // Check if it has been 20 hours since last check
-
     }
 
     private void populateListView() {

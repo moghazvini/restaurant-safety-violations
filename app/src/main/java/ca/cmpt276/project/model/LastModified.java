@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.Month;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
@@ -19,6 +20,7 @@ public class LastModified {
     private LocalDateTime lastCheck;
     private LocalDateTime last_mod_restaurants;
     private LocalDateTime last_mod_inspections;
+    private boolean appStart;
 
     // Singleton Support
     private static LastModified instance;
@@ -27,6 +29,7 @@ public class LastModified {
         lastCheck = getLastUpdate(context, LAST_CHECKED);
         last_mod_restaurants = getLastUpdate(context, LAST_MODIFIED_REST);
         last_mod_inspections = getLastUpdate(context, LAST_MODIFIED_INSP);
+        appStart = true;
     }
 
     public static LastModified getInstance(Context context) {
@@ -43,7 +46,7 @@ public class LastModified {
 
         // convert long to LocalTimeDate
         if (lastUpdated == 0) {
-            return LocalDateTime.MIN;
+            return LocalDateTime.of(1971, Month.JULY, 29, 19, 30, 40);
         }
         return Instant.ofEpochMilli(lastUpdated).atZone(ZoneId.systemDefault()).toLocalDateTime();
     }
@@ -101,5 +104,13 @@ public class LastModified {
     public void setLast_mod_inspections(Context context, LocalDateTime last_mod_inspections) {
         writeLastUpdated(context, last_mod_inspections, LAST_MODIFIED_INSP);
         this.last_mod_inspections = last_mod_inspections;
+    }
+
+    public boolean getAppStart() {
+        return appStart;
+    }
+
+    public void setAppStart() {
+        appStart = false;
     }
 }

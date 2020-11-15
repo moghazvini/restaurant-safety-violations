@@ -36,6 +36,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.time.Month;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -51,7 +52,7 @@ import ca.cmpt276.project.model.RestaurantListManager;
 import ca.cmpt276.project.model.SurreyDataGetter;
 import ca.cmpt276.project.model.types.HazardLevel;
 
-public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
+public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, DialogFragment.UpdateDialogListener{
 
     //SupportMapFragment mapFragment;
     private GoogleMap mMap;
@@ -65,7 +66,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private ArrayList<ClusterMarker> mClusterMarkers = new ArrayList<>();
 
     private static boolean read = false;
-
+    private static final String KEY = "KEY";
+    private LoadingDialogFragment loadingDialog;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -78,6 +80,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mapFragment.getMapAsync(this);
 
         restaurantManager = RestaurantListManager.getInstance();
+        lastModified = LastModified.getInstance(this);
 
         if(!read){
             fillInitialRestaurantList();
@@ -85,7 +88,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             getUpdatedFiles();
         }
 
-        if (past20Hours()) {
+        if (lastModified.getAppStart() && past20Hours()) {
+            lastModified.setAppStart();
             new GetDataTask().execute();
         }
     }
@@ -119,12 +123,16 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        setupMap();
+    }
+
+    public void setupMap(){
         mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
         mMap.getUiSettings().setZoomControlsEnabled(true);
         mMap.getUiSettings().setZoomGesturesEnabled(true);
         mMap.getUiSettings().setCompassEnabled(true);
         popLatlong();
-        addMarkers(googleMap);
+        addMarkers(mMap);
     }
 
     private void popLatlong() {
@@ -199,6 +207,24 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap.moveCamera(CameraUpdateFactory.newLatLng(restaurantlatlag.get(0)));
         mMap.animateCamera(CameraUpdateFactory.zoomTo(11));
     }
+
+    @Override
+    public void sendInput(boolean input) {
+
+        if(input) {
+            if (restaurantUpdate.get(0).getChanged() // check if restaurant list changed
+                    || restaurantUpdate.get(1).getChanged()) { // if inspection list changed
+                // Want update? Execute function
+                lastModified.setLastCheck(MapsActivity.this, LocalDateTime.now());
+                lastModified.setLast_mod_restaurants(MapsActivity.this, restaurantUpdate.get(0).getLast_modified());
+                lastModified.setLast_mod_inspections(MapsActivity.this, restaurantUpdate.get(1).getLast_modified());
+                FragmentManager manager = getSupportFragmentManager();
+                loadingDialog = new LoadingDialogFragment(); // loading dialog
+                loadingDialog.show(manager, "LoadingDialog");
+                new ListUpdateTask().execute();
+            }
+        }
+    }
     /*private BitmapDescriptor getMarkerIconFromDrawable(Drawable drawable) {
         Canvas canvas = new Canvas();
         Bitmap bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
@@ -218,20 +244,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         @Override
         protected void onPostExecute(List<CsvInfo> data) {
             restaurantUpdate = data;
-            // TODO: Dialog Box for updating if update is available
-
-            System.out.println(data.get(0));
-            System.out.println(data.get(1));
-            if (data.get(0).getChanged() // check if restaurant list changed
-                    || data.get(1).getChanged()) { // if inspection list changed
-                // Want update? Execute function
-                System.out.println("FOUND AN UPDATE!!!!--------------");
-                //FragmentManager manager = getSupportFragmentManager();
-                //DialogFragment dialog = new DialogFragment();
-                //dialog.show(manager, "MessageDialog");
-
-                new ListUpdateTask().execute();
-            }
+            FragmentManager manager = getSupportFragmentManager();
+            DialogFragment dialog = new DialogFragment(); // ask if user wants to update
+            dialog.show(manager, "MessageDialog");
         }
     }
 
@@ -239,7 +254,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private class ListUpdateTask extends AsyncTask<Void,Void, Boolean> {
         @Override
         protected Boolean doInBackground(Void... voids) {
-            // TODO: Dialog Box for updating
+
             return new SurreyDataGetter().getCSVData(restaurantUpdate, MapsActivity.this);
         }
 
@@ -249,6 +264,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             if (update) {
                 getUpdatedFiles();
             }
+            setupMap();
+            loadingDialog.dismiss();
+
         }
     }
 
@@ -290,7 +308,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         LocalDateTime compare = current.minusHours(20);
         if (previous.isBefore(compare) || compare.isEqual(previous)) {
             Toast.makeText(this, "Checking for Update", Toast.LENGTH_LONG).show();
-            lastModified.setLastCheck(MapsActivity.this, LocalDateTime.now());
             return true;
         } else {
             Toast.makeText(this, "hasn't been 20 hours since the last check", Toast.LENGTH_LONG).show();

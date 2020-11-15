@@ -23,38 +23,32 @@ public class DialogFragment extends AppCompatDialogFragment {
     boolean userInput = true;
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        // create view
+        // code for alert dialog via fragment from Dr Brian Fraser's video https://www.youtube.com/watch?v=y6StJRn-Y-A
         View v = LayoutInflater.from(getActivity()).inflate(R.layout.update_dialog_layout, null);
         DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 switch(which){
                     case DialogInterface.BUTTON_POSITIVE:
-                        Toast.makeText(getActivity(), "positive", Toast.LENGTH_SHORT).show();
                         userInput = true;
                         dialogListener.sendInput(userInput);
                         break;
 
                     case DialogInterface.BUTTON_NEGATIVE:
-                        Toast.makeText(getActivity(), "negative", Toast.LENGTH_SHORT).show();
                         userInput = false;
                         dialogListener.sendInput(userInput);
                         break;
                 }
             }
         };
-        AlertDialog alert = new AlertDialog.Builder(getActivity())
+        return new AlertDialog.Builder(getActivity())
                 .setTitle("New Update")
                 .setView(v)
                 .setPositiveButton(android.R.string.ok, listener)
                 .setNegativeButton(android.R.string.cancel, listener)
                 .create();
-
-
-        return alert;
-
     }
-
+    // code to send data from dialog to activity from https://www.youtube.com/watch?v=ARezg1D9Zd0
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
