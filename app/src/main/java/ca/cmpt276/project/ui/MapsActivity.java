@@ -55,9 +55,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private LastModified lastModified;
     private List<CsvInfo> restaurantUpdate;
     List<LatLng> restaurantlatlag;
-    private boolean updateInput = false;
+    private static boolean upToDate = false;
     private static boolean read = false;
-
+    private static final String KEY = "KEY";
+    private LoadingDialogFragment loadingDialog;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -76,6 +77,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             read = true;
             getUpdatedFiles();
         }
+
 
         if (past20Hours()) {
             new GetDataTask().execute();
@@ -111,16 +113,20 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        setupMap();
+        // Add a marker in Sydney and move the camera
+        /*LatLng sydney = new LatLng(-34, 151);
+        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));*/
+    }
+
+    public void setupMap(){
         mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
         mMap.getUiSettings().setZoomControlsEnabled(true);
         mMap.getUiSettings().setZoomGesturesEnabled(true);
         mMap.getUiSettings().setCompassEnabled(true);
         popLatlong();
-        //addMarkers(mMap);
-        // Add a marker in Sydney and move the camera
-        /*LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));*/
+        addMarkers(mMap);
     }
 
     private void popLatlong() {
@@ -168,7 +174,18 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void sendInput(boolean input) {
-        updateInput = input;
+        if(input) {
+            if (restaurantUpdate.get(0).getChanged() // check if restaurant list changed
+                    || restaurantUpdate.get(1).getChanged()) { // if inspection list changed
+                // Want update? Execute function
+                System.out.println("FOUND AN UPDATE!!!!--------------");
+                Log.d(KEY, "UPDATE INPUT TRUE");
+                FragmentManager manager = getSupportFragmentManager();
+                loadingDialog = new LoadingDialogFragment(); // loading dialog
+                loadingDialog.show(manager, "LoadingDialog");
+                new ListUpdateTask().execute();
+            }
+        }
     }
     /*private BitmapDescriptor getMarkerIconFromDrawable(Drawable drawable) {
         Canvas canvas = new Canvas();
@@ -189,24 +206,21 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         @Override
         protected void onPostExecute(List<CsvInfo> data) {
             restaurantUpdate = data;
-            // TODO: Dialog Box for updating if update is available
-            Log.d("dialogKey", "DIALOG OPENED");
-            /*FragmentManager manager = getSupportFragmentManager(); // ask if user wants to update
-            DialogFragment dialog = new DialogFragment();
-            dialog.show(manager, "MessageDialog");*/
+            FragmentManager manager = getSupportFragmentManager();
+            DialogFragment dialog = new DialogFragment(); // ask if user wants to update
+            dialog.show(manager, "MessageDialog");
             System.out.println(data.get(0));
             System.out.println(data.get(1));
-            updateInput = true;
-            if(updateInput) {
+            /*if(updateInput) {
                 if (data.get(0).getChanged() // check if restaurant list changed
                         || data.get(1).getChanged()) { // if inspection list changed
                     // Want update? Execute function
                     System.out.println("FOUND AN UPDATE!!!!--------------");
-                    Log.d("updateKey", "UPDATE INPUT TRUE");
+                    Log.d(KEY, "UPDATE INPUT TRUE");
                     new ListUpdateTask().execute();
                 }
-            }
-            addMarkers(mMap);
+            }*/
+            //addMarkers(mMap);
         }
     }
 
@@ -214,7 +228,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private class ListUpdateTask extends AsyncTask<Void,Void, Boolean> {
         @Override
         protected Boolean doInBackground(Void... voids) {
-            // TODO: Dialog Box for updating
+
             return new SurreyDataGetter().getCSVData(restaurantUpdate, MapsActivity.this);
         }
 
@@ -224,10 +238,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             if (update) {
                 getUpdatedFiles();
             }
-            else{
-                Log.d("updateKey", "UPDATE INPUT FALSE");
-            }
-            addMarkers(mMap);
+            Log.d(KEY, "updated, add markers?");
+            setupMap();
+            loadingDialog.dismiss();
+
         }
     }
 

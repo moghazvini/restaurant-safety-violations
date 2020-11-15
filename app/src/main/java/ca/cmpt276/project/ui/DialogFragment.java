@@ -30,13 +30,11 @@ public class DialogFragment extends AppCompatDialogFragment {
             public void onClick(DialogInterface dialog, int which) {
                 switch(which){
                     case DialogInterface.BUTTON_POSITIVE:
-                        Toast.makeText(getActivity(), "positive", Toast.LENGTH_SHORT).show();
                         userInput = true;
                         dialogListener.sendInput(userInput);
                         break;
 
                     case DialogInterface.BUTTON_NEGATIVE:
-                        Toast.makeText(getActivity(), "negative", Toast.LENGTH_SHORT).show();
                         userInput = false;
                         dialogListener.sendInput(userInput);
                         break;
