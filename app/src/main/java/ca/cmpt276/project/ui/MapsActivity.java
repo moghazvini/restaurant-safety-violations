@@ -24,8 +24,10 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.maps.android.clustering.ClusterManager;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -39,7 +41,8 @@ import java.util.Collections;
 import java.util.List;
 
 import ca.cmpt276.project.R;
-import ca.cmpt276.project.model.CsvInfo;
+import ca.cmpt276.project.model.ClusterManagerRenderer;
+import ca.cmpt276.project.model.ClusterMarker;
 import ca.cmpt276.project.model.Inspection;
 import ca.cmpt276.project.model.LastModified;
 import ca.cmpt276.project.model.Restaurant;
@@ -47,15 +50,19 @@ import ca.cmpt276.project.model.RestaurantListManager;
 import ca.cmpt276.project.model.SurreyDataGetter;
 import ca.cmpt276.project.model.types.HazardLevel;
 
-public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, DialogFragment.UpdateDialogListener{
+public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     //SupportMapFragment mapFragment;
     private GoogleMap mMap;
+    private LatLngBounds mMapBoundary;
     private RestaurantListManager restaurantManager;
     private LastModified lastModified;
     private List<CsvInfo> restaurantUpdate;
     List<LatLng> restaurantlatlag;
-    private boolean updateInput = false;
+    private ClusterManager<ClusterMarker> mClusterManager;
+    private ClusterManagerRenderer mClusterManagerRenderer;
+    private ArrayList<ClusterMarker> mClusterMarkers = new ArrayList<>();
+
     private static boolean read = false;
 
     @Override
@@ -116,11 +123,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap.getUiSettings().setZoomGesturesEnabled(true);
         mMap.getUiSettings().setCompassEnabled(true);
         popLatlong();
-        //addMarkers(mMap);
-        // Add a marker in Sydney and move the camera
-        /*LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));*/
+        addMarkers(googleMap);
     }
 
     private void popLatlong() {
@@ -132,43 +135,68 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void addMarkers(GoogleMap googleMap) {
-        mMap = googleMap;
-        int pos = 0 ;/*
-        Drawable Hazard_low = getResources().getDrawable(R.drawable.green_hazard);
-        BitmapDescriptor marker_low = getMarkerIconFromDrawable(Hazard_low);
-        Drawable Hazard_med = getResources().getDrawable(R.drawable.orange_hazard);
-        BitmapDescriptor marker_med = getMarkerIconFromDrawable(Hazard_med);
-        Drawable Hazard_high = getResources().getDrawable(R.drawable.red_hazard);
-        BitmapDescriptor marker_high= getMarkerIconFromDrawable(Hazard_high);*/
-        for (LatLng current : restaurantlatlag){
-            if(restaurantManager.getRestaurant(pos).getInspections().getInspections().size()>0) {
-                Inspection latestInspection = Collections.max(restaurantManager.getRestaurant(pos).getInspections().getInspections());
-                if (latestInspection.getLevel() == HazardLevel.LOW) {
-                    mMap.addMarker(new MarkerOptions().position(current).title(restaurantManager.getRestaurant(pos).getName()).snippet("SEVERITY LEVEL: LOW").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
-                }else if (latestInspection.getLevel() == HazardLevel.MODERATE) {
-                    mMap.addMarker(new MarkerOptions().position(current).title(restaurantManager.getRestaurant(pos).getName()).snippet("SEVERITY LEVEL: MODERATE").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));
-                }else if (latestInspection.getLevel() == HazardLevel.HIGH) {
-                    mMap.addMarker(new MarkerOptions().position(current).title(restaurantManager.getRestaurant(pos).getName()).snippet("SEVERITY LEVEL: HIGH").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
-                }
+
+        if(googleMap != null) {
+
+            if (mClusterManager == null) {
+                mClusterManager = new ClusterManager<ClusterMarker>(this.getApplicationContext(), googleMap);
             }
-            pos++;
-            int finalPos = pos;
-            /*mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
-                @Override
-                public boolean onMarkerClick(Marker marker) {
-                    Toast.makeText(MapsActivity.this,"Launching Restaurant detail for" + restaurantManager.getRestaurant(finalPos).getName(),Toast.LENGTH_LONG).show();
-                    return false;
+            if (mClusterManagerRenderer == null) {
+                mClusterManagerRenderer = new ClusterManagerRenderer(this, googleMap, mClusterManager );
+                mClusterManager.setRenderer(mClusterManagerRenderer);
+            }
+            int pos = 0 ;
+            // set the severity icons
+            int low = R.drawable.green_hazard;
+            int med = R.drawable.orange_hazard;
+            int high = R.drawable.red_hazard;
+            for (LatLng current : restaurantlatlag) {
+                try {
+                    if (restaurantManager.getRestaurant(pos).getInspections().getInspections().size() > 0) {
+                        String Severity = "";
+                        int severity_icon = R.drawable.green_hazard;
+                        Inspection latestInspection = Collections.max(restaurantManager.getRestaurant(pos).getInspections().getInspections());
+                        if (latestInspection.getLevel() == HazardLevel.LOW) {
+                            Severity = "LOW";
+                            severity_icon = low;
+                        } else if (latestInspection.getLevel() == HazardLevel.MODERATE) {
+                            Severity = "MODERATE";
+                            severity_icon = med;
+                        } else if (latestInspection.getLevel() == HazardLevel.HIGH) {
+                            Severity = "HIGH";
+                            severity_icon = high;
+                        }
+                        ClusterMarker newClusterMarker = new ClusterMarker(current,restaurantManager.getRestaurant(pos).getName(), Severity, severity_icon, restaurantManager.getRestaurant(pos));
+                        mClusterManager.addItem(newClusterMarker);
+                        mClusterMarkers.add(newClusterMarker);
+                    }
+                } catch(NullPointerException e){
+                    Log.e("CMarker", "addMapMarkers: NullPointerException: " + e.getMessage());
                 }
-            });*/
+                pos++;
+            }
+            mClusterManager.cluster();
+            setCamera();
         }
-        //change to user location
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(restaurantlatlag.get(5)));
-        mMap.animateCamera(CameraUpdateFactory.zoomTo(11));
     }
 
-    @Override
-    public void sendInput(boolean input) {
-        updateInput = input;
+    private void setCamera() {
+
+        // Set a boundary to start/*
+        /*
+        double bottomBoundary = mUserPosition.getGeo_point().getLatitude() - .1;
+        double leftBoundary = mUserPosition.getGeo_point().getLongitude() - .1;
+        double topBoundary = mUserPosition.getGeo_point().getLatitude() + .1;
+        double rightBoundary = mUserPosition.getGeo_point().getLongitude() + .1;
+
+        mMapBoundary = new LatLngBounds(
+                new LatLng(bottomBoundary, leftBoundary),
+                new LatLng(topBoundary, rightBoundary)
+        );
+*/
+       // mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(mMapBoundary, 0));
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(restaurantlatlag.get(0)));
+        mMap.animateCamera(CameraUpdateFactory.zoomTo(11));
     }
     /*private BitmapDescriptor getMarkerIconFromDrawable(Drawable drawable) {
         Canvas canvas = new Canvas();
@@ -190,23 +218,19 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         protected void onPostExecute(List<CsvInfo> data) {
             restaurantUpdate = data;
             // TODO: Dialog Box for updating if update is available
-            Log.d("dialogKey", "DIALOG OPENED");
-            /*FragmentManager manager = getSupportFragmentManager(); // ask if user wants to update
-            DialogFragment dialog = new DialogFragment();
-            dialog.show(manager, "MessageDialog");*/
+
             System.out.println(data.get(0));
             System.out.println(data.get(1));
-            updateInput = true;
-            if(updateInput) {
-                if (data.get(0).getChanged() // check if restaurant list changed
-                        || data.get(1).getChanged()) { // if inspection list changed
-                    // Want update? Execute function
-                    System.out.println("FOUND AN UPDATE!!!!--------------");
-                    Log.d("updateKey", "UPDATE INPUT TRUE");
-                    new ListUpdateTask().execute();
-                }
+            if (data.get(0).getChanged() // check if restaurant list changed
+                    || data.get(1).getChanged()) { // if inspection list changed
+                // Want update? Execute function
+                System.out.println("FOUND AN UPDATE!!!!--------------");
+                //FragmentManager manager = getSupportFragmentManager();
+                //DialogFragment dialog = new DialogFragment();
+                //dialog.show(manager, "MessageDialog");
+
+                new ListUpdateTask().execute();
             }
-            addMarkers(mMap);
         }
     }
 
@@ -224,10 +248,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             if (update) {
                 getUpdatedFiles();
             }
-            else{
-                Log.d("updateKey", "UPDATE INPUT FALSE");
-            }
-            addMarkers(mMap);
         }
     }
 
