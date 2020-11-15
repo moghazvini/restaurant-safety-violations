@@ -34,4 +34,13 @@ public class CsvInfo {
     public void setChanged(Boolean changed) {
         this.changed = changed;
     }
+
+    @Override
+    public String toString() {
+        return "CsvInfo{" +
+                "last_modified=" + last_modified +
+                ", url='" + url + '\'' +
+                ", changed=" + changed +
+                '}';
+    }
 }
