@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.Month;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
@@ -43,7 +44,7 @@ public class LastModified {
 
         // convert long to LocalTimeDate
         if (lastUpdated == 0) {
-            return LocalDateTime.MIN;
+            return LocalDateTime.of(1971, Month.JULY, 29, 19, 30, 40);
         }
         return Instant.ofEpochMilli(lastUpdated).atZone(ZoneId.systemDefault()).toLocalDateTime();
     }

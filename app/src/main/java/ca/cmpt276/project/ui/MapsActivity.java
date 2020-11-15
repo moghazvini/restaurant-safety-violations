@@ -34,6 +34,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.time.Month;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -77,8 +78,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             read = true;
             getUpdatedFiles();
         }
-
-
+        lastModified = LastModified.getInstance(this);
+        String toastmsg = "Last Check: " + lastModified.getLastCheck();
+        //Toast.makeText(MapsActivity.this, toastmsg, Toast.LENGTH_SHORT).show();
+        Log.d(KEY, toastmsg);
         if (past20Hours()) {
             new GetDataTask().execute();
         }
@@ -174,12 +177,17 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void sendInput(boolean input) {
+
         if(input) {
             if (restaurantUpdate.get(0).getChanged() // check if restaurant list changed
                     || restaurantUpdate.get(1).getChanged()) { // if inspection list changed
                 // Want update? Execute function
+                Log.d(KEY, "bruh moment " + input);
                 System.out.println("FOUND AN UPDATE!!!!--------------");
                 Log.d(KEY, "UPDATE INPUT TRUE");
+                lastModified.setLastCheck(MapsActivity.this, LocalDateTime.now());
+                lastModified.setLast_mod_restaurants(MapsActivity.this, restaurantUpdate.get(0).getLast_modified());
+                lastModified.setLast_mod_inspections(MapsActivity.this, restaurantUpdate.get(1).getLast_modified());
                 FragmentManager manager = getSupportFragmentManager();
                 loadingDialog = new LoadingDialogFragment(); // loading dialog
                 loadingDialog.show(manager, "LoadingDialog");
@@ -211,16 +219,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             dialog.show(manager, "MessageDialog");
             System.out.println(data.get(0));
             System.out.println(data.get(1));
-            /*if(updateInput) {
-                if (data.get(0).getChanged() // check if restaurant list changed
-                        || data.get(1).getChanged()) { // if inspection list changed
-                    // Want update? Execute function
-                    System.out.println("FOUND AN UPDATE!!!!--------------");
-                    Log.d(KEY, "UPDATE INPUT TRUE");
-                    new ListUpdateTask().execute();
-                }
-            }*/
-            //addMarkers(mMap);
         }
     }
 
@@ -283,7 +281,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         LocalDateTime compare = current.minusHours(20);
         if (previous.isBefore(compare) || compare.isEqual(previous)) {
             Toast.makeText(this, "Checking for Update", Toast.LENGTH_LONG).show();
-            lastModified.setLastCheck(MapsActivity.this, LocalDateTime.now());
             return true;
         } else {
             Toast.makeText(this, "hasn't been 20 hours since the last check", Toast.LENGTH_LONG).show();
