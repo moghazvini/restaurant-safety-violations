@@ -15,8 +15,7 @@ public class LoadingDialogFragment extends AppCompatDialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         // create view
         View v = LayoutInflater.from(getActivity()).inflate(R.layout.loading_dialog_layout, null);
-
-
+        // code for progress bar in loading_dialog_layout from https://www.youtube.com/watch?v=K5bFv_WDjVY
         return new AlertDialog.Builder(getActivity())
                 .setTitle("Updating...")
                 .setView(v)
