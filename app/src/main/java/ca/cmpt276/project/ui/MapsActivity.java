@@ -12,6 +12,7 @@ import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -46,7 +47,7 @@ import ca.cmpt276.project.model.RestaurantListManager;
 import ca.cmpt276.project.model.SurreyDataGetter;
 import ca.cmpt276.project.model.types.HazardLevel;
 
-public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
+public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, DialogFragment.UpdateDialogListener{
 
     //SupportMapFragment mapFragment;
     private GoogleMap mMap;
@@ -54,7 +55,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private LastModified lastModified;
     private List<CsvInfo> restaurantUpdate;
     List<LatLng> restaurantlatlag;
-
+    private boolean updateInput = false;
     private static boolean read = false;
 
     @Override
@@ -116,7 +117,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap.getUiSettings().setZoomGesturesEnabled(true);
         mMap.getUiSettings().setCompassEnabled(true);
         popLatlong();
-        addMarkers(googleMap);
+        //addMarkers(mMap);
         // Add a marker in Sydney and move the camera
         /*LatLng sydney = new LatLng(-34, 151);
         mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
@@ -165,6 +166,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap.moveCamera(CameraUpdateFactory.newLatLng(restaurantlatlag.get(5)));
         mMap.animateCamera(CameraUpdateFactory.zoomTo(11));
     }
+
+    @Override
+    public void sendInput(boolean input) {
+        updateInput = input;
+    }
     /*private BitmapDescriptor getMarkerIconFromDrawable(Drawable drawable) {
         Canvas canvas = new Canvas();
         Bitmap bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
@@ -185,19 +191,23 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         protected void onPostExecute(List<CsvInfo> data) {
             restaurantUpdate = data;
             // TODO: Dialog Box for updating if update is available
-
+            Log.d("dialogKey", "DIALOG OPENED");
+            /*FragmentManager manager = getSupportFragmentManager(); // ask if user wants to update
+            DialogFragment dialog = new DialogFragment();
+            dialog.show(manager, "MessageDialog");*/
             System.out.println(data.get(0));
             System.out.println(data.get(1));
-            if (data.get(0).getChanged() // check if restaurant list changed
-                    || data.get(1).getChanged()) { // if inspection list changed
-                // Want update? Execute function
-                System.out.println("FOUND AN UPDATE!!!!--------------");
-                //FragmentManager manager = getSupportFragmentManager();
-                //DialogFragment dialog = new DialogFragment();
-                //dialog.show(manager, "MessageDialog");
-
-                new ListUpdateTask().execute();
+            updateInput = true;
+            if(updateInput) {
+                if (data.get(0).getChanged() // check if restaurant list changed
+                        || data.get(1).getChanged()) { // if inspection list changed
+                    // Want update? Execute function
+                    System.out.println("FOUND AN UPDATE!!!!--------------");
+                    Log.d("updateKey", "UPDATE INPUT TRUE");
+                    new ListUpdateTask().execute();
+                }
             }
+            addMarkers(mMap);
         }
     }
 
@@ -215,6 +225,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             if (update) {
                 getUpdatedFiles();
             }
+            else{
+                Log.d("updateKey", "UPDATE INPUT FALSE");
+            }
+            addMarkers(mMap);
         }
     }
 
