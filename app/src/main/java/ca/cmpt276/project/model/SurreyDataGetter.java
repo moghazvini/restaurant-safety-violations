@@ -175,12 +175,18 @@ public class SurreyDataGetter {
         CsvInfo inspection = data.get(1);
 
         if (restaurant.getLast_modified().isAfter(lastModified.getLast_mod_restaurants())) {
+            lastModified.setLast_mod_restaurants(context, restaurant.getLast_modified());
+
+            System.out.println("SERVER: " + restaurant.getLast_modified() + " SAVED: " + lastModified.getLast_mod_restaurants());
             restaurant.setChanged(true);
         } else {
             restaurant.setChanged(false);
         }
 
         if (inspection.getLast_modified().isAfter(lastModified.getLast_mod_inspections())) {
+            lastModified.setLast_mod_inspections(context, inspection.getLast_modified());
+
+            System.out.println("SERVER: " + inspection.getLast_modified() + " SAVED: " + lastModified.getLast_mod_inspections());
             inspection.setChanged(true);
         } else {
             inspection.setChanged(false);

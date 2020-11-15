@@ -77,7 +77,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
 
         if (past20Hours()) {
-            Toast.makeText(this, "Checking for Update", Toast.LENGTH_LONG).show();
             new GetDataTask().execute();
         }
     }
@@ -253,6 +252,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         lastModified = LastModified.getInstance(MapsActivity.this);
         LocalDateTime previous = lastModified.getLastCheck();
         LocalDateTime current = LocalDateTime.now();
-        return current.minusHours(20).isAfter(previous) || current.minusHours(20).isEqual(previous);
+        LocalDateTime compare = current.minusHours(20);
+        if (previous.isBefore(compare) || compare.isEqual(previous)) {
+            Toast.makeText(this, "Checking for Update", Toast.LENGTH_LONG).show();
+            lastModified.setLastCheck(MapsActivity.this, LocalDateTime.now());
+            return true;
+        } else {
+            Toast.makeText(this, "hasn't been 20 hours since the last check", Toast.LENGTH_LONG).show();
+            return false;
+        }
     }
 }
