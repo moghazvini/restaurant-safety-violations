@@ -182,9 +182,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             if (restaurantUpdate.get(0).getChanged() // check if restaurant list changed
                     || restaurantUpdate.get(1).getChanged()) { // if inspection list changed
                 // Want update? Execute function
-                Log.d(KEY, "bruh moment " + input);
-                System.out.println("FOUND AN UPDATE!!!!--------------");
-                Log.d(KEY, "UPDATE INPUT TRUE");
                 lastModified.setLastCheck(MapsActivity.this, LocalDateTime.now());
                 lastModified.setLast_mod_restaurants(MapsActivity.this, restaurantUpdate.get(0).getLast_modified());
                 lastModified.setLast_mod_inspections(MapsActivity.this, restaurantUpdate.get(1).getLast_modified());
@@ -217,8 +214,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             FragmentManager manager = getSupportFragmentManager();
             DialogFragment dialog = new DialogFragment(); // ask if user wants to update
             dialog.show(manager, "MessageDialog");
-            System.out.println(data.get(0));
-            System.out.println(data.get(1));
         }
     }
 
