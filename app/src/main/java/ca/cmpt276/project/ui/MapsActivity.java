@@ -71,17 +71,18 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mapFragment.getMapAsync(this);
 
         restaurantManager = RestaurantListManager.getInstance();
+        lastModified = LastModified.getInstance(this);
 
         if(!read){
             fillInitialRestaurantList();
             read = true;
             getUpdatedFiles();
         }
-        lastModified = LastModified.getInstance(this);
         String toastmsg = "Last Check: " + lastModified.getLastCheck();
-        //Toast.makeText(MapsActivity.this, toastmsg, Toast.LENGTH_SHORT).show();
+
         Log.d(KEY, toastmsg);
-        if (past20Hours()) {
+        if (lastModified.getAppStart() && past20Hours()) {
+            lastModified.setAppStart();
             new GetDataTask().execute();
         }
     }
