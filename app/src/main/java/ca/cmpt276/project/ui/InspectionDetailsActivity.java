@@ -100,8 +100,10 @@ public class InspectionDetailsActivity extends AppCompatActivity {
             if(inspectionManager.getInspections().size()>0) {
                 String brief_description = violation.getCode() +"  "+ violation.getType().violation;
                 String crit_or_not = violation.getSeverity().severity;
+                boolean crit = crit_or_not.equals("Critical");
                 brief_description_txt.setText(brief_description);
-                if(crit_or_not.equals("Critical")){
+
+                if(crit){
                     crit_or_not_txt.setTextColor(Color.parseColor("#FA2828")); // Red
                 }else {
                     crit_or_not_txt.setTextColor(Color.parseColor("#45DE08")); // Green
@@ -113,19 +115,31 @@ public class InspectionDetailsActivity extends AppCompatActivity {
                         violation_img.setBackgroundResource(R.drawable.non_crit_operator_violations);
                         break;
                     case FOOD:
-                        violation_img.setBackgroundResource(R.drawable.crit_food_violations);
+                        if (crit) {
+                            violation_img.setBackgroundResource(R.drawable.crit_food_violations);
+                        } else {
+                            violation_img.setBackgroundResource(R.drawable._07_212ncrit_food_violations);
+                        }
                         break;
                     case EQUIPMENT:
-                        violation_img.setBackgroundResource(R.drawable.crit_equiptment_violations);
+                        if (crit) {
+                            violation_img.setBackgroundResource(R.drawable.crit_equiptment_violations);
+                        } else {
+                            violation_img.setBackgroundResource(R.drawable._06_308_315ncrit_equipment_violations);
+                        }
                         break;
                     case PESTS:
                         violation_img.setBackgroundResource(R.drawable.non_crit_pest_violations);
                         break;
                     case EMPLOYEES:
-                        violation_img.setBackgroundResource(R.drawable.non_crit_employee_violations);
+                        if (crit) {
+                            violation_img.setBackgroundResource(R.drawable.crit_employees_violations);
+                        } else {
+                            violation_img.setBackgroundResource(R.drawable.non_crit_employee_violations);
+                        }
                         break;
                     case ESTABLISHMENT:
-                        violation_img.setBackgroundResource(R.drawable.crit_employees_violations);
+                        violation_img.setBackgroundResource(R.drawable._01_104_violations);
                         break;
                     case CHEMICAL:
                         violation_img.setBackgroundResource(R.drawable._09ncrit_chems);
