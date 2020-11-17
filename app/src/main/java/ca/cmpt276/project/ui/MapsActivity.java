@@ -20,10 +20,12 @@ import android.widget.Toast;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMapOptions;
+import com.google.android.gms.maps.LocationSource;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
@@ -56,7 +58,8 @@ import ca.cmpt276.project.model.RestaurantListManager;
 import ca.cmpt276.project.model.SurreyDataGetter;
 import ca.cmpt276.project.model.types.HazardLevel;
 
-public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, DialogFragment.UpdateDialogListener, LocationListener {
+public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, DialogFragment.UpdateDialogListener//,LocationListener
+{
 
     //SupportMapFragment mapFragment;
     private GoogleMap mMap;
@@ -73,10 +76,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private static final String FINE_LOCATION = Manifest.permission.ACCESS_FINE_LOCATION;
     private static final String COURSE_LOCATION = Manifest.permission.ACCESS_COARSE_LOCATION;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1234;
-    private static final float DEFAULT_ZOOM = 15f;
     private Location currentLocation;
     private Boolean mLocationPermissionsGranted = false;
     private FusedLocationProviderClient mFusedLocationProviderClient;
+    private LocationSource.OnLocationChangedListener mListener;
     private static boolean read = false;
     private static final String KEY = "KEY";
     private LoadingDialogFragment loadingDialog;
@@ -206,9 +209,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 location.addOnCompleteListener(task -> {
                     if(task.isSuccessful()){
                         currentLocation = (Location) task.getResult();
-                        //mMap.addMarker(new MarkerOptions().position(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude())).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)).title("USER"));
                         mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude())));
-                        mMap.animateCamera(CameraUpdateFactory.zoomTo(15));
+                        mMap.animateCamera(CameraUpdateFactory.zoomTo(13f));
+                        //onLocationChanged(currentLocation);
                     }else{
                         Toast.makeText(MapsActivity.this, "unable to get current location", Toast.LENGTH_SHORT).show();
                     }
@@ -218,12 +221,17 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             Log.e("user location", "getDeviceLocation: SecurityException: " + e.getMessage() );
         }
     }
-
+/*
     @Override
     public void onLocationChanged(Location location) {
+        mLocationRequest = LocationRequest.create()
+                .setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY)
+                .setInterval(10 * 1000)
+                .setFastestInterval(1 * 1000);
+        mMap.addMarker(new MarkerOptions().position(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude())).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)).title("USER"));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(location.getLatitude(), location.getLongitude())));
-        mMap.animateCamera(CameraUpdateFactory.zoomTo(15));
-    }
+        mMap.animateCamera(CameraUpdateFactory.zoomTo(13f));
+    }*/
 
     public void setupMap(){
         mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
