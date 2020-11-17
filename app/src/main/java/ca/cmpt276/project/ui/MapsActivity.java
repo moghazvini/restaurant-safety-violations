@@ -3,13 +3,9 @@ package ca.cmpt276.project.ui;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -21,12 +17,8 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptor;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.maps.android.clustering.ClusterManager;
 
 import java.io.BufferedReader;
@@ -36,7 +28,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
-import java.time.Month;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -52,7 +43,7 @@ import ca.cmpt276.project.model.RestaurantListManager;
 import ca.cmpt276.project.model.SurreyDataGetter;
 import ca.cmpt276.project.model.types.HazardLevel;
 
-public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, DialogFragment.UpdateDialogListener{
+public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, DialogFragment.UpdateDialogListener, LoadingDialogFragment.CancelDialogListener{
 
     //SupportMapFragment mapFragment;
     private GoogleMap mMap;
@@ -66,6 +57,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private ArrayList<ClusterMarker> mClusterMarkers = new ArrayList<>();
 
     private static boolean read = false;
+    private boolean continue_download = true;
+    private ListUpdateTask listUpdateTask = null;
     private static final String KEY = "KEY";
     private LoadingDialogFragment loadingDialog;
     @Override
@@ -207,24 +200,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap.moveCamera(CameraUpdateFactory.newLatLng(restaurantlatlag.get(0)));
         mMap.animateCamera(CameraUpdateFactory.zoomTo(11));
     }
-
-    @Override
-    public void sendInput(boolean input) {
-
-        if(input) {
-            if (restaurantUpdate.get(0).getChanged() // check if restaurant list changed
-                    || restaurantUpdate.get(1).getChanged()) { // if inspection list changed
-                // Want update? Execute function
-                lastModified.setLastCheck(MapsActivity.this, LocalDateTime.now());
-                lastModified.setLast_mod_restaurants(MapsActivity.this, restaurantUpdate.get(0).getLast_modified());
-                lastModified.setLast_mod_inspections(MapsActivity.this, restaurantUpdate.get(1).getLast_modified());
-                FragmentManager manager = getSupportFragmentManager();
-                loadingDialog = new LoadingDialogFragment(); // loading dialog
-                loadingDialog.show(manager, "LoadingDialog");
-                new ListUpdateTask().execute();
-            }
-        }
-    }
     /*private BitmapDescriptor getMarkerIconFromDrawable(Drawable drawable) {
         Canvas canvas = new Canvas();
         Bitmap bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
@@ -244,29 +219,63 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         @Override
         protected void onPostExecute(List<CsvInfo> data) {
             restaurantUpdate = data;
-            FragmentManager manager = getSupportFragmentManager();
-            DialogFragment dialog = new DialogFragment(); // ask if user wants to update
-            dialog.show(manager, "MessageDialog");
+            if (restaurantUpdate.get(0).getChanged() // check if restaurant list changed
+                    || restaurantUpdate.get(1).getChanged()) { // if inspection list changed
+                // Want update? Execute function
+                FragmentManager manager = getSupportFragmentManager();
+                DialogFragment dialog = new DialogFragment(); // ask if user wants to update
+                dialog.show(manager, "MessageDialog");
+            } else {
+                lastModified.setLastCheck(MapsActivity.this, LocalDateTime.now());
+            }
+        }
+    }
+
+    @Override
+    public void sendInput(boolean input) {
+        if(input) {
+            listUpdateTask = (ListUpdateTask) new ListUpdateTask().execute();
+        }
+    }
+
+    @Override
+    public void sendCancel(boolean input) {
+        if (input) {
+            listUpdateTask.cancel(true);
+            Toast.makeText(this, "CANCELLED DOWNLOAD", Toast.LENGTH_LONG).show();
         }
     }
 
     // Download CSV files
     private class ListUpdateTask extends AsyncTask<Void,Void, Boolean> {
         @Override
-        protected Boolean doInBackground(Void... voids) {
+        protected void onPreExecute() {
+            FragmentManager manager = getSupportFragmentManager();
+            loadingDialog = new LoadingDialogFragment(); // loading dialog
+            loadingDialog.show(manager, "LoadingDialog");
+        }
 
-            return new SurreyDataGetter().getCSVData(restaurantUpdate, MapsActivity.this);
+        @Override
+        protected Boolean doInBackground(Void... voids) {
+            if (!isCancelled()) {
+                new SurreyDataGetter().getCSVData(restaurantUpdate, MapsActivity.this);
+                return true;
+            } else {
+                return false;
+            }
         }
 
         @Override
         protected void onPostExecute(Boolean receivedUpdate) {
             boolean update = receivedUpdate;
             if (update) {
+                lastModified.setLastCheck(MapsActivity.this, LocalDateTime.now());
+                lastModified.setLast_mod_restaurants(MapsActivity.this, restaurantUpdate.get(0).getLast_modified());
+                lastModified.setLast_mod_inspections(MapsActivity.this, restaurantUpdate.get(1).getLast_modified());
                 getUpdatedFiles();
+                setupMap();
+                loadingDialog.dismiss();
             }
-            setupMap();
-            loadingDialog.dismiss();
-
         }
     }
 
