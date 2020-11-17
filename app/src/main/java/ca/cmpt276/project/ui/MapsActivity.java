@@ -13,6 +13,7 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -77,8 +78,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private Location currentLocation;
     private Boolean mLocationPermissionsGranted = false;
     private FusedLocationProviderClient mFusedLocationProviderClient;
-    private LocationSource.OnLocationChangedListener mListener;
     private static boolean read = false;
+    private boolean doubleclick = false;
     private static final String KEY = "KEY";
     private LoadingDialogFragment loadingDialog;
     @Override
@@ -336,7 +337,20 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void onClusterItemInfoWindowClick(ClusterMarker item) {
-        // Does nothing, but you could go into the user's profile page, for example.
+        if (doubleclick) {
+            int position = restaurantlatlog.indexOf(item.getPosition());
+            Intent intent = RestaurantDetailsActivity.makeLaunchIntent(MapsActivity.this, position);
+            startActivity(intent);
+        }else{
+            this.doubleclick = true;
+            Toast.makeText(this,"Tap again to open Restaurant Details", Toast.LENGTH_SHORT).show();
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    doubleclick = false;
+                }
+            }, 4000);
+        }
     }
 
     @Override
