@@ -191,6 +191,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        setupMap();
         if (mLocationPermissionsGranted) {
             getDeviceLocation();
 
@@ -200,23 +201,20 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 return;
             }
             mMap.setMyLocationEnabled(true);
-            setupMap();
         }
-        setupMap();
-        extractDataFromIntent();
     }
 
     private void getDeviceLocation() {
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         try{
             if(mLocationPermissionsGranted){
-
                 final Task location = mFusedLocationProviderClient.getLastLocation();
                 location.addOnCompleteListener(task -> {
                     if(task.isSuccessful()){
                         currentLocation = (Location) task.getResult();
                         mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude())));
                         mMap.animateCamera(CameraUpdateFactory.zoomTo(13f));
+                        extractDataFromIntent();
                         //onLocationChanged(currentLocation);
                     }else{
                         Toast.makeText(MapsActivity.this, "unable to get current location", Toast.LENGTH_SHORT).show();
@@ -490,7 +488,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         restaurant_details_idx = intent.getIntExtra(REST_DETAILS_INDEX, -1);
         if(restaurant_details_idx > 0) {
             mMap.moveCamera(CameraUpdateFactory.newLatLng(restaurantlatlog.get(restaurant_details_idx)));
-            mMap.animateCamera(CameraUpdateFactory.zoomTo(16));
+            mMap.animateCamera(CameraUpdateFactory.zoomTo(20));
+            //TODO this only zooms into restaurant selected, but does not "click" it to show info. Need update
         }
     }
 }
