@@ -13,20 +13,30 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.GoogleMapOptions;
 import com.google.android.gms.maps.LocationSource;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.tasks.Task;
+import com.google.maps.android.clustering.Cluster;
+import com.google.maps.android.clustering.ClusterItem;
 import com.google.maps.android.clustering.ClusterManager;
 
 import java.io.BufferedReader;
@@ -37,6 +47,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -51,11 +62,7 @@ import ca.cmpt276.project.model.RestaurantListManager;
 import ca.cmpt276.project.model.SurreyDataGetter;
 import ca.cmpt276.project.model.types.HazardLevel;
 
-public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, DialogFragment.UpdateDialogListener, LoadingDialogFragment.CancelDialogListener{
-    //User Locations permission
-    private static final String FINE_LOCATION = Manifest.permission.ACCESS_FINE_LOCATION;
-    private static final String COURSE_LOCATION = Manifest.permission.ACCESS_COARSE_LOCATION;
-    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1234;
+public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, DialogFragment.UpdateDialogListener, LoadingDialogFragment.CancelDialogListener, ClusterManager.OnClusterClickListener<ClusterMarker>, ClusterManager.OnClusterInfoWindowClickListener<ClusterMarker>, ClusterManager.OnClusterItemClickListener<ClusterMarker>, ClusterManager.OnClusterItemInfoWindowClickListener<ClusterMarker>{
 
     //SupportMapFragment mapFragment;
     private GoogleMap mMap;
@@ -67,15 +74,19 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     // custom markers
     private ClusterManager<ClusterMarker> mClusterManager;
     private ClusterManagerRenderer mClusterManagerRenderer;
-    private final ArrayList<ClusterMarker> mClusterMarkers = new ArrayList<>();
+    private ArrayList<ClusterMarker> Markerlist = new ArrayList<>();
+    //User Locations permission
+    private static final String FINE_LOCATION = Manifest.permission.ACCESS_FINE_LOCATION;
+    private static final String COURSE_LOCATION = Manifest.permission.ACCESS_COARSE_LOCATION;
+    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1234;
     private Location currentLocation;
     private Boolean mLocationPermissionsGranted = false;
     private FusedLocationProviderClient mFusedLocationProviderClient;
-
     private static boolean read = false;
     private ListUpdateTask listUpdateTask = null;
+    private boolean doubleclick = false;
+    private static final String KEY = "KEY";
     private LoadingDialogFragment loadingDialog;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -122,22 +133,21 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        Log.d("permission", "onRequestPermissionsResult: called.");
         mLocationPermissionsGranted = false;
 
-        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
-            if (grantResults.length > 0) {
-                for (int grantResult : grantResults) {
-                    if (grantResult != PackageManager.PERMISSION_GRANTED) {
-                        mLocationPermissionsGranted = false;
-                        Log.d("permission", "onRequestPermissionsResult: permission failed");
-                        return;
+        switch (requestCode) {
+            case LOCATION_PERMISSION_REQUEST_CODE: {
+                if (grantResults.length > 0) {
+                    for (int i = 0; i < grantResults.length; i++) {
+                        if (grantResults[i] != PackageManager.PERMISSION_GRANTED) {
+                            mLocationPermissionsGranted = false;
+                            return;
+                        }
                     }
+                    mLocationPermissionsGranted = true;
+                    //initialize our map
+                    initialMap();
                 }
-                Log.d("permission", "onRequestPermissionsResult: permission granted");
-                mLocationPermissionsGranted = true;
-                //initialize our map
-                initialMap();
             }
         }
     }
@@ -228,6 +238,16 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap.getUiSettings().setZoomControlsEnabled(true);
         mMap.getUiSettings().setZoomGesturesEnabled(true);
         mMap.getUiSettings().setCompassEnabled(true);
+        mMap.setOnMarkerClickListener(mClusterManager);
+        mClusterManager = new ClusterManager<>(this, mMap);
+        mMap.setOnCameraIdleListener(mClusterManager);
+        mMap.setOnMarkerClickListener(mClusterManager);
+        mMap.setOnInfoWindowClickListener(mClusterManager);
+        mClusterManager.setOnClusterClickListener(this);
+        mClusterManager.setOnClusterInfoWindowClickListener(this);
+        mClusterManager.setOnClusterItemClickListener(this);
+        mClusterManager.setOnClusterItemInfoWindowClickListener(this);
+
         popLatlong();
         addMarkers(mMap);
     }
@@ -274,7 +294,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         }
                         ClusterMarker newClusterMarker = new ClusterMarker(current,restaurantManager.getRestaurant(pos).getName(), Severity, severity_icon, restaurantManager.getRestaurant(pos));
                         mClusterManager.addItem(newClusterMarker);
-                        mClusterMarkers.add(newClusterMarker);
+                        Markerlist.add(newClusterMarker);
                     }
                 } catch(NullPointerException e){
                     Log.e("CMarker", "addMapMarkers: NullPointerException: " + e.getMessage());
@@ -285,14 +305,58 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
-    /*private BitmapDescriptor getMarkerIconFromDrawable(Drawable drawable) {
-        Canvas canvas = new Canvas();
-        Bitmap bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
-        canvas.setBitmap(bitmap);
-        drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
-        drawable.draw(canvas);
-        return BitmapDescriptorFactory.fromBitmap(bitmap);
-    }*/
+    @Override
+    public boolean onClusterClick(Cluster<ClusterMarker> cluster) {
+        String Names = "";
+        // Create the builder to collect all essential cluster items for the bounds.
+        LatLngBounds.Builder builder = LatLngBounds.builder();
+        for (ClusterItem item : cluster.getItems()) {
+            Names = Names + item.getTitle() +", ";
+            builder.include(item.getPosition());
+        }
+        // Get the LatLngBounds
+        final LatLngBounds bounds = builder.build();
+        Toast.makeText(this, "Restaurants in the cluster are:" + Names, Toast.LENGTH_SHORT).show();
+
+        // Animate camera to the bounds
+        try {
+           mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 100));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return true;
+    }
+
+    @Override
+    public void onClusterInfoWindowClick(Cluster<ClusterMarker> cluster) {
+        // Does nothing, but you could go to a list of the users.
+    }
+
+    @Override
+    public boolean onClusterItemClick(ClusterMarker item) {
+        // Does nothing, but you could go into the user's profile page, for example.
+        return false;
+    }
+
+    @Override
+    public void onClusterItemInfoWindowClick(ClusterMarker item) {
+        if (doubleclick) {
+            int position = restaurantlatlog.indexOf(item.getPosition());
+            Intent intent = RestaurantDetailsActivity.makeLaunchIntent(MapsActivity.this, position);
+            startActivity(intent);
+        }else{
+            this.doubleclick = true;
+            Toast.makeText(this,"Tap again to open Restaurant Details", Toast.LENGTH_SHORT).show();
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    doubleclick = false;
+                }
+            }, 4000);
+        }
+    }
+
 
     // Get the CSV links and timestamps
     private class GetDataTask extends AsyncTask<Void,Void,List<CsvInfo>> {
