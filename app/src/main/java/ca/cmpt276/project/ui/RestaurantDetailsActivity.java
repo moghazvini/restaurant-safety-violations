@@ -194,4 +194,9 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
         intent.putExtra(INDEX, position);
         return intent;
     }
+    public static Intent makeLaunchIntent(MapsActivity mapsActivity, int position){
+        Intent intent = new Intent(mapsActivity, RestaurantDetailsActivity.class);
+        intent.putExtra(INDEX, position);
+        return intent;
+    }
 }

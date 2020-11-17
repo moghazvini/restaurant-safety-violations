@@ -35,7 +35,6 @@ public class LastModified {
     public static LastModified getInstance(Context context) {
         if (instance == null) {
             instance = new LastModified(context);
-            System.out.println("last modified NOT CREATED YET *******************");
         }
         return instance;
     }
@@ -64,7 +63,6 @@ public class LastModified {
 
         editor.putLong(modified, save);
         editor.apply();
-        System.out.println("************SAVEDDDDDD " + modified + ": " + time + "*******_-------------");
     }
 
     private long convertToLong(LocalDateTime date) {
@@ -72,12 +70,6 @@ public class LastModified {
         return zdt.toInstant().toEpochMilli();
     }
 
-/*    // https://www.javaguides.net/2020/03/convert-localdatetime-to-long-in-java.html
-    // Convert LocalDateTime to a Long
-    private long getDefaultTime(LocalDateTime time) {
-        ZonedDateTime zdt = ZonedDateTime.of(time, ZoneId.systemDefault());
-        return zdt.toInstant().toEpochMilli();
-    }*/
 
     public LocalDateTime getLastCheck() {
         return lastCheck;
@@ -91,6 +83,9 @@ public class LastModified {
         return last_mod_inspections;
     }
 
+    // Sean found the bugs in when updates are checked because his alert dialog wasn't behaving as expected.
+    // I realized that I never changed the runtime variables of the timestamps and only saved them
+    // to SharedPreferences. I needed setters to change the singleton variables.
     public void setLastCheck(Context context, LocalDateTime lastCheck) {
         writeLastUpdated(context, lastCheck, LAST_CHECKED);
         this.lastCheck = lastCheck;

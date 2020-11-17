@@ -91,7 +91,6 @@ public class RestaurantListManager {
                 instance.add(restaurant);
             }
             Collections.sort(restaurants);
-            //populateListView();
         } catch(IOException e){
             Log.wtf("RestaurantListActivity", "error reading data file on line " + line, e);
         }
