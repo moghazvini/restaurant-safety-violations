@@ -32,6 +32,7 @@ import ca.cmpt276.project.model.RestaurantListManager;
 public class RestaurantDetailsActivity extends AppCompatActivity {
 
     private final static String INDEX = "Inspection Report Index";
+    private final static String RESTAURANT_INDEX = "Restaurant Intex";
     private RestaurantListManager restaurantManager;
     private InspectionListManager inspectionManager;
     static Restaurant rest;
@@ -54,6 +55,7 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
 
         restaurantManager = RestaurantListManager.getInstance();
         Getdata();
+        setupGpsClick();
         populateList();
         setValues();
         OnClick();
@@ -169,6 +171,15 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
             startActivity(i);
         });
 
+    }
+
+    private void setupGpsClick() {
+        TextView gpsText = findViewById(R.id.txt_gps);
+        gpsText.setOnClickListener(v -> {
+            Intent i = MapsActivity.makeLaunchIntentMapsActivity(RestaurantDetailsActivity.this, rest_index);
+            startActivity(i);
+            finish();
+        });
     }
 
     private void Getdata() {

@@ -7,6 +7,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentManager;
 
+import android.content.Context;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -74,6 +75,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     // custom markers
     private ClusterManager<ClusterMarker> mClusterManager;
     private ClusterManagerRenderer mClusterManagerRenderer;
+    private ArrayList<ClusterMarker> mClusterMarkers = new ArrayList<>();
+    private static final String REST_DETAILS_INDEX = "restaurant details index";
+    private int restaurant_details_idx;
     private ArrayList<ClusterMarker> Markerlist = new ArrayList<>();
     //User Locations permission
     private static final String FINE_LOCATION = Manifest.permission.ACCESS_FINE_LOCATION;
@@ -187,6 +191,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        setupMap();
         if (mLocationPermissionsGranted) {
             getDeviceLocation();
 
@@ -196,7 +201,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 return;
             }
             mMap.setMyLocationEnabled(true);
-            setupMap();
         }
     }
 
@@ -204,13 +208,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         try{
             if(mLocationPermissionsGranted){
-
                 final Task location = mFusedLocationProviderClient.getLastLocation();
                 location.addOnCompleteListener(task -> {
                     if(task.isSuccessful()){
                         currentLocation = (Location) task.getResult();
                         mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude())));
                         mMap.animateCamera(CameraUpdateFactory.zoomTo(13f));
+                        extractDataFromIntent();
                         //onLocationChanged(currentLocation);
                     }else{
                         Toast.makeText(MapsActivity.this, "unable to get current location", Toast.LENGTH_SHORT).show();
@@ -470,6 +474,22 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         } else {
             Toast.makeText(this, "hasn't been 20 hours since the last check", Toast.LENGTH_LONG).show();
             return false;
+        }
+    }
+
+    public static Intent makeLaunchIntentMapsActivity(Context context, int restIdx){
+        Intent intent = new Intent(context, MapsActivity.class);
+        intent.putExtra(REST_DETAILS_INDEX, restIdx);
+        return intent;
+    }
+
+    private void extractDataFromIntent() {
+        Intent intent = getIntent();
+        restaurant_details_idx = intent.getIntExtra(REST_DETAILS_INDEX, -1);
+        if(restaurant_details_idx > 0) {
+            mMap.moveCamera(CameraUpdateFactory.newLatLng(restaurantlatlog.get(restaurant_details_idx)));
+            mMap.animateCamera(CameraUpdateFactory.zoomTo(20));
+            //TODO this only zooms into restaurant selected, but does not "click" it to show info. Need update
         }
     }
 }
