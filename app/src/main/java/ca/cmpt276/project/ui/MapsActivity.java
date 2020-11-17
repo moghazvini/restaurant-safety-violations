@@ -6,6 +6,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -64,9 +65,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private ClusterManager<ClusterMarker> mClusterManager;
     private ClusterManagerRenderer mClusterManagerRenderer;
     private ArrayList<ClusterMarker> mClusterMarkers = new ArrayList<>();
-
+    private static final String REST_DETAILS_INDEX = "restaurant details index";
+    private int restaurant_details_idx;
     private static boolean read = false;
-    private static final String KEY = "KEY";
+
     private LoadingDialogFragment loadingDialog;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -124,6 +126,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         setupMap();
+        extractDataFromIntent();
     }
 
     public void setupMap(){
@@ -312,6 +315,21 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         } else {
             Toast.makeText(this, "hasn't been 20 hours since the last check", Toast.LENGTH_LONG).show();
             return false;
+        }
+    }
+
+    public static Intent makeLaunchIntentMapsActivity(Context context, int restIdx){
+        Intent intent = new Intent(context, MapsActivity.class);
+        intent.putExtra(REST_DETAILS_INDEX, restIdx);
+        return intent;
+    }
+
+    private void extractDataFromIntent() {
+        Intent intent = getIntent();
+        restaurant_details_idx = intent.getIntExtra(REST_DETAILS_INDEX, -1);
+        if(restaurant_details_idx > 0) {
+            mMap.moveCamera(CameraUpdateFactory.newLatLng(restaurantlatlag.get(restaurant_details_idx)));
+            mMap.animateCamera(CameraUpdateFactory.zoomTo(16));
         }
     }
 }

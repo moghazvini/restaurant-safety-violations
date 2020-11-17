@@ -49,7 +49,7 @@ public class RestaurantListActivity extends AppCompatActivity {
 
     private void populateListView() {
         //code to sort alphabetically taken from https://www.youtube.com/watch?v=dZQqrPdqT1E
-        Collections.sort(restaurantManager.getList());
+        //Collections.sort(restaurantManager.getList());
         ArrayAdapter<Restaurant> adapter = new RestaurantListAdapter();
         ListView list = findViewById(R.id.listViewRestaurants);
         list.setAdapter(adapter);

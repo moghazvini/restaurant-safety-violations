@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import ca.cmpt276.project.model.types.HazardLevel;
@@ -89,7 +90,7 @@ public class RestaurantListManager {
                 );
                 instance.add(restaurant);
             }
-            //fillInspectionManager();
+            Collections.sort(restaurants);
             //populateListView();
         } catch(IOException e){
             Log.wtf("RestaurantListActivity", "error reading data file on line " + line, e);
