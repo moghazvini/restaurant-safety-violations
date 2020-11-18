@@ -35,6 +35,7 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.Task;
 import com.google.maps.android.clustering.Cluster;
 import com.google.maps.android.clustering.ClusterItem;
@@ -63,7 +64,7 @@ import ca.cmpt276.project.model.RestaurantListManager;
 import ca.cmpt276.project.model.SurreyDataGetter;
 import ca.cmpt276.project.model.types.HazardLevel;
 
-public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, DialogFragment.UpdateDialogListener, LoadingDialogFragment.CancelDialogListener, ClusterManager.OnClusterClickListener<ClusterMarker>, ClusterManager.OnClusterInfoWindowClickListener<ClusterMarker>, ClusterManager.OnClusterItemClickListener<ClusterMarker>, ClusterManager.OnClusterItemInfoWindowClickListener<ClusterMarker>{
+public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, DialogFragment.UpdateDialogListener, LoadingDialogFragment.CancelDialogListener,ClusterManager.OnClusterClickListener<ClusterMarker>, ClusterManager.OnClusterInfoWindowClickListener<ClusterMarker>, ClusterManager.OnClusterItemClickListener<ClusterMarker>, ClusterManager.OnClusterItemInfoWindowClickListener<ClusterMarker>{
 
     //SupportMapFragment mapFragment;
     private GoogleMap mMap;
@@ -98,7 +99,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         Toolbar toolbar = findViewById(R.id.map_toolbar);
         setSupportActionBar(toolbar);
 
-        restaurantManager = RestaurantListManager.getInstance();
+
         lastModified = LastModified.getInstance(this);
 
         if(!read){
@@ -228,11 +229,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 /*
     @Override
     public void onLocationChanged(Location location) {
-        mLocationRequest = LocationRequest.create()
-                .setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY)
-                .setInterval(10 * 1000)
-                .setFastestInterval(1 * 1000);
-        mMap.addMarker(new MarkerOptions().position(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude())).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)).title("USER"));
+        mMap.addMarker(new MarkerOptions().position(new LatLng(location.getLatitude(), location.getLongitude())).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)).title("USER")).showInfoWindow();
         mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(location.getLatitude(), location.getLongitude())));
         mMap.animateCamera(CameraUpdateFactory.zoomTo(13f));
     }*/
@@ -247,6 +244,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap.setOnCameraIdleListener(mClusterManager);
         mMap.setOnMarkerClickListener(mClusterManager);
         mMap.setOnInfoWindowClickListener(mClusterManager);
+        mMap.setInfoWindowAdapter(new CustominfowindowAdapter(MapsActivity.this));
         mClusterManager.setOnClusterClickListener(this);
         mClusterManager.setOnClusterInfoWindowClickListener(this);
         mClusterManager.setOnClusterItemClickListener(this);
@@ -283,20 +281,20 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             for (LatLng current : restaurantlatlog) {
                 try {
                     if (restaurantManager.getRestaurant(pos).getInspections().getInspections().size() > 0) {
-                        String Severity = "";
+                        String snippet = "";
                         int severity_icon = R.drawable.green_hazard;
                         Inspection latestInspection = Collections.max(restaurantManager.getRestaurant(pos).getInspections().getInspections());
                         if (latestInspection.getLevel() == HazardLevel.LOW) {
-                            Severity = "Severity: LOW";
+                            snippet = ""+ pos;
                             severity_icon = low;
                         } else if (latestInspection.getLevel() == HazardLevel.MODERATE) {
-                            Severity = "Severity: MODERATE";
+                            snippet = ""+ pos;
                             severity_icon = med;
                         } else if (latestInspection.getLevel() == HazardLevel.HIGH) {
-                            Severity = "Severity: HIGH";
+                            snippet = ""+ pos;
                             severity_icon = high;
                         }
-                        ClusterMarker newClusterMarker = new ClusterMarker(current,restaurantManager.getRestaurant(pos).getName(), Severity, severity_icon, restaurantManager.getRestaurant(pos));
+                        ClusterMarker newClusterMarker = new ClusterMarker(current,restaurantManager.getRestaurant(pos).getName(), snippet, severity_icon, restaurantManager.getRestaurant(pos));
                         mClusterManager.addItem(newClusterMarker);
                         Markerlist.add(newClusterMarker);
                     }
@@ -489,6 +487,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         if(restaurant_details_idx > 0) {
             mMap.moveCamera(CameraUpdateFactory.newLatLng(restaurantlatlog.get(restaurant_details_idx)));
             mMap.animateCamera(CameraUpdateFactory.zoomTo(20));
+            mMap.addMarker(new MarkerOptions().position(restaurantlatlog.get(restaurant_details_idx))).showInfoWindow();
             //TODO this only zooms into restaurant selected, but does not "click" it to show info. Need update
         }
     }
