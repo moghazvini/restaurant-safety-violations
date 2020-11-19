@@ -302,8 +302,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         currentLocation = (Location) task.getResult();
                         mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude())));
                         mMap.animateCamera(CameraUpdateFactory.zoomTo(13f));
-                        extractDataFromIntent();
                         startLocationUpdates();
+                        extractDataFromIntent();
                         //onLocationChanged(currentLocation);
                     }else{
                         Toast.makeText(MapsActivity.this, "unable to get current location", Toast.LENGTH_SHORT).show();
@@ -406,7 +406,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
         // Get the LatLngBounds
         final LatLngBounds bounds = builder.build();
-        Toast.makeText(this, "Restaurants in the cluster are:" + Names, Toast.LENGTH_SHORT).show();
 
         // Animate camera to the bounds
         try {
@@ -558,6 +557,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private void extractDataFromIntent() {
         Intent intent = getIntent();
         restaurant_details_idx = intent.getIntExtra(REST_DETAILS_INDEX, -1);
+        stopLocationUpdates();
         if(restaurant_details_idx > 0) {
             mMap.moveCamera(CameraUpdateFactory.newLatLng(restaurantlatlog.get(restaurant_details_idx)));
             mMap.animateCamera(CameraUpdateFactory.zoomTo(20));
@@ -565,7 +565,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             if(mark != null){
                 mark.showInfoWindow();
             }
-            //TODO this only zooms into restaurant selected, but does not "click" it to show info. Need update
         }
     }
 }
