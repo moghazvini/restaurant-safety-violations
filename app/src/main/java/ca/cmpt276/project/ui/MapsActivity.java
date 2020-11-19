@@ -89,7 +89,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private FusedLocationProviderClient mFusedLocationProviderClient;
     private static boolean read = false;
     private ListUpdateTask listUpdateTask = null;
-    private boolean doubleclick = false;
     private static final String KEY = "KEY";
     private LoadingDialogFragment loadingDialog;
     @Override
@@ -99,7 +98,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         Toolbar toolbar = findViewById(R.id.map_toolbar);
         setSupportActionBar(toolbar);
 
-
+        restaurantManager = RestaurantListManager.getInstance();
         lastModified = LastModified.getInstance(this);
 
         if(!read){
@@ -343,20 +342,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void onClusterItemInfoWindowClick(ClusterMarker item) {
-        if (doubleclick) {
             int position = restaurantlatlog.indexOf(item.getPosition());
             Intent intent = RestaurantDetailsActivity.makeLaunchIntent(MapsActivity.this, position);
             startActivity(intent);
-        }else{
-            this.doubleclick = true;
-            Toast.makeText(this,"Tap again to open Restaurant Details", Toast.LENGTH_SHORT).show();
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    doubleclick = false;
-                }
-            }, 4000);
-        }
     }
 
 
