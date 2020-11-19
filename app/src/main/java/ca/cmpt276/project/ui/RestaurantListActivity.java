@@ -71,6 +71,7 @@ public class RestaurantListActivity extends AppCompatActivity {
             InspectionListManager currentInspectionList = currentRestaurant.getInspections();
 
             ImageView hazardImageView = itemView.findViewById(R.id.item_hazard_icon);
+            ImageView restaurantLogo = itemView.findViewById(R.id.item_restaurantIcon);
             TextView nameText = itemView.findViewById(R.id.item_txt_restaurant_name);
             TextView issuesText = itemView.findViewById(R.id.item_txt_issues_found);
             TextView inspectionText = itemView.findViewById(R.id.item_txt_latest_inspection);
@@ -101,6 +102,72 @@ public class RestaurantListActivity extends AppCompatActivity {
                         break;
                     default:
                         assert false;
+                }
+
+                if (currentRestaurant.getName().contains("7-Eleven")) {
+                        restaurantLogo.setBackgroundResource(R.drawable.seveneleven);
+                }
+                else if (currentRestaurant.getName().contains("Sushi") || currentRestaurant.getName().contains("japanese")) {
+                    restaurantLogo.setBackgroundResource(R.drawable.sushi_generic);
+                }
+                else if (currentRestaurant.getName().contains("Blenz")) {
+                    restaurantLogo.setBackgroundResource(R.drawable.blenz);
+                }
+                else if (currentRestaurant.getName().contains("Booster Juice")) {
+                    restaurantLogo.setBackgroundResource(R.drawable.boosterjuice);
+                }
+                else if (currentRestaurant.getName().contains("Boston Pizza")) {
+                    restaurantLogo.setBackgroundResource(R.drawable.bostonpizza);
+                }
+                else if (currentRestaurant.getName().contains("Browns Socialhouse")) {
+                    restaurantLogo.setBackgroundResource(R.drawable.boosterjuice);
+                }
+                else if (currentRestaurant.getName().contains("KFC")) {
+                    restaurantLogo.setBackgroundResource(R.drawable.kfc_chicken);
+                }
+                else if (currentRestaurant.getName().contains("Little Caesars Pizza")) {
+                    restaurantLogo.setBackgroundResource(R.drawable.littleceasers);
+                }
+                else if (currentRestaurant.getName().contains("McDonald's")) {
+                    restaurantLogo.setBackgroundResource(R.drawable.mcdonalds);
+                }
+                else if (currentRestaurant.getName().contains("A&W") || currentRestaurant.getName().contains("A & W")) {
+                    restaurantLogo.setBackgroundResource(R.drawable.a_and_w);
+                }
+                else if (currentRestaurant.getName().contains("Pizza Pizza")) {
+                    restaurantLogo.setBackgroundResource(R.drawable.pizzapizza);
+                }
+                else if (currentRestaurant.getName().contains("Pizza Hut")) {
+                    restaurantLogo.setBackgroundResource(R.drawable.pizza_hut);
+                }
+                else if (currentRestaurant.getName().contains("Pizza")) {
+                    restaurantLogo.setBackgroundResource(R.drawable.generic_pizza);
+                }
+                else if (currentRestaurant.getName().contains("Catering")) {
+                    restaurantLogo.setBackgroundResource(R.drawable.catering);
+                }
+                else if (currentRestaurant.getName().contains("Coffee")) {
+                    restaurantLogo.setBackgroundResource(R.drawable.coffee);
+                }
+                else if (currentRestaurant.getName().contains("Pho") || currentRestaurant.getName().contains("Vietnamese")) {
+                    restaurantLogo.setBackgroundResource(R.drawable.pho);
+                }
+                else if (currentRestaurant.getName().contains("Pub") || currentRestaurant.getName().contains("Bar")) {
+                    restaurantLogo.setBackgroundResource(R.drawable.coffee);
+                }
+                else if (currentRestaurant.getName().contains("Market") || currentRestaurant.getName().contains("Grocery")) {
+                    restaurantLogo.setBackgroundResource(R.drawable.market);
+                }
+                else {
+                    restaurantLogo.setBackgroundResource(R.drawable.food1);
+                }
+
+
+
+
+
+                if (currentRestaurant.getName().contains("pizza")) {
+                    restaurantLogo.setBackgroundResource(R.drawable.generic_pizza);
                 }
 
                 LocalDate currentDate = LocalDate.now();
