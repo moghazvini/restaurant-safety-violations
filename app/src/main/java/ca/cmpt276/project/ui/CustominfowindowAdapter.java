@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.android.gms.maps.GoogleMap;
@@ -33,6 +34,7 @@ public class CustominfowindowAdapter implements GoogleMap.InfoWindowAdapter {
         TextView rest_Title = (TextView) view.findViewById(R.id.txt_name);
         TextView rest_address = (TextView) view.findViewById(R.id.txt_add);
         TextView rest_severity = (TextView) view.findViewById(R.id.txt_severity);
+        ImageView img_icon = view.findViewById(R.id.img_icon);
 
         if(!rest.getName().equals("")){
             rest_Title.setText(rest.getName());
@@ -60,7 +62,63 @@ public class CustominfowindowAdapter implements GoogleMap.InfoWindowAdapter {
                     assert false;
             }
         }
-        //add code to get restaurant logo
+        if (rest.getName().contains("7-Eleven")) {
+            img_icon.setBackgroundResource(R.drawable.seveneleven);
+        }
+        else if (rest.getName().contains("Sushi") || rest.getName().contains("japanese")) {
+            img_icon.setBackgroundResource(R.drawable.sushi_generic);
+        }
+        else if (rest.getName().contains("Blenz")) {
+            img_icon.setBackgroundResource(R.drawable.blenz);
+        }
+        else if (rest.getName().contains("Booster Juice")) {
+            img_icon.setBackgroundResource(R.drawable.boosterjuice);
+        }
+        else if (rest.getName().contains("Boston Pizza")) {
+            img_icon.setBackgroundResource(R.drawable.bostonpizza);
+        }
+        else if (rest.getName().contains("Browns Socialhouse")) {
+            img_icon.setBackgroundResource(R.drawable.boosterjuice);
+        }
+        else if (rest.getName().contains("KFC")) {
+            img_icon.setBackgroundResource(R.drawable.kfc_chicken);
+        }
+        else if (rest.getName().contains("Little Caesars Pizza")) {
+            img_icon.setBackgroundResource(R.drawable.littleceasers);
+        }
+        else if (rest.getName().contains("McDonald's")) {
+            img_icon.setBackgroundResource(R.drawable.mcdonalds);
+        }
+        else if (rest.getName().contains("A&W") || rest.getName().contains("A & W")) {
+            img_icon.setBackgroundResource(R.drawable.a_and_w);
+        }
+        else if (rest.getName().contains("Pizza Pizza")) {
+            img_icon.setBackgroundResource(R.drawable.pizzapizza);
+        }
+        else if (rest.getName().contains("Pizza Hut")) {
+            img_icon.setBackgroundResource(R.drawable.pizza_hut);
+        }
+        else if (rest.getName().contains("Pizza")) {
+            img_icon.setBackgroundResource(R.drawable.generic_pizza);
+        }
+        else if (rest.getName().contains("Catering")) {
+            img_icon.setBackgroundResource(R.drawable.catering);
+        }
+        else if (rest.getName().contains("Coffee")) {
+            img_icon.setBackgroundResource(R.drawable.coffee);
+        }
+        else if (rest.getName().contains("Pho") || rest.getName().contains("Vietnamese")) {
+            img_icon.setBackgroundResource(R.drawable.pho);
+        }
+        else if (rest.getName().contains("Pub") || rest.getName().contains("Bar")) {
+            img_icon.setBackgroundResource(R.drawable.coffee);
+        }
+        else if (rest.getName().contains("Market") || rest.getName().contains("Grocery")) {
+            img_icon.setBackgroundResource(R.drawable.market);
+        }
+        else {
+            img_icon.setBackgroundResource(R.drawable.food2);
+        }
     }
 
 

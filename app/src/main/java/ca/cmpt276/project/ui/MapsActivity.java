@@ -304,7 +304,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         mMap.animateCamera(CameraUpdateFactory.zoomTo(13f));
                         startLocationUpdates();
                         extractDataFromIntent();
-                        //onLocationChanged(currentLocation);
                     }else{
                         Toast.makeText(MapsActivity.this, "unable to get current location", Toast.LENGTH_SHORT).show();
                     }
@@ -325,6 +324,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     public void setupMap(){
+
         mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
         mMap.getUiSettings().setZoomControlsEnabled(true);
         mMap.getUiSettings().setZoomGesturesEnabled(true);
