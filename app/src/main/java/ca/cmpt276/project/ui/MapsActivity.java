@@ -51,6 +51,8 @@ import com.google.android.gms.tasks.Task;
 import com.google.maps.android.clustering.Cluster;
 import com.google.maps.android.clustering.ClusterItem;
 import com.google.maps.android.clustering.ClusterManager;
+import com.google.maps.android.clustering.view.DefaultClusterRenderer;
+
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -127,7 +129,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         restaurantManager = RestaurantListManager.getInstance();
         lastModified = LastModified.getInstance(this);
 
-        if (!read) {
+        if(!read){
             fillInitialRestaurantList();
             read = true;
             getUpdatedFiles();
@@ -188,18 +190,18 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         String[] permissions = {Manifest.permission.ACCESS_FINE_LOCATION,
                 Manifest.permission.ACCESS_COARSE_LOCATION};
 
-        if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
-                FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
-                    COURSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+        if(ContextCompat.checkSelfPermission(this.getApplicationContext(),
+                FINE_LOCATION) == PackageManager.PERMISSION_GRANTED){
+            if(ContextCompat.checkSelfPermission(this.getApplicationContext(),
+                    COURSE_LOCATION) == PackageManager.PERMISSION_GRANTED){
                 mLocationPermissionsGranted = true;
                 initialMap();
-            } else {
+            }else{
                 ActivityCompat.requestPermissions(this,
                         permissions,
                         LOCATION_PERMISSION_REQUEST_CODE);
             }
-        } else {
+        }else{
             ActivityCompat.requestPermissions(this,
                     permissions,
                     LOCATION_PERMISSION_REQUEST_CODE);
@@ -238,15 +240,15 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_map, menu);
+    public boolean onCreateOptionsMenu(Menu menu){
+        getMenuInflater().inflate(R.menu.menu_map,menu);
         return true;
     }
 
     @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+    public boolean onOptionsItemSelected(@NonNull MenuItem item){
         if (item.getItemId() == R.id.action_list) {
-            startActivity(new Intent(MapsActivity.this, RestaurantListActivity.class));
+            startActivity(new Intent(MapsActivity.this,RestaurantListActivity.class));
             finish();
             return true;
         }
@@ -280,23 +282,24 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private void getDeviceLocation() {
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
-        try {
-            if (mLocationPermissionsGranted) {
+        try{
+            if(mLocationPermissionsGranted){
                 final Task location = mFusedLocationProviderClient.getLastLocation();
                 location.addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
+                    if(task.isSuccessful()){
                         currentLocation = (Location) task.getResult();
                         mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude())));
                         mMap.animateCamera(CameraUpdateFactory.zoomTo(13f));
                         extractDataFromIntent();
                         startLocationUpdates();
-                    } else {
+                        //onLocationChanged(currentLocation);
+                    }else{
                         Toast.makeText(MapsActivity.this, "unable to get current location", Toast.LENGTH_SHORT).show();
                     }
                 });
             }
-        } catch (SecurityException e) {
-            Log.e("user location", "getDeviceLocation: SecurityException: " + e.getMessage());
+        }catch (SecurityException e){
+            Log.e("user location", "getDeviceLocation: SecurityException: " + e.getMessage() );
         }
     }
 
@@ -405,12 +408,15 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void onClusterInfoWindowClick(Cluster<ClusterMarker> cluster) {
+        // Does nothing, but you could go to a list of the users.
     }
 
     @Override
     public boolean onClusterItemClick(ClusterMarker item) {
+        // Does nothing, but you could go into the user's profile page, for example.
         return false;
     }
+
     @Override
     public void onClusterItemInfoWindowClick(ClusterMarker item) {
             int position = restaurantlatlog.indexOf(item.getPosition());
