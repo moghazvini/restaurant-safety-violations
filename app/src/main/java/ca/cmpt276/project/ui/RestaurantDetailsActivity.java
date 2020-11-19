@@ -7,6 +7,7 @@ import androidx.appcompat.widget.Toolbar;
 
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
@@ -161,6 +162,8 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
 
         TextView ResGps_txt = findViewById(R.id.txt_gps);
         ResGps_txt.setText(rest.getGPS());
+        ResGps_txt.setTextColor(Color.parseColor("#A576F1"));
+        ResGps_txt.setTypeface(null, Typeface.ITALIC);
     }
 
     private void OnClick() {
