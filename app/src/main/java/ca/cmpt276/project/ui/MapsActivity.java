@@ -40,6 +40,8 @@ import com.google.android.gms.tasks.Task;
 import com.google.maps.android.clustering.Cluster;
 import com.google.maps.android.clustering.ClusterItem;
 import com.google.maps.android.clustering.ClusterManager;
+import com.google.maps.android.clustering.view.DefaultClusterRenderer;
+
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -64,7 +66,7 @@ import ca.cmpt276.project.model.RestaurantListManager;
 import ca.cmpt276.project.model.SurreyDataGetter;
 import ca.cmpt276.project.model.types.HazardLevel;
 
-public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, DialogFragment.UpdateDialogListener, LoadingDialogFragment.CancelDialogListener,ClusterManager.OnClusterClickListener<ClusterMarker>, ClusterManager.OnClusterInfoWindowClickListener<ClusterMarker>, ClusterManager.OnClusterItemClickListener<ClusterMarker>, ClusterManager.OnClusterItemInfoWindowClickListener<ClusterMarker>{
+public class MapsActivity<Post extends ClusterItem> extends AppCompatActivity implements OnMapReadyCallback, DialogFragment.UpdateDialogListener, LoadingDialogFragment.CancelDialogListener,ClusterManager.OnClusterClickListener<ClusterMarker>, ClusterManager.OnClusterInfoWindowClickListener<ClusterMarker>, ClusterManager.OnClusterItemClickListener<ClusterMarker>, ClusterManager.OnClusterItemInfoWindowClickListener<ClusterMarker>{
 
     //SupportMapFragment mapFragment;
     private GoogleMap mMap;
@@ -76,7 +78,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     // custom markers
     private ClusterManager<ClusterMarker> mClusterManager;
     private ClusterManagerRenderer mClusterManagerRenderer;
-    private ArrayList<ClusterMarker> mClusterMarkers = new ArrayList<>();
     private static final String REST_DETAILS_INDEX = "restaurant details index";
     private int restaurant_details_idx;
     private ArrayList<ClusterMarker> Markerlist = new ArrayList<>();
@@ -238,7 +239,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap.getUiSettings().setZoomControlsEnabled(true);
         mMap.getUiSettings().setZoomGesturesEnabled(true);
         mMap.getUiSettings().setCompassEnabled(true);
-        mMap.setOnMarkerClickListener(mClusterManager);
         mClusterManager = new ClusterManager<>(this, mMap);
         mMap.setOnCameraIdleListener(mClusterManager);
         mMap.setOnMarkerClickListener(mClusterManager);
@@ -270,7 +270,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
             if (mClusterManagerRenderer == null) {
                 mClusterManagerRenderer = new ClusterManagerRenderer(this, googleMap, mClusterManager );
+                //mClusterManagerRenderer = new DefaultClusterRenderer(this, mMap, mClusterManager);
                 mClusterManager.setRenderer(mClusterManagerRenderer);
+
             }
             int pos = 0 ;
             // set the severity icons
@@ -475,10 +477,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         if(restaurant_details_idx > 0) {
             mMap.moveCamera(CameraUpdateFactory.newLatLng(restaurantlatlog.get(restaurant_details_idx)));
             mMap.animateCamera(CameraUpdateFactory.zoomTo(20));
-            mMap.addMarker(new MarkerOptions().position(restaurantlatlog.get(restaurant_details_idx))).showInfoWindow();
             //TODO this only zooms into restaurant selected, but does not "click" it to show info. Need update
-            //Markerlist.get(restaurant_details_idx).showInfoWindow();
-
+            ClusterMarker clustermarker = Markerlist.get(restaurant_details_idx);
+            Marker mark = mClusterManagerRenderer.getMarker(clustermarker);
+            if(mark == null) {
+                //mark.showInfoWindow();
+                Log.d(KEY, "bruh2");
+            }
         }
     }
 }
