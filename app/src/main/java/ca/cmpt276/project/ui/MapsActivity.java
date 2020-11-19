@@ -64,7 +64,7 @@ import ca.cmpt276.project.model.RestaurantListManager;
 import ca.cmpt276.project.model.SurreyDataGetter;
 import ca.cmpt276.project.model.types.HazardLevel;
 
-public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, DialogFragment.UpdateDialogListener, LoadingDialogFragment.CancelDialogListener,ClusterManager.OnClusterClickListener<ClusterMarker>, ClusterManager.OnClusterInfoWindowClickListener<ClusterMarker>, ClusterManager.OnClusterItemClickListener<ClusterMarker>, ClusterManager.OnClusterItemInfoWindowClickListener<ClusterMarker>{
+public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, DialogFragment.UpdateDialogListener, LoadingDialogFragment.CancelDialogListener,ClusterManager.OnClusterClickListener<ClusterMarker>, ClusterManager.OnClusterInfoWindowClickListener<ClusterMarker>, ClusterManager.OnClusterItemClickListener<ClusterMarker>, ClusterManager.OnClusterItemInfoWindowClickListener<ClusterMarker>,LocationListener{
 
     //SupportMapFragment mapFragment;
     private GoogleMap mMap;
@@ -215,7 +215,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude())));
                         mMap.animateCamera(CameraUpdateFactory.zoomTo(13f));
                         extractDataFromIntent();
-                        //onLocationChanged(currentLocation);
+                        onLocationChanged(currentLocation);
                     }else{
                         Toast.makeText(MapsActivity.this, "unable to get current location", Toast.LENGTH_SHORT).show();
                     }
@@ -225,15 +225,17 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             Log.e("user location", "getDeviceLocation: SecurityException: " + e.getMessage() );
         }
     }
-/*
+
     @Override
     public void onLocationChanged(Location location) {
-        mMap.addMarker(new MarkerOptions().position(new LatLng(location.getLatitude(), location.getLongitude())).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)).title("USER")).showInfoWindow();
+        LocationRequest req = new LocationRequest();
+        req.setInterval(1000).setFastestInterval(1000).setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
         mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(location.getLatitude(), location.getLongitude())));
         mMap.animateCamera(CameraUpdateFactory.zoomTo(13f));
-    }*/
+    }
 
     public void setupMap(){
+
         mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
         mMap.getUiSettings().setZoomControlsEnabled(true);
         mMap.getUiSettings().setZoomGesturesEnabled(true);
