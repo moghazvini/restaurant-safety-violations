@@ -146,7 +146,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         mLocationRequest = LocationRequest.create();
         mLocationRequest.setInterval(10000);
-        mLocationRequest.setFastestInterval(2000);
+        mLocationRequest.setFastestInterval(10000);
         mLocationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
     }
 
@@ -279,6 +279,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
             mMap.setMyLocationEnabled(true);
         }
+        mMap.setOnMyLocationButtonClickListener(new GoogleMap.OnMyLocationButtonClickListener(){
+            @Override
+            public boolean onMyLocationButtonClick()
+            {
+                startLocationUpdates();
+                return true;
+            }
+        });
     }
 
     private void getDeviceLocation() {
@@ -384,6 +392,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             mClusterManager.cluster();
         }
     }
+
 
 
     @Override
