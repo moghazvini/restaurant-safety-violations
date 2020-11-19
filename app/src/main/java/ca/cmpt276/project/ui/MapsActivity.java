@@ -490,6 +490,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             mMap.moveCamera(CameraUpdateFactory.newLatLng(restaurantlatlog.get(restaurant_details_idx)));
             mMap.animateCamera(CameraUpdateFactory.zoomTo(20));
             //TODO this only zooms into restaurant selected, but does not "click" it to show info. Need update
+            //Markerlist.get(restaurant_details_idx).showInfoWindow();
+
         }
     }
 }
