@@ -331,12 +331,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void onClusterInfoWindowClick(Cluster<ClusterMarker> cluster) {
-        // Does nothing, but you could go to a list of the users.
     }
 
     @Override
     public boolean onClusterItemClick(ClusterMarker item) {
-        // Does nothing, but you could go into the user's profile page, for example.
         return false;
     }
 
@@ -475,7 +473,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         if(restaurant_details_idx > 0) {
             mMap.moveCamera(CameraUpdateFactory.newLatLng(restaurantlatlog.get(restaurant_details_idx)));
             mMap.animateCamera(CameraUpdateFactory.zoomTo(20));
-            mMap.addMarker(new MarkerOptions().position(restaurantlatlog.get(restaurant_details_idx))).showInfoWindow();
+            Marker mark = mClusterManagerRenderer.getMarker(Markerlist.get(restaurant_details_idx));
+            if(mark != null){
+                mark.showInfoWindow();
+            }
             //TODO this only zooms into restaurant selected, but does not "click" it to show info. Need update
         }
     }
