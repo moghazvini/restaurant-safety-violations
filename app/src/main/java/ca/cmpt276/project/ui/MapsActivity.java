@@ -97,6 +97,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private static final String COURSE_LOCATION = Manifest.permission.ACCESS_COARSE_LOCATION;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1234;
     private Location currentLocation;
+    private GoogleMap.OnMapClickListener onMapClickListener;
     private Boolean mLocationPermissionsGranted = false;
     private FusedLocationProviderClient mFusedLocationProviderClient;
     private LocationRequest mLocationRequest;
@@ -144,20 +145,20 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
 
         mLocationRequest = LocationRequest.create();
-        mLocationRequest.setInterval(5000);
-        mLocationRequest.setFastestInterval(1500);
-        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        mLocationRequest.setInterval(10000);
+        mLocationRequest.setFastestInterval(2000);
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
     }
 
     @Override
     protected void onStart() {
         super.onStart();
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            checkSettingsAndStartLocationUpdates();
+            LocationUpdates();
         }
     }
 
-    private void checkSettingsAndStartLocationUpdates() {
+    private void LocationUpdates() {
         LocationSettingsRequest request = new LocationSettingsRequest.Builder()
                 .addLocationRequest(mLocationRequest).build();
         SettingsClient client = LocationServices.getSettingsClient(this);
@@ -225,7 +226,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     mLocationPermissionsGranted = true;
                     //initialize our map
                     initialMap();
-                    checkSettingsAndStartLocationUpdates();
+                    LocationUpdates();
                 }
             }
         }
@@ -305,10 +306,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @SuppressLint("MissingPermission")
     private void startLocationUpdates() {
-        Toast.makeText(MapsActivity.this,"update camera",Toast.LENGTH_SHORT).show();
         mFusedLocationProviderClient.requestLocationUpdates(mLocationRequest, locationCallback, Looper.getMainLooper());
     }
 
+    private void stopLocationUpdates() {
+        mFusedLocationProviderClient.removeLocationUpdates(locationCallback);
+    }
 
     public void setupMap(){
 
@@ -329,7 +332,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         popLatlong();
         addMarkers(mMap);
     }
-
     private void popLatlong() {
         restaurantlatlog = new ArrayList<>();
         for (Restaurant current : restaurantManager.getList()){
@@ -383,6 +385,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
+
     @Override
     public boolean onClusterClick(Cluster<ClusterMarker> cluster) {
         String Names = "";
@@ -402,18 +405,17 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         } catch (Exception e) {
             e.printStackTrace();
         }
-
+        stopLocationUpdates();
         return true;
     }
 
     @Override
     public void onClusterInfoWindowClick(Cluster<ClusterMarker> cluster) {
-        // Does nothing, but you could go to a list of the users.
     }
 
     @Override
     public boolean onClusterItemClick(ClusterMarker item) {
-        // Does nothing, but you could go into the user's profile page, for example.
+        stopLocationUpdates();
         return false;
     }
 
@@ -423,8 +425,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             Intent intent = RestaurantDetailsActivity.makeLaunchIntent(MapsActivity.this, position);
             startActivity(intent);
     }
-
-
     // Get the CSV links and timestamps
     private class GetDataTask extends AsyncTask<Void,Void,List<CsvInfo>> {
         @Override
