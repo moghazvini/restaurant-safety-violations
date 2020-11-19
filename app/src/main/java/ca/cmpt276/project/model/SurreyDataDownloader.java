@@ -26,7 +26,7 @@ import java.util.List;
  * Referenced the textbook for most of the API connection code:
  * Android Programming: The Big Nerd Ranch Guide Chapter 25
  */
-public class SurreyDataGetter {
+public class SurreyDataDownloader {
     public static final String DOWNLOAD_RESTAURANTS = "dl_restaurants";
     public static final String DOWNLOAD_INSPECTIONS = "dl_inspections";
 
@@ -34,7 +34,6 @@ public class SurreyDataGetter {
      * Connects to the URL and receives the data in a byte array.
      * @param urlSpec The URl to connect to
      * @return The byte array received from the API
-     * @throws IOException
      */
     public byte[] getUrlBytes(String urlSpec) throws IOException {
         URL url = new URL (urlSpec);
@@ -69,8 +68,6 @@ public class SurreyDataGetter {
     /**
      * Downloads the CSV file from the link provided and saves it as a
      * File in internal storage.
-     * @param csvLinks
-     * @param context
      */
     public void getCSVData(List<CsvInfo> csvLinks, Context context){
         try {
@@ -96,8 +93,6 @@ public class SurreyDataGetter {
     /**
      * Builds the URL for the restaurant and inspection list and gets the
      * JsonBody, ready to be parsed for information.
-     * @param context
-     * @return
      */
     public List<CsvInfo> getDataLink(Context context) {
         List<CsvInfo> data = new ArrayList<>();
@@ -139,9 +134,6 @@ public class SurreyDataGetter {
 
     /**
      * Parses the data received from the API call into a CsvData class
-     * @param data
-     * @param jsonBody
-     * @throws JSONException
      */
     private void parseData(CsvInfo data, JSONObject jsonBody) throws JSONException {
         JSONObject  resultJsonObject = jsonBody.getJSONObject("result");
@@ -164,7 +156,6 @@ public class SurreyDataGetter {
     /**
      * Checks if the CSV data have been modified
      * @param data List of CSV file information to be filled
-     * @param context
      */
     private void checkModified(List<CsvInfo> data, Context context) {
         LastModified lastModified = LastModified.getInstance(context);

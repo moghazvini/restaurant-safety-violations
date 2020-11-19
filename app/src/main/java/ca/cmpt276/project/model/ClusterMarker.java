@@ -3,20 +3,23 @@ package ca.cmpt276.project.model;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.maps.android.clustering.ClusterItem;
 
+/**
+ * Custom marker on the map.
+ */
 public class ClusterMarker implements ClusterItem {
 
     private LatLng position;
     private String title;
     private String snippet;
-    private int Icon;
-    private Restaurant Rest;
+    private int icon;
+    private Restaurant rest;
 
     public ClusterMarker(LatLng position, String title, String snippet, int icon, Restaurant rest) {
         this.position = position;
         this.title = title;
         this.snippet = snippet;
-        Icon = icon;
-        Rest = rest;
+        this.icon = icon;
+        this.rest = rest;
     }
 
 
@@ -45,18 +48,18 @@ public class ClusterMarker implements ClusterItem {
     }
 
     public Restaurant getRest() {
-        return Rest;
+        return rest;
     }
 
     public void setRest(Restaurant rest) {
-        Rest = rest;
+        this.rest = rest;
     }
 
     public int getIcon() {
-        return Icon;
+        return icon;
     }
 
     public void setIcon(int icon) {
-        this.Icon = icon;
+        this.icon = icon;
     }
 }

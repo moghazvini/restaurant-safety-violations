@@ -14,6 +14,11 @@ import androidx.appcompat.app.AppCompatDialogFragment;
 
 import ca.cmpt276.project.R;
 
+/**
+ * Loading pop up that shows that the restaurant and inspections lists
+ * are downloading.
+ * Gives the user the option to cancel the download.
+ */
 public class LoadingDialogFragment extends AppCompatDialogFragment {
     private static final String TAG = "DialogFragmentTag";
     private CancelDialogListener cancelListener;

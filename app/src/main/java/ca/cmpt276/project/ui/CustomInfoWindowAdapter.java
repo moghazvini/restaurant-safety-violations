@@ -17,13 +17,13 @@ import ca.cmpt276.project.model.Inspection;
 import ca.cmpt276.project.model.Restaurant;
 import ca.cmpt276.project.model.RestaurantListManager;
 
-public class CustominfowindowAdapter implements GoogleMap.InfoWindowAdapter {
+public class CustomInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
 
     private final View mwindow;
     private Context mcontext;
     private RestaurantListManager restaurantManager;
 
-    public CustominfowindowAdapter(Context context) {
+    public CustomInfoWindowAdapter(Context context) {
         mcontext = context;
         mwindow = LayoutInflater.from(context).inflate(R.layout.custom_infowindow, null);
     }

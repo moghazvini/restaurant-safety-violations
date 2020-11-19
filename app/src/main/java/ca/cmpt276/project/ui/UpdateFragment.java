@@ -14,7 +14,11 @@ import androidx.appcompat.app.AppCompatDialogFragment;
 
 import ca.cmpt276.project.R;
 
-public class DialogFragment extends AppCompatDialogFragment {
+/**
+ * Pop up that shows when there is an update available.
+ * Gives the user a choice to update.
+ */
+public class UpdateFragment extends AppCompatDialogFragment {
     private static final String TAG = "DialogFragmentTag";
     private UpdateDialogListener dialogListener;
     boolean userInput = true;
@@ -45,6 +49,7 @@ public class DialogFragment extends AppCompatDialogFragment {
                 .setNegativeButton(android.R.string.cancel, listener)
                 .create();
     }
+
     // code to send data from dialog to activity from https://www.youtube.com/watch?v=ARezg1D9Zd0
     @Override
     public void onAttach(@NonNull Context context) {

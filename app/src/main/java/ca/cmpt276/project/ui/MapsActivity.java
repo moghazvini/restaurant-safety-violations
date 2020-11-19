@@ -1,7 +1,6 @@
 package ca.cmpt276.project.ui;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
@@ -17,25 +16,15 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.TextView;
 import android.widget.Toast;
-
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.fragment.app.FragmentManager;
 
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
-import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
@@ -44,22 +33,17 @@ import com.google.android.gms.location.LocationSettingsResponse;
 import com.google.android.gms.location.SettingsClient;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.GoogleMapOptions;
-import com.google.android.gms.maps.LocationSource;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.maps.android.clustering.Cluster;
 import com.google.maps.android.clustering.ClusterItem;
 import com.google.maps.android.clustering.ClusterManager;
-import com.google.maps.android.clustering.view.DefaultClusterRenderer;
 
 
 import java.io.BufferedReader;
@@ -70,7 +54,6 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -82,10 +65,10 @@ import ca.cmpt276.project.model.Inspection;
 import ca.cmpt276.project.model.LastModified;
 import ca.cmpt276.project.model.Restaurant;
 import ca.cmpt276.project.model.RestaurantListManager;
-import ca.cmpt276.project.model.SurreyDataGetter;
+import ca.cmpt276.project.model.SurreyDataDownloader;
 import ca.cmpt276.project.model.types.HazardLevel;
 
-public class MapsActivity extends AppCompatActivity implements GoogleMap.OnMapClickListener,OnMapReadyCallback, DialogFragment.UpdateDialogListener, LoadingDialogFragment.CancelDialogListener, ClusterManager.OnClusterClickListener<ClusterMarker>, ClusterManager.OnClusterInfoWindowClickListener<ClusterMarker>, ClusterManager.OnClusterItemClickListener<ClusterMarker>, ClusterManager.OnClusterItemInfoWindowClickListener<ClusterMarker> {
+public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, UpdateFragment.UpdateDialogListener, LoadingDialogFragment.CancelDialogListener, ClusterManager.OnClusterClickListener<ClusterMarker>, ClusterManager.OnClusterInfoWindowClickListener<ClusterMarker>, ClusterManager.OnClusterItemClickListener<ClusterMarker>, ClusterManager.OnClusterItemInfoWindowClickListener<ClusterMarker> {
     private static final String FINE_LOCATION = Manifest.permission.ACCESS_FINE_LOCATION;
     private static final String COURSE_LOCATION = Manifest.permission.ACCESS_COARSE_LOCATION;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1234;
@@ -101,21 +84,19 @@ public class MapsActivity extends AppCompatActivity implements GoogleMap.OnMapCl
     private ClusterManager<ClusterMarker> mClusterManager;
     private ClusterManagerRenderer mClusterManagerRenderer;
     private static final String REST_DETAILS_INDEX = "restaurant details index";
-    private int restaurant_details_idx;
-    private List<ClusterMarker> Markerlist = new ArrayList<>();
+    private final List<ClusterMarker> Markerlist = new ArrayList<>();
 
     //User Locations permission
     private Location currentLocation;
-    private GoogleMap.OnMapClickListener onMapClickListener;
     private Boolean mLocationPermissionsGranted = false;
     private FusedLocationProviderClient mFusedLocationProviderClient;
     private LocationRequest mLocationRequest;
     private static boolean read = false;
     private ListUpdateTask listUpdateTask = null;
-    private static final String KEY = "KEY";
     private LoadingDialogFragment loadingDialog;
+
     //Location callBack
-    private LocationCallback locationCallback = new LocationCallback() {
+    private final LocationCallback locationCallback = new LocationCallback() {
         @Override
         public void onLocationResult(LocationResult locationResult) {
             super.onLocationResult(locationResult);
@@ -221,20 +202,18 @@ public class MapsActivity extends AppCompatActivity implements GoogleMap.OnMapCl
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         mLocationPermissionsGranted = false;
 
-        switch (requestCode) {
-            case LOCATION_PERMISSION_REQUEST_CODE: {
-                if (grantResults.length > 0) {
-                    for (int i = 0; i < grantResults.length; i++) {
-                        if (grantResults[i] != PackageManager.PERMISSION_GRANTED) {
-                            mLocationPermissionsGranted = false;
-                            return;
-                        }
+        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
+            if (grantResults.length > 0) {
+                for (int i = 0; i < grantResults.length; i++) {
+                    if (grantResults[i] != PackageManager.PERMISSION_GRANTED) {
+                        mLocationPermissionsGranted = false;
+                        return;
                     }
-                    mLocationPermissionsGranted = true;
-                    //initialize our map
-                    initialMap();
-                    LocationUpdates();
                 }
+                mLocationPermissionsGranted = true;
+                //initialize our map
+                initialMap();
+                LocationUpdates();
             }
         }
     }
@@ -327,7 +306,7 @@ public class MapsActivity extends AppCompatActivity implements GoogleMap.OnMapCl
         mMap.setOnCameraIdleListener(mClusterManager);
         mMap.setOnMarkerClickListener(mClusterManager);
         mMap.setOnInfoWindowClickListener(mClusterManager);
-        mMap.setInfoWindowAdapter(new CustominfowindowAdapter(MapsActivity.this));
+        mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(MapsActivity.this));
         mClusterManager.setOnClusterClickListener(this);
         mClusterManager.setOnClusterInfoWindowClickListener(this);
         mClusterManager.setOnClusterItemClickListener(this);
@@ -436,16 +415,11 @@ public class MapsActivity extends AppCompatActivity implements GoogleMap.OnMapCl
             startActivity(intent);
     }
 
-    @Override
-    public void onMapClick(LatLng latLng) {
-        stopLocationUpdates();
-    }
-
     // Get the CSV links and timestamps
     private class GetDataTask extends AsyncTask<Void,Void,List<CsvInfo>> {
         @Override
         protected List<CsvInfo> doInBackground(Void... voids) {
-            return new SurreyDataGetter().getDataLink(MapsActivity.this);
+            return new SurreyDataDownloader().getDataLink(MapsActivity.this);
         }
 
         @Override
@@ -455,7 +429,7 @@ public class MapsActivity extends AppCompatActivity implements GoogleMap.OnMapCl
                     || restaurantUpdate.get(1).getChanged()) { // if inspection list changed
                 // Want update? Execute function
                 FragmentManager manager = getSupportFragmentManager();
-                DialogFragment dialog = new DialogFragment(); // ask if user wants to update
+                UpdateFragment dialog = new UpdateFragment(); // ask if user wants to update
                 dialog.show(manager, "MessageDialog");
             } else {
                 lastModified.setLastCheck(MapsActivity.this, LocalDateTime.now());
@@ -490,7 +464,7 @@ public class MapsActivity extends AppCompatActivity implements GoogleMap.OnMapCl
         @Override
         protected Boolean doInBackground(Void... voids) {
             if (!isCancelled()) {
-                new SurreyDataGetter().getCSVData(restaurantUpdate, MapsActivity.this);
+                new SurreyDataDownloader().getCSVData(restaurantUpdate, MapsActivity.this);
                 return true;
             } else {
                 return false;
@@ -506,6 +480,8 @@ public class MapsActivity extends AppCompatActivity implements GoogleMap.OnMapCl
                 lastModified.setLast_mod_inspections(MapsActivity.this, restaurantUpdate.get(1).getLast_modified());
                 getUpdatedFiles();
                 setupMap();
+                finish();
+                startActivity(getIntent());
                 loadingDialog.dismiss();
             }
         }
@@ -529,15 +505,13 @@ public class MapsActivity extends AppCompatActivity implements GoogleMap.OnMapCl
         FileInputStream inputStream_rest;
         FileInputStream inputStream_insp;
         try {
-            inputStream_rest = MapsActivity.this.openFileInput(SurreyDataGetter.DOWNLOAD_RESTAURANTS);
-            inputStream_insp = MapsActivity.this.openFileInput(SurreyDataGetter.DOWNLOAD_INSPECTIONS);
+            inputStream_rest = MapsActivity.this.openFileInput(SurreyDataDownloader.DOWNLOAD_RESTAURANTS);
+            inputStream_insp = MapsActivity.this.openFileInput(SurreyDataDownloader.DOWNLOAD_INSPECTIONS);
             InputStreamReader inputReader_rest = new InputStreamReader(inputStream_rest, StandardCharsets.UTF_8);
             InputStreamReader inputReader_insp = new InputStreamReader(inputStream_insp, StandardCharsets.UTF_8);
 
             restaurantManager.fillRestaurantManager(new BufferedReader(inputReader_rest));
             restaurantManager.fillInspectionManager(new BufferedReader(inputReader_insp));
-            finish();
-            startActivity(getIntent());
         } catch (FileNotFoundException e) {
             // No update files downloaded
         }
@@ -548,11 +522,7 @@ public class MapsActivity extends AppCompatActivity implements GoogleMap.OnMapCl
         LocalDateTime previous = lastModified.getLastCheck();
         LocalDateTime current = LocalDateTime.now();
         LocalDateTime compare = current.minusHours(20);
-        if (previous.isBefore(compare) || compare.isEqual(previous)) {
-            return true;
-        } else {
-            return false;
-        }
+        return previous.isBefore(compare) || compare.isEqual(previous);
     }
 
     public static Intent makeLaunchIntentMapsActivity(Context context, int restIdx){
@@ -563,7 +533,7 @@ public class MapsActivity extends AppCompatActivity implements GoogleMap.OnMapCl
 
     private void extractDataFromIntent() {
         Intent intent = getIntent();
-        restaurant_details_idx = intent.getIntExtra(REST_DETAILS_INDEX, -1);
+        int restaurant_details_idx = intent.getIntExtra(REST_DETAILS_INDEX, -1);
         stopLocationUpdates();
         if(restaurant_details_idx > 0) {
             mMap.moveCamera(CameraUpdateFactory.newLatLng(restaurantlatlog.get(restaurant_details_idx)));

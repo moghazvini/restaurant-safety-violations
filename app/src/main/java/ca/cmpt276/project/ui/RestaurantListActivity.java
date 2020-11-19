@@ -1,6 +1,5 @@
 package ca.cmpt276.project.ui;
 
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 
