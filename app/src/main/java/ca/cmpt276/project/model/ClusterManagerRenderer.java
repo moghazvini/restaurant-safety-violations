@@ -28,6 +28,9 @@ import java.util.List;
 import ca.cmpt276.project.R;
 import ca.cmpt276.project.ui.MapsActivity;
 
+/**
+ * Draws the markers on the map.
+ **/
 public class ClusterManagerRenderer extends DefaultClusterRenderer<ClusterMarker> {
 
     private final IconGenerator icongen;
