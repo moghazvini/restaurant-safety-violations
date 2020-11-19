@@ -19,7 +19,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 
 
@@ -100,8 +99,10 @@ public class InspectionDetailsActivity extends AppCompatActivity {
             if(inspectionManager.getInspections().size()>0) {
                 String brief_description = violation.getCode() +"  "+ violation.getType().violation;
                 String crit_or_not = violation.getSeverity().severity;
+                boolean crit = crit_or_not.equals("Critical");
                 brief_description_txt.setText(brief_description);
-                if(crit_or_not.equals("Critical")){
+
+                if(crit){
                     crit_or_not_txt.setTextColor(Color.parseColor("#FA2828")); // Red
                 }else {
                     crit_or_not_txt.setTextColor(Color.parseColor("#45DE08")); // Green
@@ -113,19 +114,31 @@ public class InspectionDetailsActivity extends AppCompatActivity {
                         violation_img.setBackgroundResource(R.drawable.non_crit_operator_violations);
                         break;
                     case FOOD:
-                        violation_img.setBackgroundResource(R.drawable.crit_food_violations);
+                        if (crit) {
+                            violation_img.setBackgroundResource(R.drawable.crit_food_violations);
+                        } else {
+                            violation_img.setBackgroundResource(R.drawable._07_212ncrit_food_violations);
+                        }
                         break;
                     case EQUIPMENT:
-                        violation_img.setBackgroundResource(R.drawable.crit_equiptment_violations);
+                        if (crit) {
+                            violation_img.setBackgroundResource(R.drawable.crit_equiptment_violations);
+                        } else {
+                            violation_img.setBackgroundResource(R.drawable._06_308_315ncrit_equipment_violations);
+                        }
                         break;
                     case PESTS:
                         violation_img.setBackgroundResource(R.drawable.non_crit_pest_violations);
                         break;
                     case EMPLOYEES:
-                        violation_img.setBackgroundResource(R.drawable.non_crit_employee_violations);
+                        if (crit) {
+                            violation_img.setBackgroundResource(R.drawable.crit_employees_violations);
+                        } else {
+                            violation_img.setBackgroundResource(R.drawable.non_crit_employee_violations);
+                        }
                         break;
                     case ESTABLISHMENT:
-                        violation_img.setBackgroundResource(R.drawable.crit_employees_violations);
+                        violation_img.setBackgroundResource(R.drawable._01_104_violations);
                         break;
                     case CHEMICAL:
                         violation_img.setBackgroundResource(R.drawable._09ncrit_chems);
@@ -143,25 +156,16 @@ public class InspectionDetailsActivity extends AppCompatActivity {
     }
 
     private void setValues() {
-        LocalDate currentDate = LocalDate.now();
-        String inspectionDateText;
-        if(Math.abs(currentDate.getYear() - inspection.getDate().getYear()) != 0){
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM yyyy");
-            inspectionDateText = formatter.format(inspection.getDate());
-        }
-        else if(Math.abs(currentDate.getMonthValue() - inspection.getDate().getMonthValue()) != 0){
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMM dd");
-            inspectionDateText = formatter.format(inspection.getDate());
-        }
-        else{
-            inspectionDateText = inspection.getDate().getDayOfMonth() + " days ago";
-        }
-
         TextView inspectionType_txt = findViewById(R.id.txt_inspection_type);
         TextView critissues = findViewById(R.id.txt_critissues);
         TextView Ncritissues = findViewById(R.id.txt_num_non_crtitical);
 
+        // Format inspection date for the toolbar
+        LocalDate inspectionDate = inspection.getDate();
+        String inspectionDateText = getString(R.string.date,inspectionDate.getMonth().toString().toLowerCase(), inspectionDate.getDayOfMonth(), inspectionDate.getYear());
+        inspectionDateText = inspectionDateText.substring(0,1).toUpperCase().concat(inspectionDateText.substring(1));
         back.setTitle(inspectionDateText);
+
         String type = inspection.getType().value;
         inspectionType_txt.setText(type);
         String nonCrit = "# of Critical Issues: " + inspection.getCritical();
@@ -173,11 +177,6 @@ public class InspectionDetailsActivity extends AppCompatActivity {
         TextView hazard_txt = findViewById(R.id.txt_hazard);
         ImageView hazard_img = findViewById(R.id.img_hazard);
         switch (inspection.getLevel()) {
-            case LOW:
-                hazard_txt.setText(R.string.hazard_low);
-                hazard_txt.setTextColor(Color.parseColor("#45DE08")); // Green
-                hazard_img.setBackgroundResource(R.drawable.green_hazard);
-                break;
             case MODERATE:
                 hazard_txt.setText(R.string.hazard_moderate);
                 hazard_txt.setTextColor(Color.parseColor("#FA9009")); // Orange
@@ -189,7 +188,9 @@ public class InspectionDetailsActivity extends AppCompatActivity {
                 hazard_img.setBackgroundResource(R.drawable.red_hazard);
                 break;
             default:
-                assert false;
+                hazard_txt.setText(R.string.hazard_low);
+                hazard_txt.setTextColor(Color.parseColor("#45DE08")); // Green
+                hazard_img.setBackgroundResource(R.drawable.green_hazard);
         }
 
     }

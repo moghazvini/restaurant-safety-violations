@@ -1,5 +1,6 @@
 package ca.cmpt276.project.ui;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 
@@ -31,6 +32,7 @@ import ca.cmpt276.project.model.RestaurantListManager;
  * Displays the list of all restaurants in alphabetical order
  */
 public class RestaurantListActivity extends AppCompatActivity {
+
     private RestaurantListManager restaurantManager;
 
     @Override
@@ -49,7 +51,7 @@ public class RestaurantListActivity extends AppCompatActivity {
 
     private void populateListView() {
         //code to sort alphabetically taken from https://www.youtube.com/watch?v=dZQqrPdqT1E
-        Collections.sort(restaurantManager.getList());
+        //Collections.sort(restaurantManager.getList());
         ArrayAdapter<Restaurant> adapter = new RestaurantListAdapter();
         ListView list = findViewById(R.id.listViewRestaurants);
         list.setAdapter(adapter);
@@ -201,6 +203,7 @@ public class RestaurantListActivity extends AppCompatActivity {
             startActivity(i);
         });
     }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu){

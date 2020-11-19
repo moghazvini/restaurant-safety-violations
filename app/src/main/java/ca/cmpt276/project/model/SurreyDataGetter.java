@@ -71,9 +71,8 @@ public class SurreyDataGetter {
      * File in internal storage.
      * @param csvLinks
      * @param context
-     * @return True, if files are properly saved
      */
-    public boolean getCSVData(List<CsvInfo> csvLinks, Context context){
+    public void getCSVData(List<CsvInfo> csvLinks, Context context){
         try {
             //System.out.println(urlSpec);
             String csvRestaurant = getUrlString(csvLinks.get(0).getUrl());
@@ -85,7 +84,6 @@ public class SurreyDataGetter {
                 FileOutputStream outputInspection = context.openFileOutput(DOWNLOAD_INSPECTIONS, Context.MODE_PRIVATE);
                 outputRestaurant.write(csvRestaurant.getBytes(StandardCharsets.UTF_8));
                 outputInspection.write(csvInspection.getBytes(StandardCharsets.UTF_8));
-                return true;
             } catch (IOException e) {
                 Log.e("File Failure", "Failed to save file", e);
             }
@@ -93,7 +91,6 @@ public class SurreyDataGetter {
         } catch (IOException e) {
             Log.e("API Request", "Failed to get CSV data", e);
         }
-        return false;
     }
 
     /**
