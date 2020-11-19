@@ -24,6 +24,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.FragmentManager;
+
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
@@ -219,7 +224,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     for (int i = 0; i < grantResults.length; i++) {
                         if (grantResults[i] != PackageManager.PERMISSION_GRANTED) {
                             mLocationPermissionsGranted = false;
-
                             return;
                         }
                     }
@@ -245,7 +249,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         getMenuInflater().inflate(R.menu.menu_map,menu);
         return true;
     }
-
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item){
         if (item.getItemId() == R.id.action_list) {
@@ -322,7 +325,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     public void setupMap(){
-
         mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
         mMap.getUiSettings().setZoomControlsEnabled(true);
         mMap.getUiSettings().setZoomGesturesEnabled(true);
@@ -392,8 +394,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             mClusterManager.cluster();
         }
     }
-
-
 
     @Override
     public boolean onClusterClick(Cluster<ClusterMarker> cluster) {
@@ -566,7 +566,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 mark.showInfoWindow();
             }
             //TODO this only zooms into restaurant selected, but does not "click" it to show info. Need update
-
         }
     }
 }
