@@ -154,8 +154,8 @@ public class MapsActivity extends AppCompatActivity implements GoogleMap.OnMapCl
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
 
         mLocationRequest = LocationRequest.create();
-        mLocationRequest.setInterval(3000);
-        mLocationRequest.setFastestInterval(3000);
+        mLocationRequest.setInterval(5000);
+        mLocationRequest.setFastestInterval(5000);
         mLocationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
     }
 
@@ -345,7 +345,6 @@ public class MapsActivity extends AppCompatActivity implements GoogleMap.OnMapCl
     }
 
     private void addMarkers(GoogleMap googleMap) {
-
         if(googleMap != null) {
 
             if (mClusterManager == null) {
@@ -541,7 +540,6 @@ public class MapsActivity extends AppCompatActivity implements GoogleMap.OnMapCl
             startActivity(getIntent());
         } catch (FileNotFoundException e) {
             // No update files downloaded
-            Toast.makeText(this, "CAN'T FIND FILES",Toast.LENGTH_LONG).show();
         }
     }
 
@@ -551,10 +549,8 @@ public class MapsActivity extends AppCompatActivity implements GoogleMap.OnMapCl
         LocalDateTime current = LocalDateTime.now();
         LocalDateTime compare = current.minusHours(20);
         if (previous.isBefore(compare) || compare.isEqual(previous)) {
-            Toast.makeText(this, "Checking for Update", Toast.LENGTH_LONG).show();
             return true;
         } else {
-            Toast.makeText(this, "hasn't been 20 hours since the last check", Toast.LENGTH_LONG).show();
             return false;
         }
     }
