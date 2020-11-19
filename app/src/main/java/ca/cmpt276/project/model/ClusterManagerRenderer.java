@@ -83,6 +83,7 @@ public class ClusterManagerRenderer extends DefaultClusterRenderer<ClusterMarker
         return BitmapDescriptorFactory.fromBitmap(icon);
     }
 
+
     @Override
     protected boolean shouldRenderAsCluster(Cluster cluster) {
         return cluster.getSize()>1;
