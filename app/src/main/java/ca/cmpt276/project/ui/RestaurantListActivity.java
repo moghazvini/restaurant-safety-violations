@@ -107,7 +107,7 @@ public class RestaurantListActivity extends AppCompatActivity {
                 }
 
                 if (currentRestaurant.getName().contains("7-Eleven")) {
-                        restaurantLogo.setBackgroundResource(R.drawable.seveneleven);
+                    restaurantLogo.setBackgroundResource(R.drawable.seveneleven);
                 }
                 else if (currentRestaurant.getName().contains("Sushi") || currentRestaurant.getName().contains("japanese")) {
                     restaurantLogo.setBackgroundResource(R.drawable.sushi_generic);
@@ -161,15 +161,7 @@ public class RestaurantListActivity extends AppCompatActivity {
                     restaurantLogo.setBackgroundResource(R.drawable.market);
                 }
                 else {
-                    restaurantLogo.setBackgroundResource(R.drawable.food1);
-                }
-
-
-
-
-
-                if (currentRestaurant.getName().contains("pizza")) {
-                    restaurantLogo.setBackgroundResource(R.drawable.generic_pizza);
+                    restaurantLogo.setBackgroundResource(R.drawable.food2);
                 }
 
                 LocalDate currentDate = LocalDate.now();
