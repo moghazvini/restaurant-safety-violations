@@ -478,6 +478,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 mark.showInfoWindow();
             }
             //TODO this only zooms into restaurant selected, but does not "click" it to show info. Need update
+            //Markerlist.get(restaurant_details_idx).showInfoWindow();
+
         }
     }
 }
