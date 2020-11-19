@@ -86,6 +86,9 @@ import ca.cmpt276.project.model.SurreyDataGetter;
 import ca.cmpt276.project.model.types.HazardLevel;
 
 public class MapsActivity extends AppCompatActivity implements GoogleMap.OnMapClickListener,OnMapReadyCallback, DialogFragment.UpdateDialogListener, LoadingDialogFragment.CancelDialogListener, ClusterManager.OnClusterClickListener<ClusterMarker>, ClusterManager.OnClusterInfoWindowClickListener<ClusterMarker>, ClusterManager.OnClusterItemClickListener<ClusterMarker>, ClusterManager.OnClusterItemInfoWindowClickListener<ClusterMarker> {
+    private static final String FINE_LOCATION = Manifest.permission.ACCESS_FINE_LOCATION;
+    private static final String COURSE_LOCATION = Manifest.permission.ACCESS_COARSE_LOCATION;
+    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1234;
 
     //SupportMapFragment mapFragment;
     private GoogleMap mMap;
@@ -100,10 +103,8 @@ public class MapsActivity extends AppCompatActivity implements GoogleMap.OnMapCl
     private static final String REST_DETAILS_INDEX = "restaurant details index";
     private int restaurant_details_idx;
     private List<ClusterMarker> Markerlist = new ArrayList<>();
+
     //User Locations permission
-    private static final String FINE_LOCATION = Manifest.permission.ACCESS_FINE_LOCATION;
-    private static final String COURSE_LOCATION = Manifest.permission.ACCESS_COARSE_LOCATION;
-    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1234;
     private Location currentLocation;
     private GoogleMap.OnMapClickListener onMapClickListener;
     private Boolean mLocationPermissionsGranted = false;
@@ -536,6 +537,8 @@ public class MapsActivity extends AppCompatActivity implements GoogleMap.OnMapCl
 
             restaurantManager.fillRestaurantManager(new BufferedReader(inputReader_rest));
             restaurantManager.fillInspectionManager(new BufferedReader(inputReader_insp));
+            finish();
+            startActivity(getIntent());
         } catch (FileNotFoundException e) {
             // No update files downloaded
             Toast.makeText(this, "CAN'T FIND FILES",Toast.LENGTH_LONG).show();
