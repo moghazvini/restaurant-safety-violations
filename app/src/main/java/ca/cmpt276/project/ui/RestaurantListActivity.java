@@ -159,7 +159,7 @@ public class RestaurantListActivity extends AppCompatActivity {
                     restaurantLogo.setBackgroundResource(R.drawable.market);
                 }
                 else {
-                    restaurantLogo.setBackgroundResource(R.drawable.food1);
+                    restaurantLogo.setBackgroundResource(R.drawable.food2);
                 }
 
 
