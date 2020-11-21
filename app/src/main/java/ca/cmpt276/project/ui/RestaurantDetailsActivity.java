@@ -33,7 +33,6 @@ import ca.cmpt276.project.model.RestaurantListManager;
 public class RestaurantDetailsActivity extends AppCompatActivity {
 
     private final static String INDEX = "Inspection Report Index";
-    private final static String RESTAURANT_INDEX = "Restaurant Intex";
     private RestaurantListManager restaurantManager;
     private InspectionListManager inspectionManager;
     static Restaurant rest;
@@ -60,18 +59,16 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
         populateList();
         setValues();
         OnClick();
+        setupFavouriteClick();
     }
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        switch(item.getItemId()) {
-            case android.R.id.home:
-                finish();
-                return true;
-
-            default:
-                return super.onOptionsItemSelected(item);
+        if (item.getItemId() == android.R.id.home) {
+            finish();
+            return true;
         }
+        return super.onOptionsItemSelected(item);
     }
 
     private void populateList() {
@@ -128,6 +125,7 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
                     default:
                         assert false;
                 }
+
                 LocalDate currentDate = LocalDate.now();
 
                 String inspectionDateText;
@@ -157,13 +155,21 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
         back.setTitle(rest.getName());
         TextView ResAdd_txt = findViewById(R.id.txt_restAdd);
 
-        String address = "Facility Address: \n" + rest.getAddress() + " " + rest.getCity();
+        String address = getString(R.string.restaurant_add, rest.getAddress(), rest.getCity());
         ResAdd_txt.setText(address);
 
         TextView ResGps_txt = findViewById(R.id.txt_gps);
-        ResGps_txt.setText(rest.getGPS());
+        String gps = getString(R.string.rest_gps, rest.getGpsLat(), rest.getGpsLong());
+        ResGps_txt.setText(gps);
         ResGps_txt.setTextColor(Color.parseColor("#A576F1"));
         ResGps_txt.setTypeface(null, Typeface.ITALIC);
+
+        ImageView favourite = findViewById(R.id.add_favourite);
+        if (rest.isFavourite()) {
+            favourite.setBackgroundResource(R.drawable.crit_employees_violations);
+        } else {
+            favourite.setBackgroundResource(R.drawable.non_crit_employee_violations);
+        }
     }
 
     private void OnClick() {
@@ -174,6 +180,21 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
             startActivity(i);
         });
 
+    }
+
+    private void setupFavouriteClick() {
+        ImageView favourite = findViewById(R.id.add_favourite);
+        favourite.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                rest.setFavourite(!rest.isFavourite());
+                if (rest.isFavourite()) {
+                    favourite.setBackgroundResource(R.drawable.crit_employees_violations);
+                } else {
+                    favourite.setBackgroundResource(R.drawable.non_crit_employee_violations);
+                }
+            }
+        });
     }
 
     private void setupGpsClick() {
