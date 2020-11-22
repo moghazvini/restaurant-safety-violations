@@ -1,5 +1,7 @@
 package ca.cmpt276.project.model;
 
+import android.content.Context;
+import android.database.Cursor;
 import android.util.Log;
 
 import java.io.BufferedReader;
@@ -12,6 +14,7 @@ import java.util.List;
 
 import ca.cmpt276.project.model.types.HazardLevel;
 import ca.cmpt276.project.model.types.InspectionType;
+import ca.cmpt276.project.ui.MapsActivity;
 
 /**
  * Manages the list of restaurants that had
@@ -20,6 +23,7 @@ import ca.cmpt276.project.model.types.InspectionType;
 public class RestaurantListManager {
     private final List<Restaurant> restaurants;
     private static RestaurantListManager instance;
+    DBAdapter_restaurants myDB;
 
     private RestaurantListManager() {
         restaurants = new ArrayList<>();
@@ -56,7 +60,7 @@ public class RestaurantListManager {
         return null;
     }
 
-    public void fillRestaurantManager(BufferedReader reader) {
+    public void fillRestaurantManager(BufferedReader reader, Context context) {
         String line = "";
         try {
             reader.readLine();
@@ -89,11 +93,19 @@ public class RestaurantListManager {
                         gpsLat // Restaurant Latitude
                 );
                 instance.add(restaurant);
+                addrestaurant(restaurant, context);
             }
             Collections.sort(restaurants);
         } catch(IOException e){
             Log.wtf("RestaurantListActivity", "error reading data file on line " + line, e);
         }
+    }
+
+    private void addrestaurant(Restaurant rest, Context context) {
+        myDB = new DBAdapter_restaurants(context);
+        myDB.open();
+        myDB.insertRow(rest.getTracking(),rest.getName(),rest.getAddress(),rest.getCity(),rest.getGpsLat(),rest.getGpsLong());
+        //myDB.close();
     }
 
     public void fillInspectionManager(BufferedReader reader) {

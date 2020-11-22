@@ -1,6 +1,7 @@
 package ca.cmpt276.project.ui;
 
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Color;
 
 import androidx.annotation.NonNull;
@@ -22,6 +23,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 
 import ca.cmpt276.project.R;
+import ca.cmpt276.project.model.DBAdapter_restaurants;
 import ca.cmpt276.project.model.Inspection;
 import ca.cmpt276.project.model.InspectionListManager;
 import ca.cmpt276.project.model.Restaurant;
@@ -33,6 +35,7 @@ import ca.cmpt276.project.model.RestaurantListManager;
 public class RestaurantListActivity extends AppCompatActivity {
 
     private RestaurantListManager restaurantManager;
+    DBAdapter_restaurants myDb;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,15 +45,27 @@ public class RestaurantListActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         restaurantManager = RestaurantListManager.getInstance();
+        openDB();
 
         populateListView();
         registerCallBack();
         // Check if it has been 20 hours since last check
     }
 
+    private void openDB() {
+        myDb = new DBAdapter_restaurants(this);
+        myDb.open();
+    }
+    @Override
+    protected void onDestroy(){
+        super.onDestroy();
+        myDb.close();
+    }
+
     private void populateListView() {
         //code to sort alphabetically taken from https://www.youtube.com/watch?v=dZQqrPdqT1E
         //Collections.sort(restaurantManager.getList());
+        Cursor cursor = myDb.getAllRows();
         ArrayAdapter<Restaurant> adapter = new RestaurantListAdapter();
         ListView list = findViewById(R.id.listViewRestaurants);
         list.setAdapter(adapter);
