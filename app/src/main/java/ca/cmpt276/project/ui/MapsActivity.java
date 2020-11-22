@@ -154,23 +154,17 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         SettingsClient client = LocationServices.getSettingsClient(this);
 
         Task<LocationSettingsResponse> locationSettingsResponseTask = client.checkLocationSettings(request);
-        locationSettingsResponseTask.addOnSuccessListener(new OnSuccessListener<LocationSettingsResponse>() {
-            @Override
-            public void onSuccess(LocationSettingsResponse locationSettingsResponse) {
-                //Settings of device are satisfied and we can start location updates
-                startLocationUpdates();
-            }
+        locationSettingsResponseTask.addOnSuccessListener(locationSettingsResponse -> {
+            //Settings of device are satisfied and we can start location updates
+            startLocationUpdates();
         });
-        locationSettingsResponseTask.addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                if (e instanceof ResolvableApiException) {
-                    ResolvableApiException apiException = (ResolvableApiException) e;
-                    try {
-                        apiException.startResolutionForResult(MapsActivity.this, 1001);
-                    } catch (IntentSender.SendIntentException ex) {
-                        ex.printStackTrace();
-                    }
+        locationSettingsResponseTask.addOnFailureListener(e -> {
+            if (e instanceof ResolvableApiException) {
+                ResolvableApiException apiException = (ResolvableApiException) e;
+                try {
+                    apiException.startResolutionForResult(MapsActivity.this, 1001);
+                } catch (IntentSender.SendIntentException ex) {
+                    ex.printStackTrace();
                 }
             }
         });
@@ -204,8 +198,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
             if (grantResults.length > 0) {
-                for (int i = 0; i < grantResults.length; i++) {
-                    if (grantResults[i] != PackageManager.PERMISSION_GRANTED) {
+                for (int grantResult : grantResults) {
+                    if (grantResult != PackageManager.PERMISSION_GRANTED) {
                         mLocationPermissionsGranted = false;
                         return;
                     }
@@ -378,11 +372,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public boolean onClusterClick(Cluster<ClusterMarker> cluster) {
-        String Names = "";
+
         // Create the builder to collect all essential cluster items for the bounds.
         LatLngBounds.Builder builder = LatLngBounds.builder();
         for (ClusterItem item : cluster.getItems()) {
-            Names = Names + item.getTitle() +", ";
             builder.include(item.getPosition());
         }
         // Get the LatLngBounds
