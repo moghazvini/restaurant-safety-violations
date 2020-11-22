@@ -54,7 +54,7 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
         }
 
         restaurantManager = RestaurantListManager.getInstance();
-        Getdata();
+        GetData();
         setupGpsClick();
         populateList();
         setValues();
@@ -65,6 +65,7 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
+            setResult(101,getIntent());
             finish();
             return true;
         }
@@ -101,8 +102,8 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
             TextView inspDate_txt = iv.findViewById(R.id.txt_inspDate);
             //setting stuff
             if(insplist.getInspections().size()>0) {
-                String nonCrit = "# of Critical Issues: " + insp.getCritical();
-                String crit = "# of Non-Critical Issues: " + insp.getNonCritical();
+                String nonCrit = getString(R.string.critical_issue, insp.getCritical());
+                String crit = getString(R.string.non_critical_issue, insp.getNonCritical());
                 critissues_txt.setText(nonCrit);
                 Ncritissues_txt.setText(crit);
 
@@ -184,15 +185,12 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
 
     private void setupFavouriteClick() {
         ImageView favourite = findViewById(R.id.add_favourite);
-        favourite.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                rest.setFavourite(!rest.isFavourite());
-                if (rest.isFavourite()) {
-                    favourite.setBackgroundResource(R.drawable.crit_employees_violations);
-                } else {
-                    favourite.setBackgroundResource(R.drawable.non_crit_employee_violations);
-                }
+        favourite.setOnClickListener(v -> {
+            rest.setFavourite(!rest.isFavourite());
+            if (rest.isFavourite()) {
+                favourite.setBackgroundResource(R.drawable.crit_employees_violations);
+            } else {
+                favourite.setBackgroundResource(R.drawable.non_crit_employee_violations);
             }
         });
     }
@@ -206,7 +204,7 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
         });
     }
 
-    private void Getdata() {
+    private void GetData() {
         Intent intent = getIntent();
         rest_index = intent.getIntExtra(INDEX,0);
         rest = restaurantManager.getRestaurant(rest_index);

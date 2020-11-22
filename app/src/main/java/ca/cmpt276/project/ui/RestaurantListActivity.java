@@ -4,10 +4,12 @@ import android.content.Intent;
 import android.graphics.Color;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -16,6 +18,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -32,7 +35,9 @@ import ca.cmpt276.project.model.RestaurantListManager;
  */
 public class RestaurantListActivity extends AppCompatActivity {
 
+    public static final int REQUEST_CODE_DETAILS = 101;
     private RestaurantListManager restaurantManager;
+    private ArrayAdapter<Restaurant> adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,7 +56,7 @@ public class RestaurantListActivity extends AppCompatActivity {
     private void populateListView() {
         //code to sort alphabetically taken from https://www.youtube.com/watch?v=dZQqrPdqT1E
         //Collections.sort(restaurantManager.getList());
-        ArrayAdapter<Restaurant> adapter = new RestaurantListAdapter();
+        adapter = new RestaurantListAdapter();
         ListView list = findViewById(R.id.listViewRestaurants);
         list.setAdapter(adapter);
     }
@@ -78,6 +83,10 @@ public class RestaurantListActivity extends AppCompatActivity {
             TextView inspectionText = itemView.findViewById(R.id.item_txt_latest_inspection);
             TextView hazardText = itemView.findViewById(R.id.item_txt_hazard);
             nameText.setText(currentRestaurant.getName());
+
+            if (currentRestaurant.isFavourite()) {
+                itemView.setBackgroundColor(getResources().getColor(R.color.grey));
+            }
 
             if(currentInspectionList.getInspections().size() > 0) {
                 Inspection latestInspection;
@@ -191,10 +200,17 @@ public class RestaurantListActivity extends AppCompatActivity {
         ListView list = findViewById(R.id.listViewRestaurants);
         list.setOnItemClickListener((parent, viewClicked, position, id) -> {
             Intent i = RestaurantDetailsActivity.makeLaunchIntent(RestaurantListActivity.this,position);
-            startActivity(i);
+            startActivityForResult(i, REQUEST_CODE_DETAILS);
         });
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_CODE_DETAILS) {
+            adapter.notifyDataSetChanged();
+        }
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu){
@@ -203,14 +219,12 @@ public class RestaurantListActivity extends AppCompatActivity {
     }
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item){
-        switch (item.getItemId()){
-            case R.id.action_map:
-                startActivity(new Intent(this, MapsActivity.class));
-                finish();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
+        if (item.getItemId() == R.id.action_map) {
+            startActivity(new Intent(this, MapsActivity.class));
+            finish();
+            return true;
         }
+        return super.onOptionsItemSelected(item);
     }
 
 }

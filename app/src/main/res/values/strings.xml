@@ -19,8 +19,8 @@
     <string name="establishment_violation">establishment violation</string>
 
     <!--Restaurant Details-->
-    <string name="critical_issue">Critical Issue</string>
-    <string name="non_critical_issue">Non-Critical Issue</string>
+    <string name="critical_issue"># of Critical Issues: %d</string>
+    <string name="non_critical_issue"># of Non-Critical Issues: %d</string>
     <string name="inspection_date">Inspection Date</string>
     <string name="rest_name">Restaurant name here</string>
     <string name="restaurant_add">Facility Address:\n %s %s</string>
