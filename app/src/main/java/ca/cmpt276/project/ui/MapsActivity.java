@@ -37,11 +37,9 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-import com.google.android.material.snackbar.SnackbarContentLayout;
 import com.google.maps.android.clustering.Cluster;
 import com.google.maps.android.clustering.ClusterItem;
 import com.google.maps.android.clustering.ClusterManager;
@@ -85,7 +83,7 @@ public class MapsActivity extends AppCompatActivity implements GoogleMap.OnCamer
     private ClusterManager<ClusterMarker> mClusterManager;
     private ClusterManagerRenderer mClusterManagerRenderer;
     private static final String REST_DETAILS_INDEX = "restaurant details index";
-    private final List<ClusterMarker> Markerlist = new ArrayList<>();
+    private final List<ClusterMarker> markerList = new ArrayList<>();
 
     //User Locations permission
     private Location currentLocation;
@@ -318,11 +316,8 @@ public class MapsActivity extends AppCompatActivity implements GoogleMap.OnCamer
         mMap.setOnCameraIdleListener(mClusterManager);
         mMap.setOnMarkerClickListener(mClusterManager);
         mMap.setOnInfoWindowClickListener(mClusterManager);
-        //mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(MapsActivity.this));
         mClusterManager.setOnClusterClickListener(this);
-        //mClusterManager.setOnClusterInfoWindowClickListener(this);
         mClusterManager.setOnClusterItemClickListener(this);
-        //mClusterManager.setOnClusterItemInfoWindowClickListener(this);
 
         popLatlong();
         addMarkers(mMap);
@@ -369,7 +364,7 @@ public class MapsActivity extends AppCompatActivity implements GoogleMap.OnCamer
                         }
                         ClusterMarker newClusterMarker = new ClusterMarker(current,restaurantManager.getRestaurant(pos).getName(), snippet, severity_icon, restaurantManager.getRestaurant(pos));
                         mClusterManager.addItem(newClusterMarker);
-                        Markerlist.add(newClusterMarker);
+                        markerList.add(newClusterMarker);
                     }
                 } catch(NullPointerException e){
                     Log.e("CMarker", "addMapMarkers: NullPointerException: " + e.getMessage());
