@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
+import android.widget.Toast;
 
 
 public class DBAdapter_restaurants {
@@ -24,7 +25,7 @@ public class DBAdapter_restaurants {
      */
     // TODO: Setup your fields here:
     public static final String KEY_TRACKING = "track";
-    public static final String KEY_NAME = "restaurantname";
+    public static final String KEY_NAME = "name";
     public static final String KEY_ADDRESS = "address";
     public static final String KEY_CITY = "city";
     public static final String KEY_LATITUDE = "lat";
@@ -42,15 +43,15 @@ public class DBAdapter_restaurants {
 
     // DB info: it's name, and the table we are using (just one).
     public static final String DATABASE_NAME = "MyDb";
-    public static final String DATABASE_TABLE = "RestaurantTable";
+    public static final String DATABASE_TABLE = "RestaurantsTable";
     // Track DB version if a new version of your app changes the format.
-    public static final int DATABASE_VERSION = 2;
+    public static final int DATABASE_VERSION = 1;
 
     private static final String DATABASE_CREATE_SQL =
             "create table " + DATABASE_TABLE
-                    + " (" + KEY_ROWID + " integer primary key autoincrement, " + KEY_TRACKING + "text not null,"
-                    + KEY_NAME + "text not null," + KEY_ADDRESS + "text not null," + KEY_CITY + "text not null,"
-                    + KEY_LATITUDE + " real not null," + KEY_LONGITUDE + "real not null" + ");";
+                    + " (" + KEY_ROWID + " integer primary key autoincrement, " + KEY_TRACKING + " text not null,"
+                    + KEY_NAME + " text not null," + KEY_ADDRESS + " text not null," + KEY_CITY + " text not null,"
+                    + KEY_LATITUDE + " integer not null," + KEY_LONGITUDE + " integer not null" + ");";
 
     // Context of application who uses us.
     private final Context context;
@@ -91,6 +92,7 @@ public class DBAdapter_restaurants {
         initialValues.put(KEY_LONGITUDE, log);
 
         // Insert it into the database.
+        Toast.makeText(context,"Added a row",Toast.LENGTH_SHORT).show();
         return db.insert(DATABASE_TABLE, null, initialValues);
     }
 

@@ -486,7 +486,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 new InputStreamReader(inputStream, StandardCharsets.UTF_8)
         );
 
-        restaurantManager.fillRestaurantManager(reader);
+        restaurantManager.fillRestaurantManager(reader,this);
         InputStream is = getResources().openRawResource(R.raw.inspectionreports_itr1);
         BufferedReader inspectionReader = new BufferedReader(
                 new InputStreamReader(is, StandardCharsets.UTF_8)
@@ -503,7 +503,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             InputStreamReader inputReader_rest = new InputStreamReader(inputStream_rest, StandardCharsets.UTF_8);
             InputStreamReader inputReader_insp = new InputStreamReader(inputStream_insp, StandardCharsets.UTF_8);
 
-            restaurantManager.fillRestaurantManager(new BufferedReader(inputReader_rest));
+            restaurantManager.fillRestaurantManager(new BufferedReader(inputReader_rest),this);
             restaurantManager.fillInspectionManager(new BufferedReader(inputReader_insp));
         } catch (FileNotFoundException e) {
             // No update files downloaded
