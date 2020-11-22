@@ -3,8 +3,6 @@ package ca.cmpt276.project.ui;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
@@ -23,10 +21,14 @@ import ca.cmpt276.project.model.Inspection;
 import ca.cmpt276.project.model.Restaurant;
 import ca.cmpt276.project.model.RestaurantListManager;
 
+/**
+ * Marker information Pop Up on the map
+ */
 public class MarkerDialogFragment extends AppCompatDialogFragment {
     private static final String TAG = "DialogFragmentTag";
     private PopUpDialogListener popUpListener;
 
+    @NonNull
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         View view = LayoutInflater.from(getActivity()).inflate(R.layout.custom_infowindow, null);
 
@@ -119,12 +121,7 @@ public class MarkerDialogFragment extends AppCompatDialogFragment {
             img_icon.setBackgroundResource(R.drawable.food2);
         }
 
-        view.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                popUpListener.popUp(index);
-            }
-        });
+        view.setOnClickListener(v -> popUpListener.popUp(index));
 
         return new AlertDialog.Builder(getActivity())
                 .setView(view)
