@@ -69,7 +69,7 @@ import ca.cmpt276.project.model.RestaurantListManager;
 import ca.cmpt276.project.model.SurreyDataDownloader;
 import ca.cmpt276.project.model.types.HazardLevel;
 
-public class MapsActivity extends AppCompatActivity implements GoogleMap.OnCameraMoveStartedListener, OnMapReadyCallback, UpdateFragment.UpdateDialogListener, LoadingDialogFragment.CancelDialogListener, MarkerDialogFragment.PopUpDialogListener, ClusterManager.OnClusterClickListener<ClusterMarker>, ClusterManager.OnClusterInfoWindowClickListener<ClusterMarker>, ClusterManager.OnClusterItemClickListener<ClusterMarker>, ClusterManager.OnClusterItemInfoWindowClickListener<ClusterMarker> {
+public class MapsActivity extends AppCompatActivity implements GoogleMap.OnCameraMoveStartedListener, OnMapReadyCallback, UpdateFragment.UpdateDialogListener, LoadingDialogFragment.CancelDialogListener, MarkerDialogFragment.PopUpDialogListener, ClusterManager.OnClusterClickListener<ClusterMarker>, ClusterManager.OnClusterItemClickListener<ClusterMarker> {
     private static final String FINE_LOCATION = Manifest.permission.ACCESS_FINE_LOCATION;
     private static final String COURSE_LOCATION = Manifest.permission.ACCESS_COARSE_LOCATION;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1234;
@@ -320,9 +320,9 @@ public class MapsActivity extends AppCompatActivity implements GoogleMap.OnCamer
         mMap.setOnInfoWindowClickListener(mClusterManager);
         //mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(MapsActivity.this));
         mClusterManager.setOnClusterClickListener(this);
-        mClusterManager.setOnClusterInfoWindowClickListener(this);
+        //mClusterManager.setOnClusterInfoWindowClickListener(this);
         mClusterManager.setOnClusterItemClickListener(this);
-        mClusterManager.setOnClusterItemInfoWindowClickListener(this);
+        //mClusterManager.setOnClusterItemInfoWindowClickListener(this);
 
         popLatlong();
         addMarkers(mMap);
@@ -389,6 +389,8 @@ public class MapsActivity extends AppCompatActivity implements GoogleMap.OnCamer
         mFusedLocationProviderClient.removeLocationUpdates(locationCallback);
     }
 
+
+
     @Override
     public boolean onClusterClick(Cluster<ClusterMarker> cluster) {
         String Names = "";
@@ -412,22 +414,18 @@ public class MapsActivity extends AppCompatActivity implements GoogleMap.OnCamer
     }
 
     @Override
-    public void onClusterInfoWindowClick(Cluster<ClusterMarker> cluster) {
-    }
-
-    @Override
     public boolean onClusterItemClick(ClusterMarker item) {
         Toast.makeText(this, "marker clicked", Toast.LENGTH_SHORT).show();
 
-        Bundle info = new Bundle();
         Restaurant restaurant = item.getRest();
         int index = restaurantManager.getList().indexOf(restaurant);
         openPopUpWindow(index);
 
-        return false;
+        return true;
     }
 
     private void openPopUpWindow(int index) {
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(restaurantlatlog.get(index)));
         Bundle info = new Bundle();
         info.putInt("index", index);
 
@@ -440,13 +438,6 @@ public class MapsActivity extends AppCompatActivity implements GoogleMap.OnCamer
     @Override
     public void popUp(int index) {
         Intent intent = RestaurantDetailsActivity.makeLaunchIntent(MapsActivity.this, index);
-        startActivity(intent);
-    }
-
-    @Override
-    public void onClusterItemInfoWindowClick(ClusterMarker item) {
-        int position = restaurantlatlog.indexOf(item.getPosition());
-        Intent intent = RestaurantDetailsActivity.makeLaunchIntent(MapsActivity.this, position);
         startActivity(intent);
     }
 
@@ -569,9 +560,8 @@ public class MapsActivity extends AppCompatActivity implements GoogleMap.OnCamer
         int restaurant_details_idx = intent.getIntExtra(REST_DETAILS_INDEX, -1);
 
         if(restaurant_details_idx > 0) {
-            mMap.moveCamera(CameraUpdateFactory.newLatLng(restaurantlatlog.get(restaurant_details_idx)));
-            mMap.animateCamera(CameraUpdateFactory.zoomTo(20));
             openPopUpWindow(restaurant_details_idx);
+            mMap.animateCamera(CameraUpdateFactory.zoomTo(20));
         }
     }
 }
