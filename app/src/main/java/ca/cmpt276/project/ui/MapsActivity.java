@@ -41,6 +41,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.snackbar.SnackbarContentLayout;
 import com.google.maps.android.clustering.Cluster;
 import com.google.maps.android.clustering.ClusterItem;
 import com.google.maps.android.clustering.ClusterManager;
@@ -68,7 +69,7 @@ import ca.cmpt276.project.model.RestaurantListManager;
 import ca.cmpt276.project.model.SurreyDataDownloader;
 import ca.cmpt276.project.model.types.HazardLevel;
 
-public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, UpdateFragment.UpdateDialogListener, LoadingDialogFragment.CancelDialogListener, ClusterManager.OnClusterClickListener<ClusterMarker>, ClusterManager.OnClusterInfoWindowClickListener<ClusterMarker>, ClusterManager.OnClusterItemClickListener<ClusterMarker>, ClusterManager.OnClusterItemInfoWindowClickListener<ClusterMarker> {
+public class MapsActivity extends AppCompatActivity implements GoogleMap.OnCameraMoveStartedListener, OnMapReadyCallback, UpdateFragment.UpdateDialogListener, LoadingDialogFragment.CancelDialogListener, MarkerDialogFragment.PopUpDialogListener, ClusterManager.OnClusterClickListener<ClusterMarker>, ClusterManager.OnClusterInfoWindowClickListener<ClusterMarker>, ClusterManager.OnClusterItemClickListener<ClusterMarker>, ClusterManager.OnClusterItemInfoWindowClickListener<ClusterMarker> {
     private static final String FINE_LOCATION = Manifest.permission.ACCESS_FINE_LOCATION;
     private static final String COURSE_LOCATION = Manifest.permission.ACCESS_COARSE_LOCATION;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1234;
@@ -95,6 +96,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private ListUpdateTask listUpdateTask = null;
     private LoadingDialogFragment loadingDialog;
 
+    FragmentManager manager;
+
     //Location callBack
     private final LocationCallback locationCallback = new LocationCallback() {
         @Override
@@ -119,6 +122,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         restaurantManager = RestaurantListManager.getInstance();
         lastModified = LastModified.getInstance(this);
+        manager = getSupportFragmentManager();
 
         if(!read){
             fillInitialRestaurantList();
@@ -204,8 +208,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
             if (grantResults.length > 0) {
-                for (int i = 0; i < grantResults.length; i++) {
-                    if (grantResults[i] != PackageManager.PERMISSION_GRANTED) {
+                for (int grantResult : grantResults) {
+                    if (grantResult != PackageManager.PERMISSION_GRANTED) {
                         mLocationPermissionsGranted = false;
                         return;
                     }
@@ -296,6 +300,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
+    @Override
+    public void onCameraMoveStarted(int reason) {
+        if (reason == GoogleMap.OnCameraMoveStartedListener.REASON_GESTURE) {
+            Toast.makeText(this, "sensed", Toast.LENGTH_SHORT).show();
+            stopLocationUpdates();
+        }
+    }
+
     public void setupMap(){
 
         mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
@@ -306,7 +318,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap.setOnCameraIdleListener(mClusterManager);
         mMap.setOnMarkerClickListener(mClusterManager);
         mMap.setOnInfoWindowClickListener(mClusterManager);
-        mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(MapsActivity.this));
+        //mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(MapsActivity.this));
         mClusterManager.setOnClusterClickListener(this);
         mClusterManager.setOnClusterInfoWindowClickListener(this);
         mClusterManager.setOnClusterItemClickListener(this);
@@ -315,6 +327,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         popLatlong();
         addMarkers(mMap);
     }
+
     private void popLatlong() {
         restaurantlatlog = new ArrayList<>();
         for (Restaurant current : restaurantManager.getList()){
@@ -327,7 +340,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         if(googleMap != null) {
 
             if (mClusterManager == null) {
-                mClusterManager = new ClusterManager<ClusterMarker>(this.getApplicationContext(), googleMap);
+                mClusterManager = new ClusterManager<>(this.getApplicationContext(), googleMap);
             }
             if (mClusterManagerRenderer == null) {
                 mClusterManagerRenderer = new ClusterManagerRenderer(this, googleMap, mClusterManager );
@@ -404,15 +417,37 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public boolean onClusterItemClick(ClusterMarker item) {
-        stopLocationUpdates();
+        Toast.makeText(this, "marker clicked", Toast.LENGTH_SHORT).show();
+
+        Bundle info = new Bundle();
+        Restaurant restaurant = item.getRest();
+        int index = restaurantManager.getList().indexOf(restaurant);
+        openPopUpWindow(index);
+
         return false;
+    }
+
+    private void openPopUpWindow(int index) {
+        Bundle info = new Bundle();
+        info.putInt("index", index);
+
+        MarkerDialogFragment markerFragment = new MarkerDialogFragment();
+        markerFragment.setArguments(info);
+        markerFragment.show(manager,"popup");
+        stopLocationUpdates();
+    }
+
+    @Override
+    public void popUp(int index) {
+        Intent intent = RestaurantDetailsActivity.makeLaunchIntent(MapsActivity.this, index);
+        startActivity(intent);
     }
 
     @Override
     public void onClusterItemInfoWindowClick(ClusterMarker item) {
-            int position = restaurantlatlog.indexOf(item.getPosition());
-            Intent intent = RestaurantDetailsActivity.makeLaunchIntent(MapsActivity.this, position);
-            startActivity(intent);
+        int position = restaurantlatlog.indexOf(item.getPosition());
+        Intent intent = RestaurantDetailsActivity.makeLaunchIntent(MapsActivity.this, position);
+        startActivity(intent);
     }
 
     // Get the CSV links and timestamps
@@ -428,7 +463,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             if (restaurantUpdate.get(0).getChanged() // check if restaurant list changed
                     || restaurantUpdate.get(1).getChanged()) { // if inspection list changed
                 // Want update? Execute function
-                FragmentManager manager = getSupportFragmentManager();
                 UpdateFragment dialog = new UpdateFragment(); // ask if user wants to update
                 dialog.show(manager, "MessageDialog");
             } else {
@@ -456,7 +490,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private class ListUpdateTask extends AsyncTask<Void,Void, Boolean> {
         @Override
         protected void onPreExecute() {
-            FragmentManager manager = getSupportFragmentManager();
             loadingDialog = new LoadingDialogFragment(); // loading dialog
             loadingDialog.show(manager, "LoadingDialog");
         }
@@ -525,7 +558,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         return previous.isBefore(compare) || compare.isEqual(previous);
     }
 
-    public static Intent makeLaunchIntentMapsActivity(Context context, int restIdx){
+    public static Intent makeLaunchIntentMapsActivity(Context context, int restIdx) {
         Intent intent = new Intent(context, MapsActivity.class);
         intent.putExtra(REST_DETAILS_INDEX, restIdx);
         return intent;
@@ -534,14 +567,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private void extractDataFromIntent() {
         Intent intent = getIntent();
         int restaurant_details_idx = intent.getIntExtra(REST_DETAILS_INDEX, -1);
-        stopLocationUpdates();
+
         if(restaurant_details_idx > 0) {
             mMap.moveCamera(CameraUpdateFactory.newLatLng(restaurantlatlog.get(restaurant_details_idx)));
             mMap.animateCamera(CameraUpdateFactory.zoomTo(20));
-            Marker mark = mClusterManagerRenderer.getMarker(Markerlist.get(restaurant_details_idx));
-            if(mark != null){
-                mark.showInfoWindow();
-            }
+            openPopUpWindow(restaurant_details_idx);
         }
     }
 }
