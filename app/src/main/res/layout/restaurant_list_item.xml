@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/relativeLayout2"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
@@ -51,11 +52,10 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="5dp"
         android:layout_marginTop="8dp"
-        android:layout_marginEnd="5dp"
+        android:layout_marginEnd="4dp"
         android:text="@string/restaurant_name"
         android:textSize="18sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintEnd_toStartOf="@+id/img_fav"
         app:layout_constraintStart_toEndOf="@+id/item_restaurantIcon"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -67,5 +67,14 @@
         android:layout_marginBottom="0dp"
         app:layout_constraintBottom_toBottomOf="@+id/item_hazard_icon"
         app:layout_constraintStart_toEndOf="@+id/item_hazard_icon" />
+
+    <ImageView
+        android:id="@+id/img_fav"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

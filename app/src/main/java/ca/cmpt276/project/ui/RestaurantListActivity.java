@@ -78,6 +78,7 @@ public class RestaurantListActivity extends AppCompatActivity {
 
             ImageView hazardImageView = itemView.findViewById(R.id.item_hazard_icon);
             ImageView restaurantLogo = itemView.findViewById(R.id.item_restaurantIcon);
+            ImageView favourite = itemView.findViewById(R.id.img_fav);
             TextView nameText = itemView.findViewById(R.id.item_txt_restaurant_name);
             TextView issuesText = itemView.findViewById(R.id.item_txt_issues_found);
             TextView inspectionText = itemView.findViewById(R.id.item_txt_latest_inspection);
@@ -86,6 +87,7 @@ public class RestaurantListActivity extends AppCompatActivity {
 
             if (currentRestaurant.isFavourite()) {
                 itemView.setBackgroundColor(getResources().getColor(R.color.grey));
+                favourite.setBackgroundResource(R.drawable.fav_color);
             }
 
             if(currentInspectionList.getInspections().size() > 0) {
