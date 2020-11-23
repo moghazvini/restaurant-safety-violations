@@ -13,6 +13,7 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -98,6 +99,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private LoadingDialogFragment loadingDialog;
 
     DBAdapter_restaurants myDb;
+    List<Restaurant> foundRestaurants;
     private static final String TAG = "MapsTag";
     //Location callBack
     private final LocationCallback locationCallback = new LocationCallback() {
@@ -473,9 +475,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void sendSearchInput(String input) {
         Toast.makeText(this, input, Toast.LENGTH_LONG).show();
+        searchDatabase(input);
+        Log.d(TAG, "NEW SEARCH");
+        for(Restaurant restaurant : foundRestaurants){
+            Log.d(TAG, "found: " + restaurant.getName());
+        }
     }
-
-
 
     // Download CSV files
     private class ListUpdateTask extends AsyncTask<Void,Void, Boolean> {
@@ -540,6 +545,26 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             restaurantManager.fillInspectionManager(new BufferedReader(inputReader_insp));
         } catch (FileNotFoundException e) {
             // No update files downloaded
+        }
+    }
+
+    private void searchDatabase(String searchWord){
+        foundRestaurants = new ArrayList<>();
+        Cursor cursor = myDb.getAllRows();
+        if(cursor.moveToFirst()){
+            do{
+                String tracking = cursor.getString(DBAdapter_restaurants.COL_TRACKING);
+                String name = cursor.getString(DBAdapter_restaurants.COL_NAME);
+                String address = cursor.getString(DBAdapter_restaurants.COL_ADDRESS);
+                String city = cursor.getString(DBAdapter_restaurants.COL_CITY);
+                float latitude = cursor.getFloat(DBAdapter_restaurants.COL_LATITUDE);
+                float longitude = cursor.getFloat(DBAdapter_restaurants.COL_LONGITUDE);
+                if(name.toLowerCase().contains(searchWord)){
+                    Restaurant newRestaurant = new Restaurant(tracking, name, address, city, latitude, longitude);
+                    foundRestaurants.add(newRestaurant);
+                }
+
+            }while(cursor.moveToNext());
         }
     }
 
