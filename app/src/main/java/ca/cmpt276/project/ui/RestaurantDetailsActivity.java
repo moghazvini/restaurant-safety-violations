@@ -167,9 +167,9 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
 
         ImageView favourite = findViewById(R.id.add_favourite);
         if (rest.isFavourite()) {
-            favourite.setBackgroundResource(R.drawable.crit_employees_violations);
+            favourite.setBackgroundResource(R.drawable.fav_color);
         } else {
-            favourite.setBackgroundResource(R.drawable.non_crit_employee_violations);
+            favourite.setBackgroundResource(R.drawable.not_fav_2);
         }
     }
 
@@ -188,9 +188,9 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
         favourite.setOnClickListener(v -> {
             rest.setFavourite(!rest.isFavourite());
             if (rest.isFavourite()) {
-                favourite.setBackgroundResource(R.drawable.crit_employees_violations);
+                favourite.setBackgroundResource(R.drawable.fav_color);
             } else {
-                favourite.setBackgroundResource(R.drawable.non_crit_employee_violations);
+                favourite.setBackgroundResource(R.drawable.not_fav_2);
             }
         });
     }

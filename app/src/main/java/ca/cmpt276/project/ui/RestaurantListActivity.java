@@ -81,12 +81,14 @@ public class RestaurantListActivity extends AppCompatActivity {
 
             ImageView hazardImageView = itemView.findViewById(R.id.item_hazard_icon);
             ImageView restaurantLogo = itemView.findViewById(R.id.item_restaurantIcon);
+            ImageView favourite = itemView.findViewById(R.id.img_fav);
             TextView nameText = itemView.findViewById(R.id.item_txt_restaurant_name);
             TextView issuesText = itemView.findViewById(R.id.item_txt_issues_found);
             TextView inspectionText = itemView.findViewById(R.id.item_txt_latest_inspection);
             TextView hazardText = itemView.findViewById(R.id.item_txt_hazard);
             nameText.setText(currentRestaurant.getName());
 
+<<<<<<< app/src/main/java/ca/cmpt276/project/ui/RestaurantListActivity.java
             TypedValue theme = new TypedValue();
             int currentNightMode = getContext().getResources().getConfiguration().uiMode &
                     Configuration.UI_MODE_NIGHT_MASK;
@@ -95,12 +97,19 @@ public class RestaurantListActivity extends AppCompatActivity {
             int favouriteColor = theme.data;
             if (currentNightMode == Configuration.UI_MODE_NIGHT_NO) {
                 if (currentRestaurant.isFavourite()) {
+                    favourite.setBackgroundResource(R.drawable.fav_color);
                     favouriteColor = getColor(R.color.cyan);
                 }
             } else if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) {
                 if (currentRestaurant.isFavourite()) {
+                    favourite.setBackgroundResource(R.drawable.fav_color);
                     favouriteColor = getColor(R.color.sapphire);
                 }
+=======
+            if (currentRestaurant.isFavourite()) {
+                itemView.setBackgroundColor(getResources().getColor(R.color.grey));
+                favourite.setBackgroundResource(R.drawable.fav_color);
+>>>>>>> app/src/main/java/ca/cmpt276/project/ui/RestaurantListActivity.java
             }
             itemView.setBackgroundColor(favouriteColor);
 
