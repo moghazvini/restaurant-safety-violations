@@ -70,7 +70,7 @@ import ca.cmpt276.project.model.RestaurantListManager;
 import ca.cmpt276.project.model.SurreyDataDownloader;
 import ca.cmpt276.project.model.types.HazardLevel;
 
-public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, UpdateFragment.UpdateDialogListener, LoadingDialogFragment.CancelDialogListener, ClusterManager.OnClusterClickListener<ClusterMarker>, ClusterManager.OnClusterInfoWindowClickListener<ClusterMarker>, ClusterManager.OnClusterItemClickListener<ClusterMarker>, ClusterManager.OnClusterItemInfoWindowClickListener<ClusterMarker> {
+public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, UpdateFragment.UpdateDialogListener, LoadingDialogFragment.CancelDialogListener, SearchDialogFragment.SearchDialogListener, ClusterManager.OnClusterClickListener<ClusterMarker>, ClusterManager.OnClusterInfoWindowClickListener<ClusterMarker>, ClusterManager.OnClusterItemClickListener<ClusterMarker>, ClusterManager.OnClusterItemInfoWindowClickListener<ClusterMarker> {
     private static final String FINE_LOCATION = Manifest.permission.ACCESS_FINE_LOCATION;
     private static final String COURSE_LOCATION = Manifest.permission.ACCESS_COARSE_LOCATION;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1234;
@@ -241,7 +241,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             return true;
         }
         else if(item.getItemId() ==  R.id.action_search){
-            Log.d(TAG, "search clicked");
+            FragmentManager manager = getSupportFragmentManager();
+            SearchDialogFragment dialog = new SearchDialogFragment(); // open search
+            dialog.show(manager, "SearchDialog");
             return true;
         }
         return false;
@@ -467,6 +469,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             Toast.makeText(this, "CANCELLED DOWNLOAD", Toast.LENGTH_LONG).show();
         }
     }
+
+    @Override
+    public void sendSearchInput(String input) {
+        Toast.makeText(this, input, Toast.LENGTH_LONG).show();
+    }
+
+
 
     // Download CSV files
     private class ListUpdateTask extends AsyncTask<Void,Void, Boolean> {
