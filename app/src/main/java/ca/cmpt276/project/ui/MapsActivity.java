@@ -49,6 +49,7 @@ import com.google.maps.android.clustering.ClusterManager;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
@@ -61,6 +62,7 @@ import ca.cmpt276.project.R;
 import ca.cmpt276.project.model.ClusterManagerRenderer;
 import ca.cmpt276.project.model.ClusterMarker;
 import ca.cmpt276.project.model.CsvInfo;
+import ca.cmpt276.project.model.DBAdapter_restaurants;
 import ca.cmpt276.project.model.Inspection;
 import ca.cmpt276.project.model.LastModified;
 import ca.cmpt276.project.model.Restaurant;
@@ -95,6 +97,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private ListUpdateTask listUpdateTask = null;
     private LoadingDialogFragment loadingDialog;
 
+    DBAdapter_restaurants myDb;
+    private static final String TAG = "MapsTag";
     //Location callBack
     private final LocationCallback locationCallback = new LocationCallback() {
         @Override
@@ -116,14 +120,18 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         setContentView(R.layout.activity_maps);
         Toolbar toolbar = findViewById(R.id.map_toolbar);
         setSupportActionBar(toolbar);
-
+        openDB();
         restaurantManager = RestaurantListManager.getInstance();
         lastModified = LastModified.getInstance(this);
-
         if(!read){
             fillInitialRestaurantList();
             read = true;
             getUpdatedFiles();
+        }
+
+        if(lastModified.readInitialStart(this)){
+            fillInitialDatabase();
+            lastModified.writeInitialStart(this);
         }
 
         if (lastModified.getAppStart() && past20Hours()) {
@@ -232,7 +240,22 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             finish();
             return true;
         }
+        else if(item.getItemId() ==  R.id.action_search){
+            Log.d(TAG, "search clicked");
+            return true;
+        }
         return false;
+    }
+
+    private void openDB() {
+        myDb = new DBAdapter_restaurants(this);
+        myDb.open();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        myDb.close();
     }
 
     /**
@@ -468,24 +491,26 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         protected void onPostExecute(Boolean receivedUpdate) {
             boolean update = receivedUpdate;
             if (update) {
+                fillDatabaseWithUpdated();
                 lastModified.setLastCheck(MapsActivity.this, LocalDateTime.now());
                 lastModified.setLast_mod_restaurants(MapsActivity.this, restaurantUpdate.get(0).getLast_modified());
                 lastModified.setLast_mod_inspections(MapsActivity.this, restaurantUpdate.get(1).getLast_modified());
                 getUpdatedFiles();
                 setupMap();
+
                 finish();
                 startActivity(getIntent());
                 loadingDialog.dismiss();
             }
         }
     }
-
+    private String TAG1 = "Tag1";
     private void fillInitialRestaurantList() {
         InputStream inputStream = getResources().openRawResource(R.raw.restaurants_itr1);
         BufferedReader reader = new BufferedReader(
                 new InputStreamReader(inputStream, StandardCharsets.UTF_8)
         );
-
+        Log.d(TAG, "INITIAL FILL CALLED!!!");
         restaurantManager.fillRestaurantManager(reader,this);
         InputStream is = getResources().openRawResource(R.raw.inspectionreports_itr1);
         BufferedReader inspectionReader = new BufferedReader(
@@ -502,12 +527,70 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             inputStream_insp = MapsActivity.this.openFileInput(SurreyDataDownloader.DOWNLOAD_INSPECTIONS);
             InputStreamReader inputReader_rest = new InputStreamReader(inputStream_rest, StandardCharsets.UTF_8);
             InputStreamReader inputReader_insp = new InputStreamReader(inputStream_insp, StandardCharsets.UTF_8);
-
             restaurantManager.fillRestaurantManager(new BufferedReader(inputReader_rest),this);
             restaurantManager.fillInspectionManager(new BufferedReader(inputReader_insp));
         } catch (FileNotFoundException e) {
             // No update files downloaded
         }
+    }
+
+    private void fillInitialDatabase(){
+        InputStream inputStream = getResources().openRawResource(R.raw.restaurants_itr1);
+        BufferedReader reader = new BufferedReader(
+                new InputStreamReader(inputStream, StandardCharsets.UTF_8)
+        );
+        fillDatabaseFromCsv(reader);
+
+    }
+
+    private void fillDatabaseWithUpdated(){
+        FileInputStream inputStream_rest;
+        try {
+            inputStream_rest = MapsActivity.this.openFileInput(SurreyDataDownloader.DOWNLOAD_RESTAURANTS);
+            InputStreamReader inputReader_rest = new InputStreamReader(inputStream_rest, StandardCharsets.UTF_8);
+            fillDatabaseFromCsv(new BufferedReader(inputReader_rest));
+        } catch (FileNotFoundException e) {
+            // No update files downloaded
+        }
+    }
+
+    private void fillDatabaseFromCsv(BufferedReader reader){
+        String line = "";
+        try {
+            reader.readLine();
+            myDb.deleteAll();
+            while ((line = reader.readLine()) != null) {
+                //System.out.println(line);
+                line = line.replace("\"", "");
+
+                String[] attributes = line.split(",");
+                String tracking = attributes[0];
+                tracking = tracking.replace(" ", "");
+                String name = attributes[1];
+
+                int addrIndex = attributes.length - 5;
+                for (int i = 2; i < addrIndex; i++) {
+                    name = name.concat(attributes[i]);
+                }
+                String addr = attributes[addrIndex];
+                String city = attributes[addrIndex + 1];
+                float gpsLat = Float.parseFloat(attributes[addrIndex + 3]);
+                float gpsLong = Float.parseFloat(attributes[addrIndex + 4]);
+
+                //read data
+                myDb.insertRow(tracking,
+                        name,
+                        addr,
+                        city,
+                        gpsLat,
+                        gpsLong);
+
+            }
+
+        } catch(IOException e){
+            Log.wtf("MapsActivity", "error reading data file on line " + line, e);
+        }
+
     }
 
     private boolean past20Hours() {

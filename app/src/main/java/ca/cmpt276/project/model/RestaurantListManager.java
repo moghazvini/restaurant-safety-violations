@@ -93,7 +93,6 @@ public class RestaurantListManager {
                         gpsLat // Restaurant Latitude
                 );
                 instance.add(restaurant);
-                addrestaurant(restaurant, context);
             }
             Collections.sort(restaurants);
         } catch(IOException e){
@@ -105,7 +104,7 @@ public class RestaurantListManager {
         myDB = new DBAdapter_restaurants(context);
         myDB.open();
         myDB.insertRow(rest.getTracking(),rest.getName(),rest.getAddress(),rest.getCity(),rest.getGpsLat(),rest.getGpsLong());
-        //myDB.close();
+        myDB.close();
     }
 
     public void fillInspectionManager(BufferedReader reader) {

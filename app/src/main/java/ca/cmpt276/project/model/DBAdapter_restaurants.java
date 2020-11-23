@@ -92,7 +92,7 @@ public class DBAdapter_restaurants {
         initialValues.put(KEY_LONGITUDE, log);
 
         // Insert it into the database.
-        Toast.makeText(context,"Added a row",Toast.LENGTH_SHORT).show();
+        Log.d(TAG, "added a row");
         return db.insert(DATABASE_TABLE, null, initialValues);
     }
 
