@@ -7,5 +7,6 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="grey">#DEE3E1</color>
+    <color name="cyan">#DDFFF7</color>
+    <color name="sapphire">#251F47</color>
 </resources>

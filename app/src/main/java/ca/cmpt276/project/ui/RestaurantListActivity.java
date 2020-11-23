@@ -1,6 +1,7 @@
 package ca.cmpt276.project.ui;
 
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.graphics.Color;
 
 import androidx.annotation.NonNull;
@@ -10,6 +11,7 @@ import androidx.appcompat.widget.Toolbar;
 
 import android.os.Bundle;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -20,6 +22,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.lang.reflect.Type;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
@@ -85,10 +88,30 @@ public class RestaurantListActivity extends AppCompatActivity {
             TextView hazardText = itemView.findViewById(R.id.item_txt_hazard);
             nameText.setText(currentRestaurant.getName());
 
+<<<<<<< app/src/main/java/ca/cmpt276/project/ui/RestaurantListActivity.java
+            TypedValue theme = new TypedValue();
+            int currentNightMode = getContext().getResources().getConfiguration().uiMode &
+                    Configuration.UI_MODE_NIGHT_MASK;
+            getTheme().resolveAttribute(R.attr.colorOnPrimary, theme,true);
+
+            int favouriteColor = theme.data;
+            if (currentNightMode == Configuration.UI_MODE_NIGHT_NO) {
+                if (currentRestaurant.isFavourite()) {
+                    favourite.setBackgroundResource(R.drawable.fav_color);
+                    favouriteColor = getColor(R.color.cyan);
+                }
+            } else if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) {
+                if (currentRestaurant.isFavourite()) {
+                    favourite.setBackgroundResource(R.drawable.fav_color);
+                    favouriteColor = getColor(R.color.sapphire);
+                }
+=======
             if (currentRestaurant.isFavourite()) {
                 itemView.setBackgroundColor(getResources().getColor(R.color.grey));
                 favourite.setBackgroundResource(R.drawable.fav_color);
+>>>>>>> app/src/main/java/ca/cmpt276/project/ui/RestaurantListActivity.java
             }
+            itemView.setBackgroundColor(favouriteColor);
 
             if(currentInspectionList.getInspections().size() > 0) {
                 Inspection latestInspection;
