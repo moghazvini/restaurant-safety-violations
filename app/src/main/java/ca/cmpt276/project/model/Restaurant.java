@@ -1,5 +1,7 @@
 package ca.cmpt276.project.model;
 
+import android.database.Cursor;
+
 /**
  * Represents a Restaurant and contains
  * a list of inspections.
@@ -12,6 +14,7 @@ public class Restaurant implements Comparable<Restaurant>{
     private float gpsLat;
     private String tracking;
     private final InspectionListManager inspections;
+    private Cursor inspectionsCursor;
 
     public Restaurant(String tracking, String name, String address, String city, float gpsLong, float gpsLat) {
         this.name = name;

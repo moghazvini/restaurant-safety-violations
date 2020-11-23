@@ -39,6 +39,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -289,7 +290,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             @Override
             public boolean onMyLocationButtonClick()
             {
-                startLocationUpdates();
+                //startLocationUpdates();
                 return true;
             }
         });
@@ -390,7 +391,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @SuppressLint("MissingPermission")
     private void startLocationUpdates() {
-        mFusedLocationProviderClient.requestLocationUpdates(mLocationRequest, locationCallback, Looper.getMainLooper());
+        //mFusedLocationProviderClient.requestLocationUpdates(mLocationRequest, locationCallback, Looper.getMainLooper());
     }
 
     private void stopLocationUpdates() {
@@ -476,10 +477,53 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void sendSearchInput(String input) {
         Toast.makeText(this, input, Toast.LENGTH_LONG).show();
         searchDatabase(input);
+        addRelevantMarkers();
         Log.d(TAG, "NEW SEARCH");
         for(Restaurant restaurant : foundRestaurants){
             Log.d(TAG, "found: " + restaurant.getName());
         }
+    }
+
+    private void addRelevantMarkers(){
+        mClusterManager.clearItems();
+        mClusterManager.cluster();
+        MarkerOptions markerOptions = new MarkerOptions();
+        int pos = 0;
+        for(Restaurant restaurant : foundRestaurants){
+            LatLng temp = new LatLng(restaurant.getGpsLong(), restaurant.getGpsLat());
+            markerOptions.position(temp);
+            markerOptions.title(restaurant.getName());
+            Log.d(TAG, "add marker " + restaurant.getName());
+            mMap.addMarker(markerOptions);
+
+            /* DOES NOT WORK YET BECAUSE INSPECTION PROBLEM
+            int low = R.drawable.green_hazard;
+            int med = R.drawable.orange_hazard;
+            int high = R.drawable.red_hazard;
+            String snippet = "";
+            int severity_icon = R.drawable.green_hazard;
+            Inspection latestInspection = Collections.max(restaurant.getInspections().getInspections());
+            if (latestInspection.getLevel() == HazardLevel.LOW) {
+                snippet = ""+ pos;
+                severity_icon = low;
+            } else if (latestInspection.getLevel() == HazardLevel.MODERATE) {
+                snippet = ""+ pos;
+                severity_icon = med;
+            } else if (latestInspection.getLevel() == HazardLevel.HIGH) {
+                snippet = ""+ pos;
+                severity_icon = high;
+            }
+
+            ClusterMarker newClusterMarker = new ClusterMarker(temp ,
+                    restaurant.getName(),
+                    snippet,
+                    severity_icon,
+                    restaurant);
+            mClusterManager.addItem(newClusterMarker);
+            mClusterManager.cluster();
+            pos++;*/
+        }
+
     }
 
     // Download CSV files
