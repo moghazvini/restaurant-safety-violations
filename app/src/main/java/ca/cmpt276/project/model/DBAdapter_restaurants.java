@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.database.sqlite.SQLiteQueryBuilder;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -42,7 +43,7 @@ public class DBAdapter_restaurants {
     public static final String[] ALL_KEYS = new String[] {KEY_ROWID, KEY_TRACKING, KEY_NAME, KEY_ADDRESS, KEY_CITY, KEY_LATITUDE, KEY_LONGITUDE};
 
     // DB info: it's name, and the table we are using (just one).
-    public static final String DATABASE_NAME = "MyDb";
+    public static final String DATABASE_NAME = "MyRestaurantsDb";
     public static final String DATABASE_TABLE = "RestaurantsTable";
     // Track DB version if a new version of your app changes the format.
     public static final int DATABASE_VERSION = 1;
@@ -92,7 +93,7 @@ public class DBAdapter_restaurants {
         initialValues.put(KEY_LONGITUDE, log);
 
         // Insert it into the database.
-        Log.d(TAG, "added a row");
+        Log.d(TAG, "added a row to restaurants");
         return db.insert(DATABASE_TABLE, null, initialValues);
     }
 
@@ -123,15 +124,32 @@ public class DBAdapter_restaurants {
         }
         return c;
     }
-    
-    public Cursor getRelevantRows(String name){
-        String where = KEY_NAME + "=" + name;
-        Cursor c = db.query(true, DATABASE_TABLE, ALL_KEYS, where, null, null, null, null, null);
-        if(c != null){
-            c.moveToFirst();
+
+    // sql search on android studio from https://www.youtube.com/watch?v=mqqzt-Yvtbo
+    public Cursor getRelevantRows(String searchTerm){
+        Cursor c = null;
+        if(searchTerm != null && searchTerm.length() > 0){
+            String sql = "SELECT * FROM " + DATABASE_TABLE + " WHERE " + KEY_NAME + " LIKE '%" + searchTerm + "%'";
+            c = db.rawQuery(sql, null);
         }
         return c;
     }
+
+    public Cursor retrieveByInspection(){
+        Cursor c = null;
+        return c;
+    }
+
+    /*public Cursor retrieveByConstraint(String[] column, String filter){
+        Cursor c = null;
+        String[] selectionArgs = new String[] {"%" + filter + "%"};
+        column = new String[] {};
+        String selection = KEY_NAME +
+        c = db.query(DATABASE_TABLE, column, KEY_NAME + " LIKE ?", selectionArgs, null, null, null, null);
+
+        return c;
+    }*/
+
 
     // Get a specific row (by rowId)
     public Cursor getRow(long rowId) {

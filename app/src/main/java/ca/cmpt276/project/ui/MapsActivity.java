@@ -55,7 +55,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -64,13 +66,16 @@ import ca.cmpt276.project.R;
 import ca.cmpt276.project.model.ClusterManagerRenderer;
 import ca.cmpt276.project.model.ClusterMarker;
 import ca.cmpt276.project.model.CsvInfo;
+import ca.cmpt276.project.model.DBAdapter_inspections;
 import ca.cmpt276.project.model.DBAdapter_restaurants;
 import ca.cmpt276.project.model.Inspection;
+import ca.cmpt276.project.model.InspectionListManager;
 import ca.cmpt276.project.model.LastModified;
 import ca.cmpt276.project.model.Restaurant;
 import ca.cmpt276.project.model.RestaurantListManager;
 import ca.cmpt276.project.model.SurreyDataDownloader;
 import ca.cmpt276.project.model.types.HazardLevel;
+import ca.cmpt276.project.model.types.InspectionType;
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, UpdateFragment.UpdateDialogListener, LoadingDialogFragment.CancelDialogListener, SearchDialogFragment.SearchDialogListener, ClusterManager.OnClusterClickListener<ClusterMarker>, ClusterManager.OnClusterInfoWindowClickListener<ClusterMarker>, ClusterManager.OnClusterItemClickListener<ClusterMarker>, ClusterManager.OnClusterItemInfoWindowClickListener<ClusterMarker> {
     private static final String FINE_LOCATION = Manifest.permission.ACCESS_FINE_LOCATION;
@@ -99,7 +104,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private ListUpdateTask listUpdateTask = null;
     private LoadingDialogFragment loadingDialog;
 
-    DBAdapter_restaurants myDb;
+    DBAdapter_restaurants myRestaurantsDb;
+    DBAdapter_inspections myInspectionsDb;
     List<Restaurant> foundRestaurants;
     private static final String TAG = "MapsTag";
     //Location callBack
@@ -253,14 +259,17 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void openDB() {
-        myDb = new DBAdapter_restaurants(this);
-        myDb.open();
+        myRestaurantsDb = new DBAdapter_restaurants(this);
+        myInspectionsDb = new DBAdapter_inspections(this);
+        myRestaurantsDb.open();
+        myInspectionsDb.open();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        myDb.close();
+        myRestaurantsDb.close();
+        myInspectionsDb.close();
     }
 
     /**
@@ -476,25 +485,44 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void sendSearchInput(String input) {
         Toast.makeText(this, input, Toast.LENGTH_LONG).show();
-        searchDatabase(input);
-        addRelevantMarkers();
+        Cursor relevantRowsCursor = myRestaurantsDb.getRelevantRows(input);
+        addRelevantMarkers(relevantRowsCursor);
         Log.d(TAG, "NEW SEARCH");
-        for(Restaurant restaurant : foundRestaurants){
-            Log.d(TAG, "found: " + restaurant.getName());
+        printCursor(relevantRowsCursor);
+    }
+
+    private void printCursor(Cursor cursor){
+        if(cursor.moveToFirst()){
+            do{
+                String name = cursor.getString(DBAdapter_restaurants.COL_NAME);
+                Log.d(TAG, "printing cursor: " + name);
+            }while(cursor.moveToNext());
+        }
+        else{
+            Log.d(TAG, "null cursor");
         }
     }
 
-    private void addRelevantMarkers(){
+    private void addRelevantMarkers(Cursor cursor){
         mClusterManager.clearItems();
         mClusterManager.cluster();
         MarkerOptions markerOptions = new MarkerOptions();
         int pos = 0;
-        for(Restaurant restaurant : foundRestaurants){
-            LatLng temp = new LatLng(restaurant.getGpsLong(), restaurant.getGpsLat());
-            markerOptions.position(temp);
-            markerOptions.title(restaurant.getName());
-            Log.d(TAG, "add marker " + restaurant.getName());
-            mMap.addMarker(markerOptions);
+
+        if(cursor.moveToFirst()){
+            do{
+                String name = cursor.getString(DBAdapter_restaurants.COL_NAME);
+                float latitude = cursor.getFloat(DBAdapter_restaurants.COL_LATITUDE);
+                float longitude = cursor.getFloat(DBAdapter_restaurants.COL_LONGITUDE);
+                LatLng temp = new LatLng(latitude, longitude);
+                markerOptions.position(temp);
+                markerOptions.title(name);
+                Log.d(TAG, "add marker " + name);
+                mMap.addMarker(markerOptions);
+            }while(cursor.moveToNext());
+        }
+
+
 
             /* DOES NOT WORK YET BECAUSE INSPECTION PROBLEM
             int low = R.drawable.green_hazard;
@@ -522,7 +550,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             mClusterManager.addItem(newClusterMarker);
             mClusterManager.cluster();
             pos++;*/
-        }
+
 
     }
 
@@ -592,9 +620,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
+    //keeping this here for now in case I accidentally screw up sql search, can delete later
     private void searchDatabase(String searchWord){
         foundRestaurants = new ArrayList<>();
-        Cursor cursor = myDb.getAllRows();
+        Cursor cursor = myRestaurantsDb.getAllRows();
         if(cursor.moveToFirst()){
             do{
                 String tracking = cursor.getString(DBAdapter_restaurants.COL_TRACKING);
@@ -617,26 +646,37 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         BufferedReader reader = new BufferedReader(
                 new InputStreamReader(inputStream, StandardCharsets.UTF_8)
         );
-        fillDatabaseFromCsv(reader);
+        fillRestaurantDatabase(reader);
+        InputStream is = getResources().openRawResource(R.raw.inspectionreports_itr1);
+        BufferedReader inspectionReader = new BufferedReader(
+                new InputStreamReader(is, StandardCharsets.UTF_8)
+        );
+        fillInspectionsDatabase(inspectionReader);
 
     }
 
     private void fillDatabaseWithUpdated(){
         FileInputStream inputStream_rest;
+        FileInputStream inputStream_insp;
         try {
             inputStream_rest = MapsActivity.this.openFileInput(SurreyDataDownloader.DOWNLOAD_RESTAURANTS);
+            inputStream_insp = MapsActivity.this.openFileInput(SurreyDataDownloader.DOWNLOAD_INSPECTIONS);
             InputStreamReader inputReader_rest = new InputStreamReader(inputStream_rest, StandardCharsets.UTF_8);
-            fillDatabaseFromCsv(new BufferedReader(inputReader_rest));
+            InputStreamReader inputReader_insp = new InputStreamReader(inputStream_insp, StandardCharsets.UTF_8);
+            fillRestaurantDatabase(new BufferedReader(inputReader_rest));
+            fillInspectionsDatabase(new BufferedReader(inputReader_insp));
         } catch (FileNotFoundException e) {
             // No update files downloaded
         }
     }
 
-    private void fillDatabaseFromCsv(BufferedReader reader){
+
+
+    private void fillRestaurantDatabase(BufferedReader reader){
         String line = "";
         try {
             reader.readLine();
-            myDb.deleteAll();
+            myRestaurantsDb.deleteAll();
             while ((line = reader.readLine()) != null) {
                 //System.out.println(line);
                 line = line.replace("\"", "");
@@ -656,7 +696,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 float gpsLong = Float.parseFloat(attributes[addrIndex + 4]);
 
                 //read data
-                myDb.insertRow(tracking,
+                myRestaurantsDb.insertRow(tracking,
                         name,
                         addr,
                         city,
@@ -670,6 +710,50 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
 
     }
+
+    private void fillInspectionsDatabase(BufferedReader reader){
+        String line = "";
+        try {
+
+            reader.readLine();
+            while ((line = reader.readLine()) != null) {
+                line = line.replace("\"", "");
+                //split by ','
+                String[] tokens = line.split(",");
+
+                //read data
+                if (tokens.length > 0) {
+                    // Get the restaurant that matches the tracking number of the inspection
+                    String inspectionTracking = tokens[0];
+
+                    String date = tokens[1];
+                    String type = tokens[2];
+                    int numCritical = Integer.parseInt(tokens[3]);
+                    int numNonCritical = Integer.parseInt(tokens[4]);
+                    String hazard = tokens[tokens.length - 1];
+                    String violationLump = "[empty]";
+                    if(tokens.length > 5){
+                        if(tokens[5].length() > 0) {
+                            violationLump = getVioLump(tokens);
+                        }
+                    }
+                    myInspectionsDb.insertRow(inspectionTracking, date, type, numCritical, numNonCritical, violationLump, hazard);
+
+                }
+            }
+        } catch(IOException e){
+            Log.wtf("RestaurantListActivity", "error reading data file on line " + line, e);
+        }
+    }
+
+    private String getVioLump(String[] inspectionRow){
+        StringBuilder lump = new StringBuilder();
+        for (int i = 5; i < inspectionRow.length - 1; i++) {
+            lump.append(inspectionRow[i]).append(",");
+        }
+        return lump.toString();
+    }
+
 
     private boolean past20Hours() {
         lastModified = LastModified.getInstance(MapsActivity.this);

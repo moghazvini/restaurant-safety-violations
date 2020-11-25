@@ -8,6 +8,8 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 import android.widget.Toast;
 
+import java.io.BufferedReader;
+
 import ca.cmpt276.project.model.types.HazardLevel;
 
 
@@ -46,8 +48,8 @@ public class DBAdapter_inspections {
     public static final String[] ALL_KEYS = new String[] {KEY_ROWID, KEY_TRACKING, KEY_DATE, KEY_TYPE, KEY_NUM_CRITICAL, KEY_NUM_NON_CRITICAL, KEY_VIOLUMP, KEY_HAZARD};
 
     // DB info: it's name, and the table we are using (just one).
-    public static final String DATABASE_NAME = "MyDb";
-    public static final String DATABASE_TABLE = "InspectionTable";
+    public static final String DATABASE_NAME = "MyInspectionsDb";
+    public static final String DATABASE_TABLE = "InspectionsTable";
     // Track DB version if a new version of your app changes the format.
     public static final int DATABASE_VERSION = 1;
 
@@ -97,9 +99,10 @@ public class DBAdapter_inspections {
         initialValues.put(KEY_HAZARD, hazard);
 
         // Insert it into the database.
-        Log.d(TAG, "added a row");
+        Log.d(TAG, "added a row to inspections");
         return db.insert(DATABASE_TABLE, null, initialValues);
     }
+
 
     // Delete a row from the database, by rowId (primary key)
     public boolean deleteRow(long rowId) {
