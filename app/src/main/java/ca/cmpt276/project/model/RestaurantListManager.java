@@ -4,8 +4,12 @@ import android.content.Context;
 import android.database.Cursor;
 import android.util.Log;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -23,8 +27,7 @@ import ca.cmpt276.project.ui.MapsActivity;
 public class RestaurantListManager {
     private final List<Restaurant> restaurants;
     private static RestaurantListManager instance;
-    DBAdapter_restaurants myDB;
-
+    private static final String TAG = "RestaurantListTag";
     private RestaurantListManager() {
         restaurants = new ArrayList<>();
     }
@@ -104,7 +107,6 @@ public class RestaurantListManager {
         String line = "";
         try {
             Restaurant restaurant = instance.getRestaurant(0);
-
             reader.readLine();
             while ((line = reader.readLine()) != null) {
                 line = line.replace("\"", "");
@@ -119,9 +121,16 @@ public class RestaurantListManager {
                     if (!restaurant.getTracking().equals(inspectionTracking)) {
                         restaurant = instance.find(inspectionTracking);
                     }
-                    if (restaurant != null) {
-                        InspectionListManager inspectionList = restaurant.getInspections();
 
+                    if (restaurant != null) {
+                        //pull array out of database
+                        /*
+                        Type arrayType = new TypeToken<ArrayList<Inspection>>() {}.getType();
+                        Gson gson = new Gson();
+                        String outputarray = restaurantCursor.getString(DBAdapter_restaurants.COL_INSPECTION_LIST);
+                        ArrayList<Inspection> inspectionsListDB = gson.fromJson(outputarray, arrayType);*/
+
+                        InspectionListManager inspectionList = restaurant.getInspections();
                         // Format string date
                         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
                         LocalDate date = LocalDate.parse(tokens[1], formatter);
@@ -143,12 +152,19 @@ public class RestaurantListManager {
                             inspection = new Inspection(date, type, numCritical, numNonCritical, hazardLevel);
                         }
                         inspectionList.add(inspection);
+                        /*
+                        rowID = restaurantCursor.getInt(DBAdapter_restaurants.COL_ROWID);
+                        inspectionsListDB.add(inspection);
+                        String inputString = gson.toJson(inspectionsListDB);
+                        myDb.updateRowInspections(rowID, inputString);*/
+
                     } else {
                         // reset restaurant if restaurant wasn't found
                         // otherwise restaurant would be null for next iteration
                         restaurant = instance.getRestaurant(0);
                     }
                 }
+
             }
         } catch(IOException e){
             Log.wtf("RestaurantListActivity", "error reading data file on line " + line, e);

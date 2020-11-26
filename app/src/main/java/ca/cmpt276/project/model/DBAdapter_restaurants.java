@@ -35,6 +35,7 @@ public class DBAdapter_restaurants{
     public static final String KEY_LATITUDE = "lat";
     public static final String KEY_LONGITUDE = "long";
     public static final String KEY_INSPECTION_LIST = "inspections";
+    public static final String KEY_FAVOURITE = "favourite";
 
     // INSPECTIONS TABLE COLUMNS
     public static final String KEY_DATE = "date";
@@ -52,8 +53,9 @@ public class DBAdapter_restaurants{
     public static final int COL_LATITUDE = 5;
     public static final int COL_LONGITUDE = 6;
     public static final int COL_INSPECTION_LIST = 7;
+    public static final int COL_FAVOURITE = 8;
 
-    public static final String[] ALL_KEYS = new String[] {KEY_ROWID, KEY_TRACKING, KEY_NAME, KEY_ADDRESS, KEY_CITY, KEY_LATITUDE, KEY_LONGITUDE, KEY_INSPECTION_LIST};
+    public static final String[] ALL_KEYS = new String[] {KEY_ROWID, KEY_TRACKING, KEY_NAME, KEY_ADDRESS, KEY_CITY, KEY_LATITUDE, KEY_LONGITUDE, KEY_INSPECTION_LIST, KEY_FAVOURITE};
 
     // DB info: it's name, and the table we are using (just one).
     public static final String DATABASE_NAME = "MyDb";
@@ -66,7 +68,7 @@ public class DBAdapter_restaurants{
             "create table " + DATABASE_TABLE_1
                     + " (" + KEY_ROWID + " integer primary key autoincrement, " + KEY_TRACKING + " text not null,"
                     + KEY_NAME + " text not null," + KEY_ADDRESS + " text not null," + KEY_CITY + " text not null,"
-                    + KEY_LATITUDE + " integer not null," + KEY_LONGITUDE + " integer not null," + KEY_INSPECTION_LIST + " text" + ");";
+                    + KEY_LATITUDE + " integer not null," + KEY_LONGITUDE + " integer not null," + KEY_INSPECTION_LIST + " text," + KEY_FAVOURITE + " integer not null" + ");";
 
     private static final String CREATE_TABLE_INSPECTIONS =
             "create table " + DATABASE_TABLE_2
@@ -101,7 +103,7 @@ public class DBAdapter_restaurants{
     }
 
     // Add a new set of values to the database.
-    public long insertRowRestaurant(String tracking, String name, String address, String city, float lat, float log, String inspections) {
+    public long insertRowRestaurant(String tracking, String name, String address, String city, float lat, float log, String inspections, int favourite) {
         // Create row's data:
         ContentValues initialValues = new ContentValues();
         initialValues.put(KEY_TRACKING, tracking);
@@ -111,6 +113,7 @@ public class DBAdapter_restaurants{
         initialValues.put(KEY_LATITUDE, lat);
         initialValues.put(KEY_LONGITUDE, log);
         initialValues.put(KEY_INSPECTION_LIST, inspections);
+        initialValues.put(KEY_FAVOURITE, favourite);
         // Insert it into the database.
         Log.d(TAG, "added a row to restaurants " + "[" + tracking + "]");
         return db.insert(DATABASE_TABLE_1, null, initialValues);
@@ -184,7 +187,7 @@ public class DBAdapter_restaurants{
         String selection = KEY_NAME + " LIKE ?";
         if(trackingSearch){
             selection  = KEY_TRACKING + " LIKE ?";
-            Log.d(TAG, "looking for: " + selection);
+
         }
         c = db.query(DATABASE_TABLE_1, ALL_KEYS, selection, selectionArgs, null, null, null, null);
 
@@ -217,6 +220,13 @@ public class DBAdapter_restaurants{
         newValues.put(KEY_LONGITUDE, log);
         newValues.put(KEY_INSPECTION_LIST, inspections);
         // Insert it into the database.
+        return db.update(DATABASE_TABLE_1, newValues, where, null) != 0;
+    }
+
+    public boolean updateRowInspections(long rowId, String inspections){
+        String where = KEY_ROWID + "=" + rowId;
+        ContentValues newValues = new ContentValues();
+        newValues.put(KEY_INSPECTION_LIST, inspections);
         return db.update(DATABASE_TABLE_1, newValues, where, null) != 0;
     }
 
