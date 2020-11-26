@@ -102,8 +102,6 @@ public class DBAdapter_restaurants{
 
     // Add a new set of values to the database.
     public long insertRowRestaurant(String tracking, String name, String address, String city, float lat, float log, String inspections) {
-
-        SQLiteDatabase database = myDBHelper.getWritableDatabase();
         // Create row's data:
         ContentValues initialValues = new ContentValues();
         initialValues.put(KEY_TRACKING, tracking);
@@ -115,11 +113,11 @@ public class DBAdapter_restaurants{
         initialValues.put(KEY_INSPECTION_LIST, inspections);
         // Insert it into the database.
         Log.d(TAG, "added a row to restaurants " + "[" + tracking + "]");
-        return database.insert(DATABASE_TABLE_1, null, initialValues);
+        return db.insert(DATABASE_TABLE_1, null, initialValues);
     }
 
     public long insertRowInspection(String tracking, String date, String type, int numCritical, int numNonCritical, String violump, String hazard) {
-        SQLiteDatabase database = myDBHelper.getWritableDatabase();
+
         // Create row's data:
         ContentValues initialValues = new ContentValues();
         initialValues.put(KEY_TRACKING, tracking);
@@ -132,7 +130,7 @@ public class DBAdapter_restaurants{
 
         // Insert it into the database.
         Log.d(TAG, "added a row to inspections");
-        return database.insert(DATABASE_TABLE_2, null, initialValues);
+        return db.insert(DATABASE_TABLE_2, null, initialValues);
     }
 
     // Delete a row from the database, by rowId (primary key)
