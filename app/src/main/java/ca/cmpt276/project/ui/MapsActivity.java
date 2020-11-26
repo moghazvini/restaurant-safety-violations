@@ -104,8 +104,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private ListUpdateTask listUpdateTask = null;
     private LoadingDialogFragment loadingDialog;
 
-    DBAdapter_restaurants myRestaurantsDb;
-    DBAdapter_inspections myInspectionsDb;
+    DBAdapter_restaurants myDb;
     List<Restaurant> foundRestaurants;
     private static final String TAG = "MapsTag";
     //Location callBack
@@ -259,17 +258,15 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void openDB() {
-        myRestaurantsDb = new DBAdapter_restaurants(this);
-        myInspectionsDb = new DBAdapter_inspections(this);
-        myRestaurantsDb.open();
-        myInspectionsDb.open();
+        myDb = new DBAdapter_restaurants(this);
+        myDb.open();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        myRestaurantsDb.close();
-        myInspectionsDb.close();
+        myDb.close();
+
     }
 
     /**
@@ -485,8 +482,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void sendSearchInput(String input) {
         Toast.makeText(this, input, Toast.LENGTH_LONG).show();
-        Cursor relevantRowsCursor = myRestaurantsDb.getRelevantRows(input);
-        addRelevantMarkers(relevantRowsCursor);
+        Cursor relevantRowsCursor = myDb.retrieveByConstraint(input, true);
+        if(relevantRowsCursor != null) {
+            addRelevantMarkers(relevantRowsCursor);
+        }
         Log.d(TAG, "NEW SEARCH");
         printCursor(relevantRowsCursor);
     }
@@ -623,7 +622,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     //keeping this here for now in case I accidentally screw up sql search, can delete later
     private void searchDatabase(String searchWord){
         foundRestaurants = new ArrayList<>();
-        Cursor cursor = myRestaurantsDb.getAllRows();
+        Cursor cursor = myDb.getAllRows();
         if(cursor.moveToFirst()){
             do{
                 String tracking = cursor.getString(DBAdapter_restaurants.COL_TRACKING);
@@ -676,7 +675,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         String line = "";
         try {
             reader.readLine();
-            myRestaurantsDb.deleteAll();
+            myDb.deleteAll();
             while ((line = reader.readLine()) != null) {
                 //System.out.println(line);
                 line = line.replace("\"", "");
@@ -694,14 +693,15 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 String city = attributes[addrIndex + 1];
                 float gpsLat = Float.parseFloat(attributes[addrIndex + 3]);
                 float gpsLong = Float.parseFloat(attributes[addrIndex + 4]);
-
+                String inspections = "[inspections]";
                 //read data
-                myRestaurantsDb.insertRow(tracking,
+                myDb.insertRowRestaurant(tracking,
                         name,
                         addr,
                         city,
                         gpsLat,
-                        gpsLong);
+                        gpsLong,
+                        inspections);
 
             }
 
@@ -737,7 +737,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                             violationLump = getVioLump(tokens);
                         }
                     }
-                    myInspectionsDb.insertRow(inspectionTracking, date, type, numCritical, numNonCritical, violationLump, hazard);
+                    myDb.insertRowInspection(inspectionTracking, date, type, numCritical, numNonCritical, violationLump, hazard);
 
                 }
             }

@@ -48,7 +48,7 @@ public class DBAdapter_inspections {
     public static final String[] ALL_KEYS = new String[] {KEY_ROWID, KEY_TRACKING, KEY_DATE, KEY_TYPE, KEY_NUM_CRITICAL, KEY_NUM_NON_CRITICAL, KEY_VIOLUMP, KEY_HAZARD};
 
     // DB info: it's name, and the table we are using (just one).
-    public static final String DATABASE_NAME = "MyInspectionsDb";
+    public static final String DATABASE_NAME = "MyDb";
     public static final String DATABASE_TABLE = "InspectionsTable";
     // Track DB version if a new version of your app changes the format.
     public static final int DATABASE_VERSION = 1;
