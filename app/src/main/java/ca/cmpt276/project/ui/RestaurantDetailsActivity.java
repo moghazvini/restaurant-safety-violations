@@ -33,7 +33,6 @@ import ca.cmpt276.project.model.RestaurantListManager;
 public class RestaurantDetailsActivity extends AppCompatActivity {
 
     private final static String INDEX = "Inspection Report Index";
-    private final static String RESTAURANT_INDEX = "Restaurant Intex";
     private RestaurantListManager restaurantManager;
     private InspectionListManager inspectionManager;
     static Restaurant rest;
@@ -55,23 +54,22 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
         }
 
         restaurantManager = RestaurantListManager.getInstance();
-        Getdata();
+        GetData();
         setupGpsClick();
         populateList();
         setValues();
         OnClick();
+        setupFavouriteClick();
     }
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        switch(item.getItemId()) {
-            case android.R.id.home:
-                finish();
-                return true;
-
-            default:
-                return super.onOptionsItemSelected(item);
+        if (item.getItemId() == android.R.id.home) {
+            setResult(101,getIntent());
+            finish();
+            return true;
         }
+        return super.onOptionsItemSelected(item);
     }
 
     private void populateList() {
@@ -104,8 +102,8 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
             TextView inspDate_txt = iv.findViewById(R.id.txt_inspDate);
             //setting stuff
             if(insplist.getInspections().size()>0) {
-                String nonCrit = "# of Critical Issues: " + insp.getCritical();
-                String crit = "# of Non-Critical Issues: " + insp.getNonCritical();
+                String nonCrit = getString(R.string.critical_issue, insp.getCritical());
+                String crit = getString(R.string.non_critical_issue, insp.getNonCritical());
                 critissues_txt.setText(nonCrit);
                 Ncritissues_txt.setText(crit);
 
@@ -128,6 +126,7 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
                     default:
                         assert false;
                 }
+
                 LocalDate currentDate = LocalDate.now();
 
                 String inspectionDateText;
@@ -157,13 +156,21 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
         back.setTitle(rest.getName());
         TextView ResAdd_txt = findViewById(R.id.txt_restAdd);
 
-        String address = "Facility Address: \n" + rest.getAddress() + " " + rest.getCity();
+        String address = getString(R.string.restaurant_add, rest.getAddress(), rest.getCity());
         ResAdd_txt.setText(address);
 
         TextView ResGps_txt = findViewById(R.id.txt_gps);
-        ResGps_txt.setText(rest.getGPS());
+        String gps = getString(R.string.rest_gps, rest.getGpsLat(), rest.getGpsLong());
+        ResGps_txt.setText(gps);
         ResGps_txt.setTextColor(Color.parseColor("#A576F1"));
         ResGps_txt.setTypeface(null, Typeface.ITALIC);
+
+        ImageView favourite = findViewById(R.id.add_favourite);
+        if (rest.isFavourite()) {
+            favourite.setBackgroundResource(R.drawable.fav_color);
+        } else {
+            favourite.setBackgroundResource(R.drawable.not_fav_2);
+        }
     }
 
     private void OnClick() {
@@ -176,6 +183,18 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
 
     }
 
+    private void setupFavouriteClick() {
+        ImageView favourite = findViewById(R.id.add_favourite);
+        favourite.setOnClickListener(v -> {
+            rest.setFavourite(!rest.isFavourite());
+            if (rest.isFavourite()) {
+                favourite.setBackgroundResource(R.drawable.fav_color);
+            } else {
+                favourite.setBackgroundResource(R.drawable.not_fav_2);
+            }
+        });
+    }
+
     private void setupGpsClick() {
         TextView gpsText = findViewById(R.id.txt_gps);
         gpsText.setOnClickListener(v -> {
@@ -185,7 +204,7 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
         });
     }
 
-    private void Getdata() {
+    private void GetData() {
         Intent intent = getIntent();
         rest_index = intent.getIntExtra(INDEX,0);
         rest = restaurantManager.getRestaurant(rest_index);

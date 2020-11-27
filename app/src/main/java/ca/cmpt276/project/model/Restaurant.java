@@ -13,6 +13,7 @@ public class Restaurant implements Comparable<Restaurant>{
     private float gpsLong;
     private float gpsLat;
     private String tracking;
+    private boolean isFavourite;
     private final InspectionListManager inspections;
 
     public Restaurant(String tracking, String name, String address, String city, float gpsLong, float gpsLat) {
@@ -22,6 +23,7 @@ public class Restaurant implements Comparable<Restaurant>{
         this.gpsLong = gpsLong;
         this.gpsLat = gpsLat;
         this.tracking = tracking;
+        this.isFavourite = false;
         this.inspections = new InspectionListManager();
     }
 
@@ -79,6 +81,14 @@ public class Restaurant implements Comparable<Restaurant>{
 
     public String getGPS(){
         return "Longitude: " + this.getGpsLong() + ", Latitude: " + this.getGpsLat();
+    }
+
+    public boolean isFavourite() {
+        return isFavourite;
+    }
+
+    public void setFavourite(boolean favourite) {
+        isFavourite = favourite;
     }
 
     @Override

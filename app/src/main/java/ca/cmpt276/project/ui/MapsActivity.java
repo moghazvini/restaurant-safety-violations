@@ -18,6 +18,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Looper;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -40,6 +41,8 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -77,6 +80,7 @@ import ca.cmpt276.project.model.types.HazardLevel;
 import ca.cmpt276.project.model.types.InspectionType;
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, UpdateFragment.UpdateDialogListener, LoadingDialogFragment.CancelDialogListener, SearchDialogFragment.SearchDialogListener, ClusterManager.OnClusterClickListener<ClusterMarker>, ClusterManager.OnClusterInfoWindowClickListener<ClusterMarker>, ClusterManager.OnClusterItemClickListener<ClusterMarker>, ClusterManager.OnClusterItemInfoWindowClickListener<ClusterMarker> {
+public class MapsActivity extends AppCompatActivity implements GoogleMap.OnCameraMoveStartedListener, OnMapReadyCallback, UpdateFragment.UpdateDialogListener, LoadingDialogFragment.CancelDialogListener, MarkerDialogFragment.PopUpDialogListener, ClusterManager.OnClusterClickListener<ClusterMarker>, ClusterManager.OnClusterItemClickListener<ClusterMarker> {
     private static final String FINE_LOCATION = Manifest.permission.ACCESS_FINE_LOCATION;
     private static final String COURSE_LOCATION = Manifest.permission.ACCESS_COARSE_LOCATION;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1234;
@@ -92,7 +96,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private ClusterManager<ClusterMarker> mClusterManager;
     private ClusterManagerRenderer mClusterManagerRenderer;
     private static final String REST_DETAILS_INDEX = "restaurant details index";
-    private final List<ClusterMarker> Markerlist = new ArrayList<>();
+    private final List<ClusterMarker> markerList = new ArrayList<>();
 
     //User Locations permission
     private Boolean mLocationPermissionsGranted = false;
@@ -101,6 +105,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private static boolean read = false;
     private ListUpdateTask listUpdateTask = null;
     private LoadingDialogFragment loadingDialog;
+
+    FragmentManager manager;
 
     DBAdapter myDb;
     List<Restaurant> foundRestaurants;
@@ -130,6 +136,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         myDb.open();
         restaurantManager = RestaurantListManager.getInstance();
         lastModified = LastModified.getInstance(this);
+        manager = getSupportFragmentManager();
+
         if(!read){
             fillInitialRestaurantList();
             read = true;
@@ -309,7 +317,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 location.addOnCompleteListener(task -> {
                     if(task.isSuccessful()){
                         Location currentLocation = (Location) task.getResult();
-                        
+
                         if(currentLocation != null) {
                             mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude())));
                             mMap.animateCamera(CameraUpdateFactory.zoomTo(13f));
@@ -327,6 +335,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
+    @Override
+    public void onCameraMoveStarted(int reason) {
+        if (reason == GoogleMap.OnCameraMoveStartedListener.REASON_GESTURE) {
+            Toast.makeText(this, "sensed", Toast.LENGTH_SHORT).show();
+            stopLocationUpdates();
+        }
+    }
+
     public void setupMap(){
 
         mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
@@ -337,15 +353,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap.setOnCameraIdleListener(mClusterManager);
         mMap.setOnMarkerClickListener(mClusterManager);
         mMap.setOnInfoWindowClickListener(mClusterManager);
-        mMap.setInfoWindowAdapter(new CustomInfoWindowAdapter(MapsActivity.this));
         mClusterManager.setOnClusterClickListener(this);
-        mClusterManager.setOnClusterInfoWindowClickListener(this);
         mClusterManager.setOnClusterItemClickListener(this);
-        mClusterManager.setOnClusterItemInfoWindowClickListener(this);
 
         popLatlong();
         addMarkers(mMap);
     }
+
     private void popLatlong() {
         restaurantlatlog = new ArrayList<>();
         for (Restaurant current : restaurantManager.getList()){
@@ -358,7 +372,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         if(googleMap != null) {
 
             if (mClusterManager == null) {
-                mClusterManager = new ClusterManager<ClusterMarker>(this.getApplicationContext(), googleMap);
+                mClusterManager = new ClusterManager<>(this.getApplicationContext(), googleMap);
             }
             if (mClusterManagerRenderer == null) {
                 mClusterManagerRenderer = new ClusterManagerRenderer(this, googleMap, mClusterManager );
@@ -387,7 +401,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         }
                         ClusterMarker newClusterMarker = new ClusterMarker(current,restaurantManager.getRestaurant(pos).getName(), snippet, severity_icon, restaurantManager.getRestaurant(pos));
                         mClusterManager.addItem(newClusterMarker);
-                        Markerlist.add(newClusterMarker);
+                        markerList.add(newClusterMarker);
                     }
                 } catch(NullPointerException e){
                     Log.e("CMarker", "addMapMarkers: NullPointerException: " + e.getMessage());
@@ -406,6 +420,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private void stopLocationUpdates() {
         mFusedLocationProviderClient.removeLocationUpdates(locationCallback);
     }
+
+
 
     @Override
     public boolean onClusterClick(Cluster<ClusterMarker> cluster) {
@@ -429,20 +445,31 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     @Override
-    public void onClusterInfoWindowClick(Cluster<ClusterMarker> cluster) {
-    }
-
-    @Override
     public boolean onClusterItemClick(ClusterMarker item) {
+        Toast.makeText(this, "marker clicked", Toast.LENGTH_SHORT).show();
+
+        Restaurant restaurant = item.getRest();
+        int index = restaurantManager.getList().indexOf(restaurant);
+        openPopUpWindow(index);
+
+        return true;
+    }
+
+    private void openPopUpWindow(int index) {
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(restaurantlatlog.get(index)));
+        Bundle info = new Bundle();
+        info.putInt("index", index);
+
+        MarkerDialogFragment markerFragment = new MarkerDialogFragment();
+        markerFragment.setArguments(info);
+        markerFragment.show(manager,"popup");
         stopLocationUpdates();
-        return false;
     }
 
     @Override
-    public void onClusterItemInfoWindowClick(ClusterMarker item) {
-            int position = restaurantlatlog.indexOf(item.getPosition());
-            Intent intent = RestaurantDetailsActivity.makeLaunchIntent(MapsActivity.this, position);
-            startActivity(intent);
+    public void popUp(int index) {
+        Intent intent = RestaurantDetailsActivity.makeLaunchIntent(MapsActivity.this, index);
+        startActivity(intent);
     }
 
     // Get the CSV links and timestamps
@@ -458,7 +485,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             if (restaurantUpdate.get(0).getChanged() // check if restaurant list changed
                     || restaurantUpdate.get(1).getChanged()) { // if inspection list changed
                 // Want update? Execute function
-                FragmentManager manager = getSupportFragmentManager();
                 UpdateFragment dialog = new UpdateFragment(); // ask if user wants to update
                 dialog.show(manager, "MessageDialog");
             } else {
@@ -578,7 +604,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private class ListUpdateTask extends AsyncTask<Void,Void, Boolean> {
         @Override
         protected void onPreExecute() {
-            FragmentManager manager = getSupportFragmentManager();
             loadingDialog = new LoadingDialogFragment(); // loading dialog
             loadingDialog.show(manager, "LoadingDialog");
         }
@@ -804,7 +829,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         return previous.isBefore(compare) || compare.isEqual(previous);
     }
 
-    public static Intent makeLaunchIntentMapsActivity(Context context, int restIdx){
+    public static Intent makeLaunchIntentMapsActivity(Context context, int restIdx) {
         Intent intent = new Intent(context, MapsActivity.class);
         intent.putExtra(REST_DETAILS_INDEX, restIdx);
         return intent;
@@ -813,14 +838,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private void extractDataFromIntent() {
         Intent intent = getIntent();
         int restaurant_details_idx = intent.getIntExtra(REST_DETAILS_INDEX, -1);
-        stopLocationUpdates();
+
         if(restaurant_details_idx > 0) {
-            mMap.moveCamera(CameraUpdateFactory.newLatLng(restaurantlatlog.get(restaurant_details_idx)));
+            openPopUpWindow(restaurant_details_idx);
             mMap.animateCamera(CameraUpdateFactory.zoomTo(20));
-            Marker mark = mClusterManagerRenderer.getMarker(Markerlist.get(restaurant_details_idx));
-            if(mark != null){
-                mark.showInfoWindow();
-            }
         }
     }
 }

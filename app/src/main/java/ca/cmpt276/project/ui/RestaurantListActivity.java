@@ -1,14 +1,18 @@
 package ca.cmpt276.project.ui;
 
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Color;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import android.os.Bundle;
+import android.util.Log;
+import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -17,7 +21,9 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import java.lang.reflect.Type;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
@@ -34,7 +40,9 @@ import ca.cmpt276.project.model.RestaurantListManager;
  */
 public class RestaurantListActivity extends AppCompatActivity {
 
+    public static final int REQUEST_CODE_DETAILS = 101;
     private RestaurantListManager restaurantManager;
+    private ArrayAdapter<Restaurant> adapter;
     DBAdapter myDb;
 
     @Override
@@ -67,6 +75,7 @@ public class RestaurantListActivity extends AppCompatActivity {
         //Collections.sort(restaurantManager.getList());
         Cursor cursor = myDb.getAllRows();
         ArrayAdapter<Restaurant> adapter = new RestaurantListAdapter();
+        adapter = new RestaurantListAdapter();
         ListView list = findViewById(R.id.listViewRestaurants);
         list.setAdapter(adapter);
     }
@@ -88,11 +97,31 @@ public class RestaurantListActivity extends AppCompatActivity {
 
             ImageView hazardImageView = itemView.findViewById(R.id.item_hazard_icon);
             ImageView restaurantLogo = itemView.findViewById(R.id.item_restaurantIcon);
+            ImageView favourite = itemView.findViewById(R.id.img_fav);
             TextView nameText = itemView.findViewById(R.id.item_txt_restaurant_name);
             TextView issuesText = itemView.findViewById(R.id.item_txt_issues_found);
             TextView inspectionText = itemView.findViewById(R.id.item_txt_latest_inspection);
             TextView hazardText = itemView.findViewById(R.id.item_txt_hazard);
             nameText.setText(currentRestaurant.getName());
+
+            TypedValue theme = new TypedValue();
+            int currentNightMode = getContext().getResources().getConfiguration().uiMode &
+                    Configuration.UI_MODE_NIGHT_MASK;
+            getTheme().resolveAttribute(R.attr.colorOnPrimary, theme,true);
+
+            int favouriteColor = theme.data;
+            if (currentNightMode == Configuration.UI_MODE_NIGHT_NO) {
+                if (currentRestaurant.isFavourite()) {
+                    //favourite.setBackgroundResource(R.drawable.fav_color);
+                    favouriteColor = getColor(R.color.cyan);
+                }
+            } else if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) {
+                if (currentRestaurant.isFavourite()) {
+                    //favourite.setBackgroundResource(R.drawable.fav_color);
+                    favouriteColor = getColor(R.color.sapphire);
+                }
+            }
+            itemView.setBackgroundColor(favouriteColor);
 
             if(currentInspectionList.getInspections().size() > 0) {
                 Inspection latestInspection;
@@ -206,10 +235,17 @@ public class RestaurantListActivity extends AppCompatActivity {
         ListView list = findViewById(R.id.listViewRestaurants);
         list.setOnItemClickListener((parent, viewClicked, position, id) -> {
             Intent i = RestaurantDetailsActivity.makeLaunchIntent(RestaurantListActivity.this,position);
-            startActivity(i);
+            startActivityForResult(i, REQUEST_CODE_DETAILS);
         });
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_CODE_DETAILS) {
+            adapter.notifyDataSetChanged();
+        }
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu){
@@ -218,14 +254,12 @@ public class RestaurantListActivity extends AppCompatActivity {
     }
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item){
-        switch (item.getItemId()){
-            case R.id.action_map:
-                startActivity(new Intent(this, MapsActivity.class));
-                finish();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
+        if (item.getItemId() == R.id.action_map) {
+            startActivity(new Intent(this, MapsActivity.class));
+            finish();
+            return true;
         }
+        return super.onOptionsItemSelected(item);
     }
 
 }
