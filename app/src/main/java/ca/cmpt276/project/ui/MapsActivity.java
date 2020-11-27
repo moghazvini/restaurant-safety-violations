@@ -483,14 +483,16 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     @Override
-    public void sendSearchInput(String input) {
-        Toast.makeText(this, input, Toast.LENGTH_LONG).show();
-        Cursor relevantRowsCursor = myDb.searchRestaurants(DBAdapter.KEY_NAME, input, DBAdapter.MatchString.CONTAINS);
-        Log.d(TAG, "NEW SEARCH: " + input);
-        if(relevantRowsCursor != null) {
-            addRelevantMarkers(relevantRowsCursor);
+    public void sendSearchInput(String input, String hazard_filter, int num_critical_filter) {
+        Toast.makeText(this, "name: " + input+" hazard filter: "+hazard_filter+" critical filter: "+num_critical_filter, Toast.LENGTH_LONG).show();
+        if(input.length() > 0) {
+            Cursor relevantRowsCursor = myDb.searchRestaurants(DBAdapter.KEY_NAME, input, DBAdapter.MatchString.CONTAINS);
+            Log.d(TAG, "NEW SEARCH: " + input);
+            if (relevantRowsCursor != null) {
+                addRelevantMarkers(relevantRowsCursor);
+            }
+            printCursor(relevantRowsCursor);
         }
-        printCursor(relevantRowsCursor);
     }
 
     private void printCursor(Cursor cursor){

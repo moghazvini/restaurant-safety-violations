@@ -10,13 +10,49 @@
         android:id="@+id/inputSearchBar"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="20dp"
+        android:layout_marginStart="5dp"
+        android:layout_marginEnd="5dp"
         android:ems="10"
+        android:hint="Search restaurant name"
         android:inputType="textPersonName"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <RadioGroup
+        android:id="@+id/radioGroupHazard"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="@+id/txt_hazardSelection"
+        app:layout_constraintTop_toBottomOf="@+id/txt_hazardSelection" />
+
+    <TextView
+        android:id="@+id/txt_hazardSelection"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="3dp"
+        android:text="Hazard filter:"
+        app:layout_constraintStart_toStartOf="@+id/inputSearchBar"
+        app:layout_constraintTop_toBottomOf="@+id/inputSearchBar" />
+
+    <TextView
+        android:id="@+id/txt_numCritical"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="65dp"
+        android:text="# of critical violations:"
+        app:layout_constraintStart_toEndOf="@+id/txt_hazardSelection"
+        app:layout_constraintTop_toTopOf="@+id/txt_hazardSelection" />
+
+    <EditText
+        android:id="@+id/inputCriticalFilter"
+        android:layout_width="78dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:ems="10"
+        android:inputType="number"
+        android:textSize="14sp"
+        app:layout_constraintStart_toStartOf="@+id/txt_numCritical"
+        app:layout_constraintTop_toBottomOf="@+id/txt_numCritical" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="hazard_selection">
+        <item>"OFF"</item>
+        <item>"LOW"</item>
+        <item>"MODERATE"</item>
+        <item>"HIGH"</item>
+    </string-array>
+</resources>

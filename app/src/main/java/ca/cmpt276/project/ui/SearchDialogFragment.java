@@ -9,7 +9,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.SearchView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatDialogFragment;
@@ -17,26 +20,42 @@ import androidx.appcompat.app.AppCompatDialogFragment;
 import ca.cmpt276.project.R;
 
 public class SearchDialogFragment extends AppCompatDialogFragment {
-    private String userInput;
+    
     private SearchDialogListener dialogListener;
     private static final String TAG = "SearchDialogTag";
+    View v;
+    private String searchTerm;
+    private String hazardFilter;
+    private int numCriticalFilter;
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         // code for alert dialog via fragment from Dr Brian Fraser's video https://www.youtube.com/watch?v=y6StJRn-Y-A
-        View v = LayoutInflater.from(getActivity()).inflate(R.layout.search_dialog_layout, null);
+        v = LayoutInflater.from(getActivity()).inflate(R.layout.search_dialog_layout, null);
+        setupHazardRadioButtons();
         DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 switch(which){
                     case DialogInterface.BUTTON_POSITIVE:
                         EditText searchTxt = v.findViewById(R.id.inputSearchBar);
-                        userInput = searchTxt.getText().toString();
-                        dialogListener.sendSearchInput(userInput);
+                        EditText criticalTxt = v.findViewById(R.id.inputCriticalFilter);
+                        String stringCritical = criticalTxt.getText().toString();
+                        if(stringCritical.length() > 0) {
+                            numCriticalFilter = Integer.parseInt(criticalTxt.getText().toString());
+                        } else {
+                            numCriticalFilter = -1;
+                        }
+                        searchTerm = searchTxt.getText().toString();
+                        if(hazardFilter == null){
+                            hazardFilter = "OFF";
+                        }
+                        Log.d(TAG, "selected hazard filter: " + hazardFilter);
+
+                        dialogListener.sendSearchInput(searchTerm, hazardFilter, numCriticalFilter);
                         break;
 
                     case DialogInterface.BUTTON_NEGATIVE:
-                        //userInput = false;
-                        //dialogListener.sendInput(userInput);
+                        Toast.makeText(getContext(), "Search cancelled", Toast.LENGTH_SHORT).show();
                         break;
                 }
             }
@@ -47,6 +66,22 @@ public class SearchDialogFragment extends AppCompatDialogFragment {
                 .setPositiveButton(android.R.string.ok, listener)
                 .setNegativeButton(android.R.string.cancel, listener)
                 .create();
+    }
+
+    private void setupHazardRadioButtons() {
+        RadioGroup group = v.findViewById(R.id.radioGroupHazard);
+        String[] hazardSelectionsArray = getResources().getStringArray(R.array.hazard_selection);
+        for (int i = 0; i < hazardSelectionsArray.length; i++){
+            final String selectedHazardFilter = hazardSelectionsArray[i];
+            RadioButton btn = new RadioButton(getContext());
+            btn.setText(selectedHazardFilter);
+            btn.setOnClickListener(v -> {
+                hazardFilter = selectedHazardFilter;
+            });
+            group.addView(btn);
+
+        }
+
     }
 
     // code to send data from dialog to activity from https://www.youtube.com/watch?v=ARezg1D9Zd0
@@ -61,7 +96,7 @@ public class SearchDialogFragment extends AppCompatDialogFragment {
     }
 
     public interface SearchDialogListener{
-        void sendSearchInput(String input);
+        void sendSearchInput(String input, String hazard_filter, int num_critical_filter);
     }
 
 }
