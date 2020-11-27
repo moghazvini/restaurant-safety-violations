@@ -23,7 +23,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 
 import ca.cmpt276.project.R;
-import ca.cmpt276.project.model.DBAdapter_restaurants;
+import ca.cmpt276.project.model.DBAdapter;
 import ca.cmpt276.project.model.Inspection;
 import ca.cmpt276.project.model.InspectionListManager;
 import ca.cmpt276.project.model.Restaurant;
@@ -35,7 +35,7 @@ import ca.cmpt276.project.model.RestaurantListManager;
 public class RestaurantListActivity extends AppCompatActivity {
 
     private RestaurantListManager restaurantManager;
-    DBAdapter_restaurants myDb;
+    DBAdapter myDb;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,7 +53,7 @@ public class RestaurantListActivity extends AppCompatActivity {
     }
 
     private void openDB() {
-        myDb = new DBAdapter_restaurants(this);
+        myDb = new DBAdapter(this);
         myDb.open();
     }
     @Override

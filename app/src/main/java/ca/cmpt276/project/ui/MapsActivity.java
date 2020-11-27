@@ -14,10 +14,10 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Looper;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -40,8 +40,6 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -69,10 +67,8 @@ import ca.cmpt276.project.R;
 import ca.cmpt276.project.model.ClusterManagerRenderer;
 import ca.cmpt276.project.model.ClusterMarker;
 import ca.cmpt276.project.model.CsvInfo;
-import ca.cmpt276.project.model.DBAdapter_inspections;
-import ca.cmpt276.project.model.DBAdapter_restaurants;
+import ca.cmpt276.project.model.DBAdapter;
 import ca.cmpt276.project.model.Inspection;
-import ca.cmpt276.project.model.InspectionListManager;
 import ca.cmpt276.project.model.LastModified;
 import ca.cmpt276.project.model.Restaurant;
 import ca.cmpt276.project.model.RestaurantListManager;
@@ -99,7 +95,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private final List<ClusterMarker> Markerlist = new ArrayList<>();
 
     //User Locations permission
-    private Location currentLocation;
     private Boolean mLocationPermissionsGranted = false;
     private FusedLocationProviderClient mFusedLocationProviderClient;
     private LocationRequest mLocationRequest;
@@ -107,7 +102,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private ListUpdateTask listUpdateTask = null;
     private LoadingDialogFragment loadingDialog;
 
-    DBAdapter_restaurants myDb;
+    DBAdapter myDb;
     List<Restaurant> foundRestaurants;
     private static final String TAG = "MapsTag";
     //Location callBack
@@ -131,7 +126,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         setContentView(R.layout.activity_maps);
         Toolbar toolbar = findViewById(R.id.map_toolbar);
         setSupportActionBar(toolbar);
-        myDb = new DBAdapter_restaurants(this);
+        myDb = new DBAdapter(this);
         myDb.open();
         restaurantManager = RestaurantListManager.getInstance();
         lastModified = LastModified.getInstance(this);
@@ -262,7 +257,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
 
-    public DBAdapter_restaurants getDBAdapter_restaurants(){
+    public DBAdapter getDBAdapter_restaurants(){
         return myDb;
     }
 
@@ -313,9 +308,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 final Task location = mFusedLocationProviderClient.getLastLocation();
                 location.addOnCompleteListener(task -> {
                     if(task.isSuccessful()){
-                        currentLocation = (Location) task.getResult();
-                        mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude())));
-                        mMap.animateCamera(CameraUpdateFactory.zoomTo(13f));
+                        Location currentLocation = (Location) task.getResult();
+                        
+                        if(currentLocation != null) {
+                            mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude())));
+                            mMap.animateCamera(CameraUpdateFactory.zoomTo(13f));
+                        }
+
                         startLocationUpdates();
                         extractDataFromIntent();
                     }else{
@@ -486,18 +485,18 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void sendSearchInput(String input) {
         Toast.makeText(this, input, Toast.LENGTH_LONG).show();
-        Cursor relevantRowsCursor = myDb.retrieveByConstraint(input, true);
+        Cursor relevantRowsCursor = myDb.searchRestaurants(DBAdapter.KEY_NAME, input, DBAdapter.MatchString.CONTAINS);
+        Log.d(TAG, "NEW SEARCH: " + input);
         if(relevantRowsCursor != null) {
             addRelevantMarkers(relevantRowsCursor);
         }
-        Log.d(TAG, "NEW SEARCH");
         printCursor(relevantRowsCursor);
     }
 
     private void printCursor(Cursor cursor){
         if(cursor.moveToFirst()){
             do{
-                String name = cursor.getString(DBAdapter_restaurants.COL_NAME);
+                String name = cursor.getString(DBAdapter.COL_NAME);
                 Log.d(TAG, "printing cursor: " + name);
             }while(cursor.moveToNext());
         }
@@ -514,47 +513,63 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         if(cursor.moveToFirst()){
             do{
-                String name = cursor.getString(DBAdapter_restaurants.COL_NAME);
-                float latitude = cursor.getFloat(DBAdapter_restaurants.COL_LATITUDE);
-                float longitude = cursor.getFloat(DBAdapter_restaurants.COL_LONGITUDE);
+//                markerOptions.position(temp);
+//                markerOptions.title(name);
+//                mMap.addMarker(markerOptions);
+                String tracking = cursor.getString(DBAdapter.COL_TRACKING);
+                String address = cursor.getString(DBAdapter.COL_ADDRESS);
+                String city = cursor.getString(DBAdapter.COL_CITY);
+                String name = cursor.getString(DBAdapter.COL_NAME);
+                float latitude = cursor.getFloat(DBAdapter.COL_LATITUDE);
+                float longitude = cursor.getFloat(DBAdapter.COL_LONGITUDE);
                 LatLng temp = new LatLng(latitude, longitude);
-                markerOptions.position(temp);
-                markerOptions.title(name);
-                Log.d(TAG, "add marker " + name);
-                mMap.addMarker(markerOptions);
+                Restaurant newRestaurant = new Restaurant(tracking, name, address, city, longitude, latitude);
+                int low = R.drawable.green_hazard;
+                int med = R.drawable.orange_hazard;
+                int high = R.drawable.red_hazard;
+                String snippet = "";
+                int severity_icon = R.drawable.green_hazard;
+                Inspection latestInspection = extractLatestInspection(cursor);
+                if(latestInspection != null) {
+                    if (latestInspection.getLevel() == HazardLevel.LOW) {
+                        snippet = "" + pos;
+                        severity_icon = low;
+                    } else if (latestInspection.getLevel() == HazardLevel.MODERATE) {
+                        snippet = "" + pos;
+                        severity_icon = med;
+                    } else if (latestInspection.getLevel() == HazardLevel.HIGH) {
+                        snippet = "" + pos;
+                        severity_icon = high;
+                    }
+                    Log.d(TAG, "new restaurant added to map: " + name);
+                    name = "poo";
+                    ClusterMarker newClusterMarker = new ClusterMarker(temp ,
+                            name,
+                            snippet,
+                            severity_icon,
+                            newRestaurant);
+                    mClusterManager.addItem(newClusterMarker);
+                    mClusterManager.cluster();
+                    pos++;
+                } else {
+                    Log.d(TAG, "null inspection");
+                }
+
             }while(cursor.moveToNext());
         }
 
+    }
 
-
-            /* DOES NOT WORK YET BECAUSE INSPECTION PROBLEM
-            int low = R.drawable.green_hazard;
-            int med = R.drawable.orange_hazard;
-            int high = R.drawable.red_hazard;
-            String snippet = "";
-            int severity_icon = R.drawable.green_hazard;
-            Inspection latestInspection = Collections.max(restaurant.getInspections().getInspections());
-            if (latestInspection.getLevel() == HazardLevel.LOW) {
-                snippet = ""+ pos;
-                severity_icon = low;
-            } else if (latestInspection.getLevel() == HazardLevel.MODERATE) {
-                snippet = ""+ pos;
-                severity_icon = med;
-            } else if (latestInspection.getLevel() == HazardLevel.HIGH) {
-                snippet = ""+ pos;
-                severity_icon = high;
-            }
-
-            ClusterMarker newClusterMarker = new ClusterMarker(temp ,
-                    restaurant.getName(),
-                    snippet,
-                    severity_icon,
-                    restaurant);
-            mClusterManager.addItem(newClusterMarker);
-            mClusterManager.cluster();
-            pos++;*/
-
-
+    private Inspection extractLatestInspection(Cursor cursor){
+        Gson gson = new Gson();
+        Type type = new TypeToken<ArrayList<Inspection>>() {}.getType();
+        String outputString = cursor.getString(DBAdapter.COL_INSPECTION_LIST);
+        ArrayList<Inspection> inspectionsArray = gson.fromJson(outputString, type);
+        Inspection latestInpection = null;
+        if(inspectionsArray.size() > 0){
+            latestInpection = Collections.max(inspectionsArray);
+        }
+        return latestInpection;
     }
 
     // Download CSV files
@@ -605,7 +620,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         BufferedReader inspectionReader = new BufferedReader(
                 new InputStreamReader(is, StandardCharsets.UTF_8)
         );
-        //restaurantManager.fillInspectionManager(inspectionReader);
+        restaurantManager.fillInspectionManager(inspectionReader);
     }
 
     private void getUpdatedFiles() {
@@ -622,27 +637,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             // No update files downloaded
         }
     }
-
-    //keeping this here for now in case I accidentally screw up sql search, can delete later
-    /*private void searchDatabase(String searchWord){
-        foundRestaurants = new ArrayList<>();
-        Cursor cursor = myDb.getAllRows();
-        if(cursor.moveToFirst()){
-            do{
-                String tracking = cursor.getString(DBAdapter_restaurants.COL_TRACKING);
-                String name = cursor.getString(DBAdapter_restaurants.COL_NAME);
-                String address = cursor.getString(DBAdapter_restaurants.COL_ADDRESS);
-                String city = cursor.getString(DBAdapter_restaurants.COL_CITY);
-                float latitude = cursor.getFloat(DBAdapter_restaurants.COL_LATITUDE);
-                float longitude = cursor.getFloat(DBAdapter_restaurants.COL_LONGITUDE);
-                if(name.toLowerCase().contains(searchWord)){
-                    Restaurant newRestaurant = new Restaurant(tracking, name, address, city, latitude, longitude);
-                    foundRestaurants.add(newRestaurant);
-                }
-
-            }while(cursor.moveToNext());
-        }
-    }*/
 
     private void fillInitialDatabase(){
         InputStream inputStream = getResources().openRawResource(R.raw.restaurants_itr1);
@@ -667,7 +661,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             InputStreamReader inputReader_rest = new InputStreamReader(inputStream_rest, StandardCharsets.UTF_8);
             InputStreamReader inputReader_insp = new InputStreamReader(inputStream_insp, StandardCharsets.UTF_8);
             fillRestaurantDatabase(new BufferedReader(inputReader_rest));
+            long startTime = System.nanoTime();
             fillInspectionsDatabase(new BufferedReader(inputReader_insp));
+            long stopTime = System.nanoTime();
+            Log.d(TAG, "TIME TAKEN: " + (stopTime - startTime));
         } catch (FileNotFoundException e) {
             // No update files downloaded
         }
@@ -680,8 +677,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         try {
             reader.readLine();
             myDb.deleteAll();
+            myDb.beginTransaction();
             while ((line = reader.readLine()) != null) {
-                //System.out.println(line);
                 line = line.replace("\"", "");
 
                 String[] attributes = line.split(",");
@@ -712,6 +709,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         favourite);
 
             }
+            myDb.endTransactionSuccessful();
 
         } catch(IOException e){
             Log.wtf("MapsActivity", "error reading data file on line " + line, e);
@@ -722,60 +720,56 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private void fillInspectionsDatabase(BufferedReader reader){
         String line = "";
         try {
-
             reader.readLine();
+            Gson gson = new Gson();
+            myDb.beginTransaction();
             while ((line = reader.readLine()) != null) {
                 line = line.replace("\"", "");
-                //split by ','
                 String[] tokens = line.split(",");
 
                 //read data
                 if (tokens.length > 0) {
-                    // Get the restaurant that matches the tracking number of the inspection
                     String inspectionTracking = tokens[0];
-                    Cursor restaurantCursor = myDb.retrieveByConstraint(inspectionTracking, true);
-                    if(restaurantCursor.moveToFirst()) {
-                        Type arrayType = new TypeToken<ArrayList<Inspection>>() {}.getType();
-                        Gson gson = new Gson();
-                        String outputarray = restaurantCursor.getString(DBAdapter_restaurants.COL_INSPECTION_LIST);
-                        ArrayList<Inspection> inspectionsListDB = gson.fromJson(outputarray, arrayType);
-
-                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
-                        LocalDate date = LocalDate.parse(tokens[1], formatter);
-
-                        String stringType = tokens[2];
-                        InspectionType inspectionType;
-                        if(stringType.equals("Routine")){
-                            inspectionType = InspectionType.ROUTINE;
-                        }
-                        else{
-                            inspectionType = InspectionType.FOLLOWUP;
-                        }
-                        int numCritical = Integer.parseInt(tokens[3]);
-                        int numNonCritical = Integer.parseInt(tokens[4]);
-                        HazardLevel hazard = getHazardLevel(tokens[tokens.length-1]);
-                        String violationLump = "[empty]";
-
-                        Inspection inspection;
-                        if (tokens.length > 5) {
-                            if (tokens[5].length() > 0) {
-                                violationLump = getVioLump(tokens);
-                                inspection = new Inspection(date, inspectionType, numCritical, numNonCritical, hazard, violationLump);
-                            }else {
-                                inspection = new Inspection(date, inspectionType, numCritical, numNonCritical, hazard);
-                            }
-                        }else {
-                            inspection = new Inspection(date, inspectionType, numCritical, numNonCritical, hazard);
-                        }
-                        int rowID = restaurantCursor.getInt(DBAdapter_restaurants.COL_ROWID);
-                        inspectionsListDB.add(inspection);
-                        String inputString = gson.toJson(inspectionsListDB);
-                        myDb.updateRowInspections(rowID, inputString);
-
+                    Cursor restaurantCursor = myDb.searchRestaurants(DBAdapter.KEY_TRACKING, inspectionTracking, DBAdapter.MatchString.EQUALS);
+                    String stringDate = tokens[1];
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+                    LocalDate date = LocalDate.parse(tokens[1], formatter);
+                    String stringType = tokens[2];
+                    InspectionType inspectionType;
+                    if(stringType.equals("Routine")){
+                        inspectionType = InspectionType.ROUTINE;
                     }
-
+                    else{
+                        inspectionType = InspectionType.FOLLOWUP;
+                    }
+                    int numCritical = Integer.parseInt(tokens[3]);
+                    int numNonCritical = Integer.parseInt(tokens[4]);
+                    String violationLump = "[empty]";
+                    String stringHazard = tokens[tokens.length-1];
+                    HazardLevel hazard = getHazardLevel(tokens[tokens.length-1]);
+                    Inspection inspection;
+                    if(tokens.length > 5 && tokens[5].length() > 0) {
+                        violationLump = getVioLump(tokens);
+                        inspection = new Inspection(date, inspectionType, numCritical, numNonCritical, hazard, violationLump);
+                    } else {
+                        inspection = new Inspection(date, inspectionType, numCritical, numNonCritical, hazard);
+                    }
+                    if(restaurantCursor.moveToFirst()) {
+                        //Type arrayType = new TypeToken<ArrayList<Inspection>>() {}.getType();
+                        //String outputarray = restaurantCursor.getString(DBAdapter.COL_INSPECTION_LIST);
+                        //ArrayList<Inspection> inspectionsListDB = gson.fromJson(outputarray, arrayType);
+                        ArrayList<Inspection> inspectionsListDB = new ArrayList<>();
+                        inspectionsListDB.add(inspection);
+                        String trackingID = restaurantCursor.getString(DBAdapter.COL_TRACKING);
+                        String inputString = gson.toJson(inspectionsListDB);
+                        //String trackingID = restaurantCursor.getString(DBAdapter.COL_TRACKING);
+                        //String inputString = "gobbledy goop";
+                        myDb.updateRowInspections(trackingID, inputString);
+                    }
+                    //myDb.insertRowInspection(inspectionTracking, stringDate, stringType, numCritical, numNonCritical, violationLump, stringHazard);
                 }
             }
+            myDb.endTransactionSuccessful();
         } catch(IOException e){
             Log.wtf("RestaurantListActivity", "error reading data file on line " + line, e);
         }
