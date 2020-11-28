@@ -43,7 +43,7 @@ public class RestaurantListActivity extends AppCompatActivity {
     public static final int REQUEST_CODE_DETAILS = 101;
     private RestaurantListManager restaurantManager;
     private ArrayAdapter<Restaurant> adapter;
-    DBAdapter myDb;
+    private DBAdapter myDb;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +64,7 @@ public class RestaurantListActivity extends AppCompatActivity {
         myDb = new DBAdapter(this);
         myDb.open();
     }
+
     @Override
     protected void onDestroy(){
         super.onDestroy();
@@ -74,7 +75,7 @@ public class RestaurantListActivity extends AppCompatActivity {
         //code to sort alphabetically taken from https://www.youtube.com/watch?v=dZQqrPdqT1E
         //Collections.sort(restaurantManager.getList());
         Cursor cursor = myDb.getAllRows();
-        ArrayAdapter<Restaurant> adapter = new RestaurantListAdapter();
+
         adapter = new RestaurantListAdapter();
         ListView list = findViewById(R.id.listViewRestaurants);
         list.setAdapter(adapter);

@@ -22,6 +22,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 
 import ca.cmpt276.project.R;
+import ca.cmpt276.project.model.DBAdapter;
 import ca.cmpt276.project.model.Inspection;
 import ca.cmpt276.project.model.InspectionListManager;
 import ca.cmpt276.project.model.Restaurant;
@@ -35,8 +36,9 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
     private final static String INDEX = "Inspection Report Index";
     private RestaurantListManager restaurantManager;
     private InspectionListManager inspectionManager;
-    static Restaurant rest;
+    private static Restaurant rest;
     private int rest_index;
+    private DBAdapter myDb;
 
     private ActionBar back;
 
@@ -53,13 +55,26 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
             back.setDisplayHomeAsUpEnabled(true);
         }
 
+        openDB();
         restaurantManager = RestaurantListManager.getInstance();
+
         GetData();
         setupGpsClick();
         populateList();
         setValues();
         OnClick();
         setupFavouriteClick();
+    }
+
+    private void openDB() {
+        myDb = new DBAdapter(this);
+        myDb.open();
+    }
+
+    @Override
+    protected void onDestroy(){
+        super.onDestroy();
+        myDb.close();
     }
 
     @Override
@@ -186,10 +201,13 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
         ImageView favourite = findViewById(R.id.add_favourite);
         favourite.setOnClickListener(v -> {
             rest.setFavourite(!rest.isFavourite());
+
             if (rest.isFavourite()) {
                 favourite.setBackgroundResource(R.drawable.fav_color_2); //TODO colour error with fav_color
+                myDb.updateRow(DBAdapter.KEY_FAVOURITE, rest.getTracking(), "1");
             } else {
                 favourite.setBackgroundResource(R.drawable.not_fav_2);
+                myDb.updateRow(DBAdapter.KEY_FAVOURITE, rest.getTracking(), "0");
             }
         });
     }

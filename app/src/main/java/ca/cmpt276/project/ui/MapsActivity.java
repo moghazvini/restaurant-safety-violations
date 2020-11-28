@@ -14,11 +14,9 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Looper;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -39,10 +37,6 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -793,7 +787,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         inspectionsListDB.add(inspection);
                         String trackingID = restaurantCursor.getString(DBAdapter.COL_TRACKING);
                         String inputString = gson.toJson(inspectionsListDB);
-                        myDb.updateRowInspections(trackingID, inputString);
+                        myDb.updateRow(DBAdapter.KEY_INSPECTION_LIST, trackingID, inputString);
                     }
                     //myDb.insertRowInspection(inspectionTracking, stringDate, stringType, numCritical, numNonCritical, violationLump, stringHazard);
                 }

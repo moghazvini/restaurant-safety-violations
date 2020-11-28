@@ -242,14 +242,17 @@ public class DBAdapter {
         return db.update(TABLE_RESTAURANTS, newValues, where, whereArgs) != 0;
     }
 
-     public boolean updateRowInspections(String trackingID, String inspections) {
+     public boolean updateRow(String key_column, String trackingID, String values) {
          String where = KEY_TRACKING + "='" + trackingID + "'";
          ContentValues newValues = new ContentValues();
-         newValues.put(KEY_INSPECTION_LIST, inspections);
+
+         if (key_column.equals(KEY_FAVOURITE)) {
+             newValues.put(key_column, Integer.parseInt(values));
+         } else {
+             newValues.put(key_column, values);
+         }
          return db.update(TABLE_RESTAURANTS, newValues, where, null) != 0;
      }
-
-
 
     /////////////////////////////////////////////////////////////////////
     //	Private Helper Classes:
