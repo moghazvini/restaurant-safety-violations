@@ -123,13 +123,6 @@ public class RestaurantListManager {
                     }
 
                     if (restaurant != null) {
-                        //pull array out of database
-                        /*
-                        Type arrayType = new TypeToken<ArrayList<Inspection>>() {}.getType();
-                        Gson gson = new Gson();
-                        String outputarray = restaurantCursor.getString(DBAdapter_restaurants.COL_INSPECTION_LIST);
-                        ArrayList<Inspection> inspectionsListDB = gson.fromJson(outputarray, arrayType);*/
-
                         InspectionListManager inspectionList = restaurant.getInspections();
                         // Format string date
                         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
@@ -152,11 +145,6 @@ public class RestaurantListManager {
                             inspection = new Inspection(date, type, numCritical, numNonCritical, hazardLevel);
                         }
                         inspectionList.add(inspection);
-                        /*
-                        rowID = restaurantCursor.getInt(DBAdapter_restaurants.COL_ROWID);
-                        inspectionsListDB.add(inspection);
-                        String inputString = gson.toJson(inspectionsListDB);
-                        myDb.updateRowInspections(rowID, inputString);*/
 
                     } else {
                         // reset restaurant if restaurant wasn't found

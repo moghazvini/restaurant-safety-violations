@@ -7,7 +7,7 @@ import java.util.List;
  * Manages a restaurant's list of inspections.
  */
 public class InspectionListManager {
-    private final List<Inspection> inspections;
+    private List<Inspection> inspections;
 
     public InspectionListManager() {
         inspections = new ArrayList<>();
@@ -20,6 +20,10 @@ public class InspectionListManager {
 
     public List<Inspection> getInspections() {
         return inspections;
+    }
+
+    public void setInspectionsList(ArrayList<Inspection> inspectionArrayList){
+        inspections = inspectionArrayList;
     }
 
     public Inspection getInspection(int index) {

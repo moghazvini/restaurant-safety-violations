@@ -167,7 +167,7 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
 
         ImageView favourite = findViewById(R.id.add_favourite);
         if (rest.isFavourite()) {
-            favourite.setBackgroundResource(R.drawable.fav_color);
+            favourite.setBackgroundResource(R.drawable.fav_color_2);
         } else {
             favourite.setBackgroundResource(R.drawable.not_fav_2);
         }
@@ -176,7 +176,6 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
     private void OnClick() {
         ListView insp_list = findViewById(R.id.list_insp);
         insp_list.setOnItemClickListener((parent, view, position, id) -> {
-
             Intent i = InspectionDetailsActivity.makeLaunchIntent(RestaurantDetailsActivity.this, position, rest_index);
             startActivity(i);
         });
@@ -188,7 +187,7 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
         favourite.setOnClickListener(v -> {
             rest.setFavourite(!rest.isFavourite());
             if (rest.isFavourite()) {
-                favourite.setBackgroundResource(R.drawable.fav_color);
+                favourite.setBackgroundResource(R.drawable.fav_color_2); //TODO colour error with fav_color
             } else {
                 favourite.setBackgroundResource(R.drawable.not_fav_2);
             }
@@ -198,7 +197,8 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
     private void setupGpsClick() {
         TextView gpsText = findViewById(R.id.txt_gps);
         gpsText.setOnClickListener(v -> {
-            Intent i = MapsActivity.makeLaunchIntentMapsActivity(RestaurantDetailsActivity.this, rest_index);
+            String tracking = rest.getTracking();
+            Intent i = MapsActivity.makeLaunchIntentMapsActivity(RestaurantDetailsActivity.this, tracking);
             startActivity(i);
             finish();
         });

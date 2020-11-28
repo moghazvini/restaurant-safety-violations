@@ -3,6 +3,7 @@ package ca.cmpt276.project.ui;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
+import android.database.Cursor;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
@@ -14,6 +15,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatDialogFragment;
 
+import java.io.Serializable;
 import java.util.Collections;
 
 import ca.cmpt276.project.R;
@@ -27,7 +29,7 @@ import ca.cmpt276.project.model.RestaurantListManager;
 public class MarkerDialogFragment extends AppCompatDialogFragment {
     private static final String TAG = "DialogFragmentTag";
     private PopUpDialogListener popUpListener;
-
+    private static final String RESTAURANT_KEY = "restaurant key";
     @NonNull
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         View view = LayoutInflater.from(getActivity()).inflate(R.layout.custom_infowindow, null);
@@ -38,8 +40,9 @@ public class MarkerDialogFragment extends AppCompatDialogFragment {
         ImageView img_icon = view.findViewById(R.id.img_icon);
 
         RestaurantListManager restaurantListManager = RestaurantListManager.getInstance();
-        int index = getArguments().getInt("index");
-        Restaurant restaurant = restaurantListManager.getRestaurant(index);
+        //int index = getArguments().getInt("index");
+        //Restaurant restaurant = restaurantListManager.getRestaurant(index);
+        Restaurant restaurant = getArguments().getParcelable(RESTAURANT_KEY);
 
         restaurant_Title.setText(restaurant.getName());
         restaurant_address.setText(restaurant.getAddress());
@@ -120,12 +123,20 @@ public class MarkerDialogFragment extends AppCompatDialogFragment {
         else {
             img_icon.setBackgroundResource(R.drawable.food2);
         }
-
-        view.setOnClickListener(v -> popUpListener.popUp(index));
+        //TODO IMPLEMENT ONCLICK LISTENER
+        //view.setOnClickListener(v -> popUpListener.popUp(index));
 
         return new AlertDialog.Builder(getActivity())
                 .setView(view)
                 .create();
+    }
+
+    public static MarkerDialogFragment newInstance(Restaurant restaurant){
+        MarkerDialogFragment fragment = new MarkerDialogFragment();
+        Bundle info = new Bundle();
+        info.putParcelable(RESTAURANT_KEY, restaurant);
+        fragment.setArguments(info);
+        return fragment;
     }
 
     @Override

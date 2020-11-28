@@ -72,6 +72,7 @@ import ca.cmpt276.project.model.ClusterMarker;
 import ca.cmpt276.project.model.CsvInfo;
 import ca.cmpt276.project.model.DBAdapter;
 import ca.cmpt276.project.model.Inspection;
+import ca.cmpt276.project.model.InspectionListManager;
 import ca.cmpt276.project.model.LastModified;
 import ca.cmpt276.project.model.Restaurant;
 import ca.cmpt276.project.model.RestaurantListManager;
@@ -95,7 +96,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     // custom markers
     private ClusterManager<ClusterMarker> mClusterManager;
     private ClusterManagerRenderer mClusterManagerRenderer;
-    private static final String REST_DETAILS_INDEX = "restaurant details index";
+    private static final String REST_DETAILS_TRACKING = "restaurant details tracking";
     private final List<ClusterMarker> markerList = new ArrayList<>();
 
     //User Locations permission
@@ -355,9 +356,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap.setOnInfoWindowClickListener(mClusterManager);
         mClusterManager.setOnClusterClickListener(this);
         mClusterManager.setOnClusterItemClickListener(this);
-
+        Cursor allRestCursor = myDb.getAllRows();
         popLatlong();
-        addMarkers(mMap);
+        addRelevantMarkers(mMap, allRestCursor);
     }
 
     private void popLatlong() {
@@ -449,19 +450,19 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         Toast.makeText(this, "marker clicked", Toast.LENGTH_SHORT).show();
 
         Restaurant restaurant = item.getRest();
-        int index = restaurantManager.getList().indexOf(restaurant);
-        openPopUpWindow(index);
+//        int index = restaurantManager.getList().indexOf(restaurant);
+        openPopUpWindow(restaurant);
 
         return true;
     }
 
-    private void openPopUpWindow(int index) {
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(restaurantlatlog.get(index)));
-        Bundle info = new Bundle();
-        info.putInt("index", index);
-
-        MarkerDialogFragment markerFragment = new MarkerDialogFragment();
-        markerFragment.setArguments(info);
+    private void openPopUpWindow(Restaurant restaurant) {
+        LatLng coords = new LatLng(restaurant.getGpsLat(), restaurant.getGpsLong());
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(coords));
+        //Bundle info = new Bundle();
+        //info.putString("tracking", restaurant.getTracking());
+        MarkerDialogFragment markerFragment = MarkerDialogFragment.newInstance(restaurant);
+        //markerFragment.setArguments(info);
         markerFragment.show(manager,"popup");
         stopLocationUpdates();
     }
@@ -515,7 +516,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             Cursor relevantRowsCursor = myDb.searchRestaurants(DBAdapter.KEY_NAME, input, DBAdapter.MatchString.CONTAINS);
             Log.d(TAG, "NEW SEARCH: " + input);
             if (relevantRowsCursor != null) {
-                addRelevantMarkers(relevantRowsCursor);
+                addRelevantMarkers(mMap, relevantRowsCursor);
             }
             printCursor(relevantRowsCursor);
         }
@@ -533,31 +534,43 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
-    private void addRelevantMarkers(Cursor cursor){
+    private void addRelevantMarkers(GoogleMap map, Cursor cursor){
+        if (mClusterManager == null) {
+            mClusterManager = new ClusterManager<>(this.getApplicationContext(), map);
+        }
+        if (mClusterManagerRenderer == null) {
+            mClusterManagerRenderer = new ClusterManagerRenderer(this, map, mClusterManager );
+            mClusterManager.setRenderer(mClusterManagerRenderer);
+        }
         mClusterManager.clearItems();
         mClusterManager.cluster();
-        MarkerOptions markerOptions = new MarkerOptions();
+        Gson gson = new Gson();
         int pos = 0;
 
         if(cursor.moveToFirst()){
             do{
-//                markerOptions.position(temp);
-//                markerOptions.title(name);
-//                mMap.addMarker(markerOptions);
                 String tracking = cursor.getString(DBAdapter.COL_TRACKING);
                 String address = cursor.getString(DBAdapter.COL_ADDRESS);
                 String city = cursor.getString(DBAdapter.COL_CITY);
                 String name = cursor.getString(DBAdapter.COL_NAME);
                 float latitude = cursor.getFloat(DBAdapter.COL_LATITUDE);
                 float longitude = cursor.getFloat(DBAdapter.COL_LONGITUDE);
-                LatLng temp = new LatLng(latitude, longitude);
+                LatLng coords = new LatLng(latitude, longitude);
+                ArrayList<Inspection> inspectionArrayList = extractInspectionList(cursor);
+                InspectionListManager inspectionListManager = new InspectionListManager();
+                inspectionListManager.setInspectionsList(inspectionArrayList);
                 Restaurant newRestaurant = new Restaurant(tracking, name, address, city, longitude, latitude);
+                newRestaurant.setInspections(inspectionListManager);
+                Inspection latestInspection = null;
+                if(inspectionArrayList.size() > 0) {
+                    latestInspection = Collections.max(inspectionArrayList);
+                }
                 int low = R.drawable.green_hazard;
                 int med = R.drawable.orange_hazard;
                 int high = R.drawable.red_hazard;
                 String snippet = "";
                 int severity_icon = R.drawable.green_hazard;
-                Inspection latestInspection = extractLatestInspection(cursor);
+                //Inspection latestInspection = extractLatestInspection(cursor);
                 if(latestInspection != null) {
                     if (latestInspection.getLevel() == HazardLevel.LOW) {
                         snippet = "" + pos;
@@ -569,35 +582,31 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         snippet = "" + pos;
                         severity_icon = high;
                     }
-                    Log.d(TAG, "new restaurant added to map: " + name);
-                    name = "poo";
-                    ClusterMarker newClusterMarker = new ClusterMarker(temp ,
+                    //Log.d(TAG, "new restaurant added to map: " + name);
+                    ClusterMarker newClusterMarker = new ClusterMarker(
+                            coords,
                             name,
                             snippet,
                             severity_icon,
                             newRestaurant);
                     mClusterManager.addItem(newClusterMarker);
-                    mClusterManager.cluster();
                     pos++;
                 } else {
                     Log.d(TAG, "null inspection");
                 }
 
             }while(cursor.moveToNext());
+            mClusterManager.cluster();
         }
 
     }
 
-    private Inspection extractLatestInspection(Cursor cursor){
+    private ArrayList<Inspection> extractInspectionList(Cursor cursor){
         Gson gson = new Gson();
         Type type = new TypeToken<ArrayList<Inspection>>() {}.getType();
         String outputString = cursor.getString(DBAdapter.COL_INSPECTION_LIST);
         ArrayList<Inspection> inspectionsArray = gson.fromJson(outputString, type);
-        Inspection latestInpection = null;
-        if(inspectionsArray.size() > 0){
-            latestInpection = Collections.max(inspectionsArray);
-        }
-        return latestInpection;
+        return inspectionsArray;
     }
 
     // Download CSV files
@@ -782,15 +791,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         inspection = new Inspection(date, inspectionType, numCritical, numNonCritical, hazard);
                     }
                     if(restaurantCursor.moveToFirst()) {
-                        //Type arrayType = new TypeToken<ArrayList<Inspection>>() {}.getType();
-                        //String outputarray = restaurantCursor.getString(DBAdapter.COL_INSPECTION_LIST);
-                        //ArrayList<Inspection> inspectionsListDB = gson.fromJson(outputarray, arrayType);
                         ArrayList<Inspection> inspectionsListDB = new ArrayList<>();
                         inspectionsListDB.add(inspection);
                         String trackingID = restaurantCursor.getString(DBAdapter.COL_TRACKING);
                         String inputString = gson.toJson(inspectionsListDB);
-                        //String trackingID = restaurantCursor.getString(DBAdapter.COL_TRACKING);
-                        //String inputString = "gobbledy goop";
                         myDb.updateRowInspections(trackingID, inputString);
                     }
                     //myDb.insertRowInspection(inspectionTracking, stringDate, stringType, numCritical, numNonCritical, violationLump, stringHazard);
@@ -829,19 +833,42 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         return previous.isBefore(compare) || compare.isEqual(previous);
     }
 
-    public static Intent makeLaunchIntentMapsActivity(Context context, int restIdx) {
+    public static Intent makeLaunchIntentMapsActivity(Context context, String restTracking) {
         Intent intent = new Intent(context, MapsActivity.class);
-        intent.putExtra(REST_DETAILS_INDEX, restIdx);
+        intent.putExtra(REST_DETAILS_TRACKING, restTracking);
         return intent;
     }
 
     private void extractDataFromIntent() {
         Intent intent = getIntent();
-        int restaurant_details_idx = intent.getIntExtra(REST_DETAILS_INDEX, -1);
-
-        if(restaurant_details_idx > 0) {
-            openPopUpWindow(restaurant_details_idx);
-            mMap.animateCamera(CameraUpdateFactory.zoomTo(20));
+        int restaurant_details_idx = intent.getIntExtra(REST_DETAILS_TRACKING, -1);
+        String restaurant_details_tracking = intent.getStringExtra(REST_DETAILS_TRACKING);
+        if(restaurant_details_tracking != null){
+            Restaurant restaurant = getRestaurantFromTracking(restaurant_details_tracking);
+            if(restaurant != null){
+                openPopUpWindow(restaurant);
+                mMap.animateCamera(CameraUpdateFactory.zoomTo(20));
+            } else {
+                Toast.makeText(this, "could not find restaurant", Toast.LENGTH_SHORT).show();
+            }
         }
+//        if(restaurant_details_idx > 0) {
+//            openPopUpWindow(restaurant_details_idx);
+//            mMap.animateCamera(CameraUpdateFactory.zoomTo(20));
+//        }
+    }
+
+    private Restaurant getRestaurantFromTracking(String tracking){
+        Cursor restaurantCursor = myDb.searchRestaurants(DBAdapter.KEY_TRACKING, tracking, DBAdapter.MatchString.EQUALS);
+        Restaurant newRestaurant = null;
+        if(restaurantCursor.moveToFirst()){
+            String name = restaurantCursor.getString(DBAdapter.COL_NAME);
+            String address = restaurantCursor.getString(DBAdapter.COL_ADDRESS);
+            String city = restaurantCursor.getString(DBAdapter.COL_CITY);
+            float gpsLong = restaurantCursor.getFloat(DBAdapter.COL_LONGITUDE);
+            float gpsLat = restaurantCursor.getFloat(DBAdapter.COL_LATITUDE);
+            newRestaurant = new Restaurant(tracking, name, address, city, gpsLong, gpsLat);
+        }
+        return newRestaurant;
     }
 }
