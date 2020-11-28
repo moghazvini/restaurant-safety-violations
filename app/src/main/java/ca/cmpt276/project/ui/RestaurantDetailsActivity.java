@@ -197,8 +197,7 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
     private void setupGpsClick() {
         TextView gpsText = findViewById(R.id.txt_gps);
         gpsText.setOnClickListener(v -> {
-            String tracking = rest.getTracking();
-            Intent i = MapsActivity.makeLaunchIntentMapsActivity(RestaurantDetailsActivity.this, tracking);
+            Intent i = MapsActivity.makeLaunchIntentMapsActivity(RestaurantDetailsActivity.this, rest);
             startActivity(i);
             finish();
         });

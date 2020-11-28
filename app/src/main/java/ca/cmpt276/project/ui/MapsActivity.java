@@ -96,7 +96,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     // custom markers
     private ClusterManager<ClusterMarker> mClusterManager;
     private ClusterManagerRenderer mClusterManagerRenderer;
-    private static final String REST_DETAILS_TRACKING = "restaurant details tracking";
+    private static final String REST_DETAILS = "restaurant details tracking";
     private final List<ClusterMarker> markerList = new ArrayList<>();
 
     //User Locations permission
@@ -459,10 +459,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private void openPopUpWindow(Restaurant restaurant) {
         LatLng coords = new LatLng(restaurant.getGpsLat(), restaurant.getGpsLong());
         mMap.moveCamera(CameraUpdateFactory.newLatLng(coords));
-        //Bundle info = new Bundle();
-        //info.putString("tracking", restaurant.getTracking());
         MarkerDialogFragment markerFragment = MarkerDialogFragment.newInstance(restaurant);
-        //markerFragment.setArguments(info);
         markerFragment.show(manager,"popup");
         stopLocationUpdates();
     }
@@ -544,10 +541,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
         mClusterManager.clearItems();
         mClusterManager.cluster();
-        Gson gson = new Gson();
         int pos = 0;
 
         if(cursor.moveToFirst()){
+            myDb.beginTransaction();
             do{
                 String tracking = cursor.getString(DBAdapter.COL_TRACKING);
                 String address = cursor.getString(DBAdapter.COL_ADDRESS);
@@ -596,6 +593,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 }
 
             }while(cursor.moveToNext());
+            myDb.endTransactionSuccessful();
             mClusterManager.cluster();
         }
 
@@ -833,30 +831,26 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         return previous.isBefore(compare) || compare.isEqual(previous);
     }
 
-    public static Intent makeLaunchIntentMapsActivity(Context context, String restTracking) {
+    public static Intent makeLaunchIntentMapsActivity(Context context, Restaurant restaurant) {
         Intent intent = new Intent(context, MapsActivity.class);
-        intent.putExtra(REST_DETAILS_TRACKING, restTracking);
+        intent.putExtra(REST_DETAILS, restaurant);
         return intent;
     }
 
     private void extractDataFromIntent() {
         Intent intent = getIntent();
-        int restaurant_details_idx = intent.getIntExtra(REST_DETAILS_TRACKING, -1);
-        String restaurant_details_tracking = intent.getStringExtra(REST_DETAILS_TRACKING);
-        if(restaurant_details_tracking != null){
-            Restaurant restaurant = getRestaurantFromTracking(restaurant_details_tracking);
-            if(restaurant != null){
-                openPopUpWindow(restaurant);
-                mMap.animateCamera(CameraUpdateFactory.zoomTo(20));
-            } else {
-                Toast.makeText(this, "could not find restaurant", Toast.LENGTH_SHORT).show();
-            }
+        Restaurant restaurant = intent.getParcelableExtra(REST_DETAILS);
+        if(restaurant != null){
+            openPopUpWindow(restaurant);
+            mMap.animateCamera(CameraUpdateFactory.zoomTo(20));
+        } else {
+            Toast.makeText(this, "could not find restaurant", Toast.LENGTH_SHORT).show();
         }
+    }
 //        if(restaurant_details_idx > 0) {
 //            openPopUpWindow(restaurant_details_idx);
 //            mMap.animateCamera(CameraUpdateFactory.zoomTo(20));
 //        }
-    }
 
     private Restaurant getRestaurantFromTracking(String tracking){
         Cursor restaurantCursor = myDb.searchRestaurants(DBAdapter.KEY_TRACKING, tracking, DBAdapter.MatchString.EQUALS);
