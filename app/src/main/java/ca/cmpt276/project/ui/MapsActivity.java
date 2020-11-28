@@ -358,7 +358,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mClusterManager.setOnClusterItemClickListener(this);
         Cursor allRestCursor = myDb.getAllRows();
         popLatlong();
-        addRelevantMarkers(mMap, allRestCursor);
+        addAllMarkers(mMap);
     }
 
     private void popLatlong() {
@@ -369,7 +369,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
-    private void addMarkers(GoogleMap googleMap) {
+    private void addAllMarkers(GoogleMap googleMap) {
         if(googleMap != null) {
 
             if (mClusterManager == null) {
