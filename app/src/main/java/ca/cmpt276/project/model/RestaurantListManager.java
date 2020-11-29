@@ -1,15 +1,10 @@
 package ca.cmpt276.project.model;
 
 import android.content.Context;
-import android.database.Cursor;
 import android.util.Log;
-
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -18,7 +13,6 @@ import java.util.List;
 
 import ca.cmpt276.project.model.types.HazardLevel;
 import ca.cmpt276.project.model.types.InspectionType;
-import ca.cmpt276.project.ui.MapsActivity;
 
 /**
  * Manages the list of restaurants that had
@@ -27,8 +21,7 @@ import ca.cmpt276.project.ui.MapsActivity;
 public class RestaurantListManager {
     private List<Restaurant> restaurants;
     private static RestaurantListManager instance;
-    private static final String TAG = "RestaurantListTag";
-    private List<Restaurant> favourited;
+    private final List<Restaurant> favourited;
 
     private RestaurantListManager() {
         restaurants = new ArrayList<>();
@@ -62,13 +55,12 @@ public class RestaurantListManager {
         return null;
     }
 
-    public void fillRestaurantManager(BufferedReader reader, Context context) {
+    public void fillRestaurantManager(BufferedReader reader) {
         String line = "";
         try {
             reader.readLine();
             List<Restaurant> updated = new ArrayList<>();
             while ((line = reader.readLine()) != null) {
-                //System.out.println(line);
                 line = line.replace("\"", "");
 
                 boolean favourite = false;
