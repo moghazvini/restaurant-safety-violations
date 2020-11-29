@@ -104,6 +104,7 @@ public class Restaurant implements Comparable<Restaurant>, Parcelable {
     }
 
     protected Restaurant(Parcel in) {
+
         name = in.readString();
         address = in.readString();
         city = in.readString();
@@ -111,7 +112,6 @@ public class Restaurant implements Comparable<Restaurant>, Parcelable {
         gpsLat = in.readFloat();
         tracking = in.readString();
         isFavourite = in.readByte() != 0;
-        inspections = new InspectionListManager();
     }
 
     public static final Creator<Restaurant> CREATOR = new Creator<Restaurant>() {
@@ -133,6 +133,7 @@ public class Restaurant implements Comparable<Restaurant>, Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+
         dest.writeString(name);
         dest.writeString(address);
         dest.writeString(city);

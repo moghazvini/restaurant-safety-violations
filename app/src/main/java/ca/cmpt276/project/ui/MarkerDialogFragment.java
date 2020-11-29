@@ -124,8 +124,11 @@ public class MarkerDialogFragment extends AppCompatDialogFragment {
             img_icon.setBackgroundResource(R.drawable.food2);
         }
         //TODO IMPLEMENT ONCLICK LISTENER
-        //view.setOnClickListener(v -> popUpListener.popUp(index));
-
+        view.setOnClickListener(v -> popUpListener.popUp(restaurant.getTracking()));
+        Log.d(TAG, "restaurant inspection list size: " + restaurant.getInspections().getInspections().size());
+        for (int i = 0; i < restaurant.getInspections().getInspections().size(); i++){
+            Log.d(TAG, "inspection tracking: " + restaurant.getInspections().getInspections().get(i));
+        }
         return new AlertDialog.Builder(getActivity())
                 .setView(view)
                 .create();
@@ -150,6 +153,6 @@ public class MarkerDialogFragment extends AppCompatDialogFragment {
     }
 
     public interface PopUpDialogListener{
-        void popUp(int index);
+        void popUp(String tracking);
     }
 }

@@ -461,8 +461,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     @Override
-    public void popUp(int index) {
-        Intent intent = RestaurantDetailsActivity.makeLaunchIntent(MapsActivity.this, index);
+    public void popUp(String tracking) {
+        Intent intent = RestaurantDetailsActivity.makeLaunchIntent(MapsActivity.this, tracking);
         startActivity(intent);
     }
 
@@ -505,7 +505,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void sendSearchInput(String name, String hazard_filter, int num_critical_filter, String lessMore) {
         String msg = "name: " + name+" hazard filter: "+hazard_filter+" critical filter: "+num_critical_filter + "less: " + lessMore;
-        //Toast.makeText(this, "name: " + name+" hazard filter: "+hazard_filter+" critical filter: "+num_critical_filter + "less: " + lessMore, Toast.LENGTH_LONG).show();
         Log.d(TAG, msg);
         if(name.length() > 0 || hazard_filter.length() > 0 || num_critical_filter > 0) {
             //Cursor relevantRowsCursor = myDb.searchRestaurants(DBAdapter.KEY_NAME, input, DBAdapter.MatchString.CONTAINS);
@@ -514,7 +513,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             if (relevantRowsCursor != null) {
                 addRelevantMarkers(mMap, relevantRowsCursor);
             }
-            printCursor(relevantRowsCursor);
+            //printCursor(relevantRowsCursor);
         } else {
             Log.d(TAG, "no filter");
         }
@@ -605,9 +604,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         Type type = new TypeToken<ArrayList<Inspection>>() {}.getType();
         String outputString = cursor.getString(DBAdapter.COL_INSPECTION_LIST);
         ArrayList<Inspection> inspectionsArray = gson.fromJson(outputString, type);
-        if(inspectionsArray.size() > 0) {
-            Log.d(TAG, "extrat date from db: " + inspectionsArray.get(0).getDate().toString());
-        }
         return inspectionsArray;
     }
 
@@ -775,7 +771,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     String stringDate = tokens[1];
                     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
                     LocalDate date = LocalDate.parse(tokens[1], formatter);
-                    Log.d(TAG, "adding date: " + date.toString());
                     String stringType = tokens[2];
                     InspectionType inspectionType;
                     if(stringType.equals("Routine")){
@@ -802,7 +797,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         inspectionsListDB.add(inspection);
                         String trackingID = restaurantCursor.getString(DBAdapter.COL_TRACKING);
                         String inputString = gson.toJson(inspectionsListDB);
-                        Log.d(TAG, "input string date: " + inputString);
                         myDb.updateRestaurantRow(trackingID, inputString);
                     }
                     //myDb.insertRowInspection(inspectionTracking, stringDate, stringType, numCritical, numNonCritical, violationLump, stringHazard);

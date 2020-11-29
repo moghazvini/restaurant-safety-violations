@@ -1,5 +1,8 @@
 package ca.cmpt276.project.model;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
@@ -121,4 +124,5 @@ public class Inspection implements Comparable<Inspection>{
     public int compareTo(Inspection other) {
         return this.date.compareTo(other.date);
     }
+
 }

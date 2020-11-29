@@ -72,9 +72,9 @@ public class RestaurantListActivity extends AppCompatActivity {
 
     private void populateListView() {
         //code to sort alphabetically taken from https://www.youtube.com/watch?v=dZQqrPdqT1E
-        //Collections.sort(restaurantManager.getList());
+        Collections.sort(restaurantManager.getList());
         Cursor cursor = myDb.getAllRows();
-        ArrayAdapter<Restaurant> adapter = new RestaurantListAdapter();
+
         adapter = new RestaurantListAdapter();
         ListView list = findViewById(R.id.listViewRestaurants);
         list.setAdapter(adapter);
@@ -234,7 +234,8 @@ public class RestaurantListActivity extends AppCompatActivity {
     private void registerCallBack(){
         ListView list = findViewById(R.id.listViewRestaurants);
         list.setOnItemClickListener((parent, viewClicked, position, id) -> {
-            Intent i = RestaurantDetailsActivity.makeLaunchIntent(RestaurantListActivity.this,position);
+            String tracking = restaurantManager.getRestaurant(position).getTracking();
+            Intent i = RestaurantDetailsActivity.makeLaunchIntent(RestaurantListActivity.this, tracking);
             startActivityForResult(i, REQUEST_CODE_DETAILS);
         });
     }
