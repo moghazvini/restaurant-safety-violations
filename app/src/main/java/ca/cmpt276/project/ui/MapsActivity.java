@@ -647,10 +647,21 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 lastModified.setLast_mod_restaurants(MapsActivity.this, restaurantUpdate.get(0).getLast_modified());
                 lastModified.setLast_mod_inspections(MapsActivity.this, restaurantUpdate.get(1).getLast_modified());
                 getUpdatedFiles();
+                favouritesUpdated = restaurantManager.getFavourited();
+                if (favouritesUpdated.size() > 0) {
+                /*String rests = "";
+                for (Restaurant restaurant : favouritesUpdated) {
+                    rests = rests.concat(restaurant.getName());
+                }
+                Log.d("Favourites updated", rests);*/
+                    FavouritesUpdatedDialogFragment updated = new FavouritesUpdatedDialogFragment();
+                    updated.show(manager,"Updated favourites");
+                }
+
                 setupMap();
 
-                finish();
-                startActivity(getIntent());
+                /*finish();
+                startActivity(getIntent());*/
                 loadingDialog.dismiss();
             }
         }
@@ -680,16 +691,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             InputStreamReader inputReader_insp = new InputStreamReader(inputStream_insp, StandardCharsets.UTF_8);
             restaurantManager.fillRestaurantManager(new BufferedReader(inputReader_rest),this);
             restaurantManager.fillInspectionManager(new BufferedReader(inputReader_insp));
-            favouritesUpdated = restaurantManager.getFavourited();
-            if (favouritesUpdated.size() > 0) {
-                /*String rests = "";
-                for (Restaurant restaurant : favouritesUpdated) {
-                    rests = rests.concat(restaurant.getName());
-                }
-                Log.d("Favourites updated", rests);*/
-                FavouritesUpdatedDialogFragment updated = new FavouritesUpdatedDialogFragment();
-                updated.show(manager,"Updated favourites");
-            }
         } catch (FileNotFoundException e) {
             // No update files downloaded
         }

@@ -173,8 +173,13 @@ public class RestaurantListManager {
 
     private void checkUpdatedFavourites() {
         for (Restaurant favourite : favourited) {
-            if (favourite.getInspections().getInspections().size() == this.find(favourite.getTracking()).getInspections().getInspections().size()) {
+            List<Inspection> previous = favourite.getInspections().getInspections();
+            List<Inspection> updated = this.find(favourite.getTracking()).getInspections().getInspections();
+
+            if (previous.size() == updated.size()) {
                 favourited.remove(favourite);
+            } else {
+                favourite.getInspections().setInspectionsList(updated);
             }
         }
     }

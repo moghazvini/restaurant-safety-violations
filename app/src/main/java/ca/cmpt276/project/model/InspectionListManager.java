@@ -22,7 +22,7 @@ public class InspectionListManager {
         return inspections;
     }
 
-    public void setInspectionsList(ArrayList<Inspection> inspectionArrayList){
+    public void setInspectionsList(List<Inspection> inspectionArrayList){
         inspections = inspectionArrayList;
     }
 
