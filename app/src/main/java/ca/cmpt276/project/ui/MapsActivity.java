@@ -344,7 +344,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     public void setupMap(){
-
         mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
         mMap.getUiSettings().setZoomControlsEnabled(true);
         mMap.getUiSettings().setZoomGesturesEnabled(true);
@@ -376,8 +375,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
             if (mClusterManagerRenderer == null) {
                 mClusterManagerRenderer = new ClusterManagerRenderer(this, googleMap, mClusterManager );
-                mClusterManager.setRenderer(mClusterManagerRenderer);
             }
+            mClusterManager.setRenderer(mClusterManagerRenderer);
             int pos = 0 ;
             // set the severity icons
             int low = R.drawable.green_hazard;
@@ -420,8 +419,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private void stopLocationUpdates() {
         mFusedLocationProviderClient.removeLocationUpdates(locationCallback);
     }
-
-
 
     @Override
     public boolean onClusterClick(Cluster<ClusterMarker> cluster) {
@@ -647,25 +644,22 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 lastModified.setLast_mod_restaurants(MapsActivity.this, restaurantUpdate.get(0).getLast_modified());
                 lastModified.setLast_mod_inspections(MapsActivity.this, restaurantUpdate.get(1).getLast_modified());
                 getUpdatedFiles();
-                favouritesUpdated = restaurantManager.getFavourited();
-                if (favouritesUpdated.size() > 0) {
-                /*String rests = "";
-                for (Restaurant restaurant : favouritesUpdated) {
-                    rests = rests.concat(restaurant.getName());
-                }
-                Log.d("Favourites updated", rests);*/
-                    FavouritesUpdatedDialogFragment updated = new FavouritesUpdatedDialogFragment();
-                    updated.show(manager,"Updated favourites");
-                }
-
                 setupMap();
 
-                /*finish();
-                startActivity(getIntent());*/
                 loadingDialog.dismiss();
+                showUpdatedFavourites();
             }
         }
     }
+
+    private void showUpdatedFavourites() {
+        favouritesUpdated = restaurantManager.getFavourited();
+        if (favouritesUpdated.size() > 0) {
+            FavouritesUpdatedDialogFragment updated = new FavouritesUpdatedDialogFragment();
+            updated.show(manager,"Updated favourites");
+        }
+    }
+
     private String TAG1 = "Tag1";
     private void fillInitialRestaurantList() {
         InputStream inputStream = getResources().openRawResource(R.raw.restaurants_itr1);
