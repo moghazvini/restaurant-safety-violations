@@ -32,6 +32,7 @@ public class RestaurantListManager {
 
     private RestaurantListManager() {
         restaurants = new ArrayList<>();
+        favourited = new ArrayList<>();
     }
 
     public static RestaurantListManager getInstance() {
@@ -62,8 +63,6 @@ public class RestaurantListManager {
     }
 
     public void fillRestaurantManager(BufferedReader reader, Context context) {
-        favourited = new ArrayList<>();
-
         String line = "";
         try {
             reader.readLine();
@@ -76,12 +75,6 @@ public class RestaurantListManager {
                 String[] attributes = line.split(",");
                 String tracking = attributes[0];
                 tracking = tracking.replace(" ", "");
-
-                Restaurant checkFavourite = this.find(tracking);
-                if (checkFavourite != null) {
-                    favourited.add(checkFavourite);
-                    favourite = checkFavourite.isFavourite();
-                }
 
                 String name = attributes[1];
 

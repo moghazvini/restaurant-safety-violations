@@ -225,6 +225,10 @@ public class DBAdapter {
         else {return null;}
     }
 
+    public Cursor trackingSearch(String tracking) {
+        return db.query(TABLE_RESTAURANTS, ALL_KEYS, KEY_TRACKING +"='"+tracking+"'", null, null, null, null, null);
+    }
+
     public String sqlSelectionBuilder(String name, String hazard, int numCritical, String lessMore){
         String selection = "";
         if(name.length() > 0){

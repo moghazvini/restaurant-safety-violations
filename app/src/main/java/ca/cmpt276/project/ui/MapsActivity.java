@@ -693,7 +693,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     // ALL DATABASE RELATED FUNCTIONS BELOW
-    private void fillInitialDatabase(){
+    private void fillInitialDatabase() {
+        Log.d("initialDB", "filling initial");
+        Toast.makeText(this,"filling initial database",Toast.LENGTH_SHORT).show();
         InputStream inputStream = getResources().openRawResource(R.raw.restaurants_itr1);
         BufferedReader reader = new BufferedReader(
                 new InputStreamReader(inputStream, StandardCharsets.UTF_8)
@@ -739,9 +741,17 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 String[] attributes = line.split(",");
                 String tracking = attributes[0];
                 tracking = tracking.replace(" ", "");
+                int favourite = 0;
 
-                Cursor cursor = myDb.searchRestaurants(DBAdapter.KEY_TRACKING, tracking, DBAdapter.MatchString.EQUALS);
-                if (cursor == null) {
+                //Cursor cursor = myDb.searchRestaurants(DBAdapter.KEY_TRACKING, tracking, DBAdapter.MatchString.EQUALS);
+                Cursor cursor = myDb.trackingSearch(tracking);
+                if (cursor.getCount() > 0) {
+                    cursor.moveToFirst();
+                    favourite = Integer.parseInt(cursor.getString(DBAdapter.COL_FAVOURITE));
+                    if (favourite == 1) {
+                        restaurantManager.getFavourited().add(restaurantManager.find(tracking));
+                    }
+                } else {
                     String name = attributes[1];
 
                     int addrIndex = attributes.length - 5;
@@ -755,7 +765,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     ArrayList<Inspection> inspectionsArray = new ArrayList<>();
 
                     String inspections = gson.toJson(inspectionsArray);
-                    int favourite = 0;
+
                     //read data
                     myDb.insertRowRestaurant(tracking,
                             name,
@@ -856,7 +866,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 if(inspectionArrayList.size() > 0) {
                     Inspection latestInspection = Collections.max(inspectionArrayList);
                     hazardLevel = latestInspection.getStringHazard();
-                    Log.d(TAG, "Restaurant: " + restaurantDBcursor.getString(DBAdapter.COL_NAME));
+
                     numCritical = getLatestYearSumCritical(inspectionArrayList);
                     String tracking = restaurantDBcursor.getString(DBAdapter.COL_TRACKING);
                     myDb.updateRestaurantRow(tracking, hazardLevel, numCritical);
@@ -897,7 +907,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             openPopUpWindow(restaurant);
             mMap.animateCamera(CameraUpdateFactory.zoomTo(20));
         } else {
-            Toast.makeText(this, "could not find restaurant", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(this, "could not find restaurant", Toast.LENGTH_SHORT).show();
         }
     }
 //        if(restaurant_details_idx > 0) {
