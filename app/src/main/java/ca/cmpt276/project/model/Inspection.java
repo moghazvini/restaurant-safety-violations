@@ -95,6 +95,16 @@ public class Inspection implements Comparable<Inspection>{
         return level;
     }
 
+    public String getStringHazard(){
+        String stringHazard;
+        if(level == HazardLevel.HIGH){
+            stringHazard = "HIGH";
+        } else if (level == HazardLevel.MODERATE){
+            stringHazard = "MODERATE";
+        } else {stringHazard = "LOW";}
+        return stringHazard;
+    }
+
     public void setLevel(HazardLevel level) {
         this.level = level;
     }
