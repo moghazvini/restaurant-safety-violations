@@ -18,14 +18,14 @@ public class Restaurant implements Comparable<Restaurant>, Parcelable {
     private boolean isFavourite;
     private InspectionListManager inspections;
 
-    public Restaurant(String tracking, String name, String address, String city, float gpsLong, float gpsLat) {
+    public Restaurant(String tracking, String name, String address, String city, float gpsLong, float gpsLat, boolean isFavourite) {
         this.name = name;
         this.address = address;
         this.city = city;
         this.gpsLong = gpsLong;
         this.gpsLat = gpsLat;
         this.tracking = tracking;
-        this.isFavourite = false;
+        this.isFavourite = isFavourite;
         this.inspections = new InspectionListManager();
     }
 

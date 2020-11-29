@@ -25,9 +25,11 @@ import ca.cmpt276.project.ui.MapsActivity;
  * inspections.
  */
 public class RestaurantListManager {
-    private final List<Restaurant> restaurants;
+    private List<Restaurant> restaurants;
     private static RestaurantListManager instance;
     private static final String TAG = "RestaurantListTag";
+    private List<Restaurant> favourited;
+
     private RestaurantListManager() {
         restaurants = new ArrayList<>();
     }
@@ -37,10 +39,6 @@ public class RestaurantListManager {
             instance = new RestaurantListManager();
         }
         return instance;
-    }
-
-    public void add (Restaurant restaurant) {
-        restaurants.add(restaurant);
     }
 
     public List<Restaurant> getList() {
@@ -64,17 +62,27 @@ public class RestaurantListManager {
     }
 
     public void fillRestaurantManager(BufferedReader reader, Context context) {
+        favourited = new ArrayList<>();
+
         String line = "";
         try {
             reader.readLine();
-            instance.getList().clear();
+            List<Restaurant> updated = new ArrayList<>();
             while ((line = reader.readLine()) != null) {
                 //System.out.println(line);
                 line = line.replace("\"", "");
 
+                boolean favourite = false;
                 String[] attributes = line.split(",");
                 String tracking = attributes[0];
                 tracking = tracking.replace(" ", "");
+
+                Restaurant checkFavourite = this.find(tracking);
+                if (checkFavourite != null) {
+                    favourited.add(checkFavourite);
+                    favourite = checkFavourite.isFavourite();
+                }
+
                 String name = attributes[1];
 
                 int addrIndex = attributes.length - 5;
@@ -93,10 +101,12 @@ public class RestaurantListManager {
                         addr,
                         city,
                         gpsLong, // Restaurant Longitude
-                        gpsLat // Restaurant Latitude
+                        gpsLat, // Restaurant Latitude
+                        favourite
                 );
-                instance.add(restaurant);
+                updated.add(restaurant);
             }
+            restaurants = updated;
             Collections.sort(restaurants);
         } catch(IOException e){
             Log.wtf("RestaurantListActivity", "error reading data file on line " + line, e);
@@ -154,8 +164,18 @@ public class RestaurantListManager {
                 }
 
             }
+
+            checkUpdatedFavourites();
         } catch(IOException e){
             Log.wtf("RestaurantListActivity", "error reading data file on line " + line, e);
+        }
+    }
+
+    private void checkUpdatedFavourites() {
+        for (Restaurant favourite : favourited) {
+            if (favourite.getInspections().getInspections().size() == this.find(favourite.getTracking()).getInspections().getInspections().size()) {
+                favourited.remove(favourite);
+            }
         }
     }
 
@@ -183,5 +203,9 @@ public class RestaurantListManager {
             lump.append(inspectionRow[i]).append(",");
         }
         return lump.toString();
+    }
+
+    public List<Restaurant> getFavourited() {
+        return favourited;
     }
 }

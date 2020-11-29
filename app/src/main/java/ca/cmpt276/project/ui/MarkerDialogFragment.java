@@ -39,9 +39,6 @@ public class MarkerDialogFragment extends AppCompatDialogFragment {
         TextView restaurant_severity = (TextView) view.findViewById(R.id.txt_severity);
         ImageView img_icon = view.findViewById(R.id.img_icon);
 
-        RestaurantListManager restaurantListManager = RestaurantListManager.getInstance();
-        //int index = getArguments().getInt("index");
-        //Restaurant restaurant = restaurantListManager.getRestaurant(index);
         Restaurant restaurant = getArguments().getParcelable(RESTAURANT_KEY);
 
         restaurant_Title.setText(restaurant.getName());

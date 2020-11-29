@@ -107,6 +107,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     Gson gson;
     DBAdapter myDb;
     List<Restaurant> foundRestaurants;
+    List<Restaurant> favouritesUpdated;
+
     private static final String TAG = "MapsTag";
     //Location callBack
     private final LocationCallback locationCallback = new LocationCallback() {
@@ -134,6 +136,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         restaurantManager = RestaurantListManager.getInstance();
         lastModified = LastModified.getInstance(this);
         manager = getSupportFragmentManager();
+
         gson = new GsonBuilder().registerTypeAdapter(LocalDate.class, new LocalDateAdapter().nullSafe()).create();
         if(!read){
             fillInitialRestaurantList();
@@ -553,11 +556,16 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 String name = cursor.getString(DBAdapter.COL_NAME);
                 float latitude = cursor.getFloat(DBAdapter.COL_LATITUDE);
                 float longitude = cursor.getFloat(DBAdapter.COL_LONGITUDE);
+                boolean favourite = false;
+                if (cursor.getInt(DBAdapter.COL_FAVOURITE) == 1) {
+                    favourite = true;
+                }
                 LatLng coords = new LatLng(latitude, longitude);
+
                 ArrayList<Inspection> inspectionArrayList = extractInspectionList(cursor);
                 InspectionListManager inspectionListManager = new InspectionListManager();
                 inspectionListManager.setInspectionsList(inspectionArrayList);
-                Restaurant newRestaurant = new Restaurant(tracking, name, address, city, longitude, latitude);
+                Restaurant newRestaurant = new Restaurant(tracking, name, address, city, longitude, latitude, favourite);
                 newRestaurant.setInspections(inspectionListManager);
                 Inspection latestInspection = null;
                 if(inspectionArrayList.size() > 0) {
@@ -633,6 +641,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         protected void onPostExecute(Boolean receivedUpdate) {
             boolean update = receivedUpdate;
             if (update) {
+                favouritesUpdated = new ArrayList<>();
                 fillDatabaseWithUpdated();
                 lastModified.setLastCheck(MapsActivity.this, LocalDateTime.now());
                 lastModified.setLast_mod_restaurants(MapsActivity.this, restaurantUpdate.get(0).getLast_modified());
@@ -671,6 +680,16 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             InputStreamReader inputReader_insp = new InputStreamReader(inputStream_insp, StandardCharsets.UTF_8);
             restaurantManager.fillRestaurantManager(new BufferedReader(inputReader_rest),this);
             restaurantManager.fillInspectionManager(new BufferedReader(inputReader_insp));
+            favouritesUpdated = restaurantManager.getFavourited();
+            if (favouritesUpdated.size() > 0) {
+                /*String rests = "";
+                for (Restaurant restaurant : favouritesUpdated) {
+                    rests = rests.concat(restaurant.getName());
+                }
+                Log.d("Favourites updated", rests);*/
+                FavouritesUpdatedDialogFragment updated = new FavouritesUpdatedDialogFragment();
+                updated.show(manager,"Updated favourites");
+            }
         } catch (FileNotFoundException e) {
             // No update files downloaded
         }
@@ -717,7 +736,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         String line = "";
         try {
             reader.readLine();
-            myDb.deleteAll();
+            //myDb.deleteAll();
             myDb.beginTransaction();
             while ((line = reader.readLine()) != null) {
                 line = line.replace("\"", "");
@@ -725,30 +744,33 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 String[] attributes = line.split(",");
                 String tracking = attributes[0];
                 tracking = tracking.replace(" ", "");
-                String name = attributes[1];
 
-                int addrIndex = attributes.length - 5;
-                for (int i = 2; i < addrIndex; i++) {
-                    name = name.concat(attributes[i]);
+                Cursor cursor = myDb.searchRestaurants(DBAdapter.KEY_TRACKING, tracking, DBAdapter.MatchString.EQUALS);
+                if (cursor == null) {
+                    String name = attributes[1];
+
+                    int addrIndex = attributes.length - 5;
+                    for (int i = 2; i < addrIndex; i++) {
+                        name = name.concat(attributes[i]);
+                    }
+                    String addr = attributes[addrIndex];
+                    String city = attributes[addrIndex + 1];
+                    float gpsLat = Float.parseFloat(attributes[addrIndex + 3]);
+                    float gpsLong = Float.parseFloat(attributes[addrIndex + 4]);
+                    ArrayList<Inspection> inspectionsArray = new ArrayList<>();
+
+                    String inspections = gson.toJson(inspectionsArray);
+                    int favourite = 0;
+                    //read data
+                    myDb.insertRowRestaurant(tracking,
+                            name,
+                            addr,
+                            city,
+                            gpsLat,
+                            gpsLong,
+                            inspections,
+                            favourite);
                 }
-                String addr = attributes[addrIndex];
-                String city = attributes[addrIndex + 1];
-                float gpsLat = Float.parseFloat(attributes[addrIndex + 3]);
-                float gpsLong = Float.parseFloat(attributes[addrIndex + 4]);
-                ArrayList<Inspection> inspectionsArray = new ArrayList<>();
-
-                String inspections = gson.toJson(inspectionsArray);
-                int favourite = 0;
-                //read data
-                myDb.insertRowRestaurant(tracking,
-                        name,
-                        addr,
-                        city,
-                        gpsLat,
-                        gpsLong,
-                        inspections,
-                        favourite);
-
             }
             myDb.endTransactionSuccessful();
 
@@ -801,7 +823,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         inspectionsListDB.add(inspection);
                         String trackingID = restaurantCursor.getString(DBAdapter.COL_TRACKING);
                         String inputString = gson.toJson(inspectionsListDB);
-                        Log.d(TAG, "input string date: " + inputString);
                         myDb.updateRow(DBAdapter.KEY_INSPECTION_LIST, trackingID, inputString);
                     }
                     //myDb.insertRowInspection(inspectionTracking, stringDate, stringType, numCritical, numNonCritical, violationLump, stringHazard);
@@ -854,12 +875,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         LocalDateTime current = LocalDateTime.now();
         int totalCritical = 0;
         for(int i = 0; i < inspectionsArrayList.size(); i++){
-            Log.d(TAG, ""+Math.abs(current.getYear() - inspectionsArrayList.get(i).getDate().getYear()));
-            Log.d(TAG, "current: "+current.getYear());
-            Log.d(TAG, "inspection: "+inspectionsArrayList.get(i).getDate().toString());
             if(Math.abs(current.getYear() - inspectionsArrayList.get(i).getDate().getYear()) <= 1){
                 totalCritical += inspectionsArrayList.get(i).getCritical();
-                Log.d(TAG, "# critical: " + inspectionsArrayList.get(i).getCritical() + " total crit: " + totalCritical);
             }
         }
         return totalCritical;
@@ -903,7 +920,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             String city = restaurantCursor.getString(DBAdapter.COL_CITY);
             float gpsLong = restaurantCursor.getFloat(DBAdapter.COL_LONGITUDE);
             float gpsLat = restaurantCursor.getFloat(DBAdapter.COL_LATITUDE);
-            newRestaurant = new Restaurant(tracking, name, address, city, gpsLong, gpsLat);
+            boolean favourite = false;
+            if (restaurantCursor.getInt(DBAdapter.COL_FAVOURITE) == 1) {
+                favourite = true;
+            }
+            newRestaurant = new Restaurant(tracking, name, address, city, gpsLong, gpsLat, favourite);
         }
         return newRestaurant;
     }
