@@ -81,13 +81,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private static final String FINE_LOCATION = Manifest.permission.ACCESS_FINE_LOCATION;
     private static final String COURSE_LOCATION = Manifest.permission.ACCESS_COARSE_LOCATION;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1234;
+    private static final String TAG = "MapsTag";
 
     //SupportMapFragment mapFragment;
     private GoogleMap mMap;
     private RestaurantListManager restaurantManager;
     private LastModified lastModified;
     private List<CsvInfo> restaurantUpdate;
-    private List<LatLng> restaurantlatlog;
+    private List<LatLng> restaurantlatlong;
 
     // custom markers
     private ClusterManager<ClusterMarker> mClusterManager;
@@ -109,21 +110,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     List<Restaurant> foundRestaurants;
     List<Restaurant> favouritesUpdated;
 
-    private static final String TAG = "MapsTag";
     //Location callBack
-    private final LocationCallback locationCallback = new LocationCallback() {
-        @Override
-        public void onLocationResult(LocationResult locationResult) {
-            super.onLocationResult(locationResult);
-            if (locationResult == null) {
-                return;
-            }
-            for(Location location : locationResult.getLocations()){
-                mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(location.getLatitude(), location.getLongitude())));
-                mMap.animateCamera(CameraUpdateFactory.zoomTo(13f));
-            }
-        }
-    };
+    private LocationCallback locationCallback;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -154,6 +142,20 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             new GetDataTask().execute();
         }
         getLocationPermission();
+
+        locationCallback = new LocationCallback() {
+            @Override
+            public void onLocationResult(LocationResult locationResult) {
+                super.onLocationResult(locationResult);
+                if (locationResult == null) {
+                    return;
+                }
+                for(Location location : locationResult.getLocations()){
+                    mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(location.getLatitude(), location.getLongitude())));
+                    mMap.animateCamera(CameraUpdateFactory.zoomTo(13f));
+                }
+            }
+        };
 
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
 
@@ -360,10 +362,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void popLatlong() {
-        restaurantlatlog = new ArrayList<>();
+        restaurantlatlong = new ArrayList<>();
         for (Restaurant current : restaurantManager.getList()){
             LatLng temp = new LatLng(current.getGpsLat(),current.getGpsLong());
-            restaurantlatlog.add(temp);
+            restaurantlatlong.add(temp);
         }
     }
 
@@ -382,7 +384,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             int low = R.drawable.green_hazard;
             int med = R.drawable.orange_hazard;
             int high = R.drawable.red_hazard;
-            for (LatLng current : restaurantlatlog) {
+            for (LatLng current : restaurantlatlong) {
                 try {
                     if (restaurantManager.getRestaurant(pos).getInspections().getInspections().size() > 0) {
                         String snippet = "";
@@ -725,8 +727,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
-
-
     private void fillRestaurantDatabase(BufferedReader reader){
         String line = "";
         try {
@@ -789,7 +789,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 if (tokens.length > 0) {
                     String inspectionTracking = tokens[0];
                     Cursor restaurantCursor = myDb.searchRestaurants(DBAdapter.KEY_TRACKING, inspectionTracking, DBAdapter.MatchString.EQUALS);
-                    String stringDate = tokens[1];
                     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
                     LocalDate date = LocalDate.parse(tokens[1], formatter);
                     String stringType = tokens[2];
