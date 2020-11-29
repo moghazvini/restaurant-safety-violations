@@ -39,6 +39,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.tasks.Task;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.google.maps.android.clustering.Cluster;
 import com.google.maps.android.clustering.ClusterItem;
@@ -68,6 +69,7 @@ import ca.cmpt276.project.model.DBAdapter;
 import ca.cmpt276.project.model.Inspection;
 import ca.cmpt276.project.model.InspectionListManager;
 import ca.cmpt276.project.model.LastModified;
+import ca.cmpt276.project.model.LocalDateAdapter;
 import ca.cmpt276.project.model.Restaurant;
 import ca.cmpt276.project.model.RestaurantListManager;
 import ca.cmpt276.project.model.SurreyDataDownloader;
@@ -102,7 +104,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private LoadingDialogFragment loadingDialog;
 
     FragmentManager manager;
-
+    Gson gson;
     DBAdapter myDb;
     List<Restaurant> foundRestaurants;
     private static final String TAG = "MapsTag";
@@ -132,7 +134,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         restaurantManager = RestaurantListManager.getInstance();
         lastModified = LastModified.getInstance(this);
         manager = getSupportFragmentManager();
-
+        gson = new GsonBuilder().registerTypeAdapter(LocalDate.class, new LocalDateAdapter().nullSafe()).create();
         if(!read){
             fillInitialRestaurantList();
             read = true;
@@ -501,15 +503,20 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     @Override
-    public void sendSearchInput(String input, String hazard_filter, int num_critical_filter) {
-        Toast.makeText(this, "name: " + input+" hazard filter: "+hazard_filter+" critical filter: "+num_critical_filter, Toast.LENGTH_LONG).show();
-        if(input.length() > 0) {
-            Cursor relevantRowsCursor = myDb.searchRestaurants(DBAdapter.KEY_NAME, input, DBAdapter.MatchString.CONTAINS);
-            Log.d(TAG, "NEW SEARCH: " + input);
+    public void sendSearchInput(String name, String hazard_filter, int num_critical_filter, String lessMore) {
+        String msg = "name: " + name+" hazard filter: "+hazard_filter+" critical filter: "+num_critical_filter + "less: " + lessMore;
+        //Toast.makeText(this, "name: " + name+" hazard filter: "+hazard_filter+" critical filter: "+num_critical_filter + "less: " + lessMore, Toast.LENGTH_LONG).show();
+        Log.d(TAG, msg);
+        if(name.length() > 0 || hazard_filter.length() > 0 || num_critical_filter > 0) {
+            //Cursor relevantRowsCursor = myDb.searchRestaurants(DBAdapter.KEY_NAME, input, DBAdapter.MatchString.CONTAINS);
+            Cursor relevantRowsCursor = myDb.filterRestaurants(name, hazard_filter, num_critical_filter, lessMore);
+            Log.d(TAG, "NEW SEARCH: " + name);
             if (relevantRowsCursor != null) {
                 addRelevantMarkers(mMap, relevantRowsCursor);
             }
             printCursor(relevantRowsCursor);
+        } else {
+            Log.d(TAG, "no filter");
         }
     }
 
@@ -594,10 +601,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private ArrayList<Inspection> extractInspectionList(Cursor cursor){
-        Gson gson = new Gson();
+
         Type type = new TypeToken<ArrayList<Inspection>>() {}.getType();
         String outputString = cursor.getString(DBAdapter.COL_INSPECTION_LIST);
         ArrayList<Inspection> inspectionsArray = gson.fromJson(outputString, type);
+        if(inspectionsArray.size() > 0) {
+            Log.d(TAG, "extrat date from db: " + inspectionsArray.get(0).getDate().toString());
+        }
         return inspectionsArray;
     }
 
@@ -666,6 +676,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
+    // ALL DATABASE RELATED FUNCTIONS BELOW
     private void fillInitialDatabase(){
         InputStream inputStream = getResources().openRawResource(R.raw.restaurants_itr1);
         BufferedReader reader = new BufferedReader(
@@ -677,6 +688,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 new InputStreamReader(is, StandardCharsets.UTF_8)
         );
         fillInspectionsDatabase(inspectionReader);
+        addHazardAndCriticalToDB();
 
     }
 
@@ -691,6 +703,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             fillRestaurantDatabase(new BufferedReader(inputReader_rest));
             long startTime = System.nanoTime();
             fillInspectionsDatabase(new BufferedReader(inputReader_insp));
+            addHazardAndCriticalToDB();
             long stopTime = System.nanoTime();
             Log.d(TAG, "TIME TAKEN: " + (stopTime - startTime));
         } catch (FileNotFoundException e) {
@@ -723,7 +736,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 float gpsLat = Float.parseFloat(attributes[addrIndex + 3]);
                 float gpsLong = Float.parseFloat(attributes[addrIndex + 4]);
                 ArrayList<Inspection> inspectionsArray = new ArrayList<>();
-                Gson gson = new Gson();
+
                 String inspections = gson.toJson(inspectionsArray);
                 int favourite = 0;
                 //read data
@@ -749,7 +762,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         String line = "";
         try {
             reader.readLine();
-            Gson gson = new Gson();
+
             myDb.beginTransaction();
             while ((line = reader.readLine()) != null) {
                 line = line.replace("\"", "");
@@ -782,11 +795,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     } else {
                         inspection = new Inspection(date, inspectionType, numCritical, numNonCritical, hazard);
                     }
+
                     if(restaurantCursor.moveToFirst()) {
-                        ArrayList<Inspection> inspectionsListDB = new ArrayList<>();
+                        ArrayList<Inspection> inspectionsListDB = extractInspectionList(restaurantCursor);
                         inspectionsListDB.add(inspection);
                         String trackingID = restaurantCursor.getString(DBAdapter.COL_TRACKING);
                         String inputString = gson.toJson(inspectionsListDB);
+                        Log.d(TAG, "input string date: " + inputString);
                         myDb.updateRow(DBAdapter.KEY_INSPECTION_LIST, trackingID, inputString);
                     }
                     //myDb.insertRowInspection(inspectionTracking, stringDate, stringType, numCritical, numNonCritical, violationLump, stringHazard);
@@ -816,6 +831,39 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         return lump.toString();
     }
 
+    private void addHazardAndCriticalToDB(){
+        Cursor restaurantDBcursor = myDb.getAllRows();
+        if(restaurantDBcursor.moveToFirst()){
+            do{
+                ArrayList<Inspection> inspectionArrayList = extractInspectionList(restaurantDBcursor);
+                String hazardLevel = "N/A";
+                int numCritical = 0;
+                if(inspectionArrayList.size() > 0) {
+                    Inspection latestInspection = Collections.max(inspectionArrayList);
+                    hazardLevel = latestInspection.getStringHazard();
+                    Log.d(TAG, "Restaurant: " + restaurantDBcursor.getString(DBAdapter.COL_NAME));
+                    numCritical = getLatestYearSumCritical(inspectionArrayList);
+                    String tracking = restaurantDBcursor.getString(DBAdapter.COL_TRACKING);
+                    myDb.updateRestaurantRow(tracking, hazardLevel, numCritical);
+                }
+            } while (restaurantDBcursor.moveToNext());
+        }
+    }
+
+    private int getLatestYearSumCritical(ArrayList<Inspection> inspectionsArrayList){
+        LocalDateTime current = LocalDateTime.now();
+        int totalCritical = 0;
+        for(int i = 0; i < inspectionsArrayList.size(); i++){
+            Log.d(TAG, ""+Math.abs(current.getYear() - inspectionsArrayList.get(i).getDate().getYear()));
+            Log.d(TAG, "current: "+current.getYear());
+            Log.d(TAG, "inspection: "+inspectionsArrayList.get(i).getDate().toString());
+            if(Math.abs(current.getYear() - inspectionsArrayList.get(i).getDate().getYear()) <= 1){
+                totalCritical += inspectionsArrayList.get(i).getCritical();
+                Log.d(TAG, "# critical: " + inspectionsArrayList.get(i).getCritical() + " total crit: " + totalCritical);
+            }
+        }
+        return totalCritical;
+    }
 
     private boolean past20Hours() {
         lastModified = LastModified.getInstance(MapsActivity.this);

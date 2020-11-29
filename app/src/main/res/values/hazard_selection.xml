@@ -6,4 +6,10 @@
         <item>"MODERATE"</item>
         <item>"HIGH"</item>
     </string-array>
+
+    <string-array name="less_more_selection">
+        <item>"OFF"</item>
+        <item>"Less than"</item>
+        <item>"More than"</item>
+    </string-array>
 </resources>

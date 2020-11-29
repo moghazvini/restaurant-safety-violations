@@ -11,7 +11,6 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
-import android.widget.SearchView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -27,11 +26,14 @@ public class SearchDialogFragment extends AppCompatDialogFragment {
     private String searchTerm;
     private String hazardFilter;
     private int numCriticalFilter;
+    //private boolean less;
+    private String lessMore;
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         // code for alert dialog via fragment from Dr Brian Fraser's video https://www.youtube.com/watch?v=y6StJRn-Y-A
         v = LayoutInflater.from(getActivity()).inflate(R.layout.search_dialog_layout, null);
         setupHazardRadioButtons();
+        setupCriticalRadioButtons();
         DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -49,9 +51,17 @@ public class SearchDialogFragment extends AppCompatDialogFragment {
                         if(hazardFilter == null){
                             hazardFilter = "OFF";
                         }
-                        Log.d(TAG, "selected hazard filter: " + hazardFilter);
+                        if(lessMore == null){
+                            lessMore = "OFF";
+                        } else if (lessMore.equals("Less than")){
+                            lessMore = "LESS";
+                        } else if (lessMore.equals("More than")){
+                            lessMore = "MORE";
+                        } else {
+                            lessMore = "OFF";
+                        }
 
-                        dialogListener.sendSearchInput(searchTerm, hazardFilter, numCriticalFilter);
+                        dialogListener.sendSearchInput(searchTerm, hazardFilter, numCriticalFilter, lessMore);
                         break;
 
                     case DialogInterface.BUTTON_NEGATIVE:
@@ -68,18 +78,36 @@ public class SearchDialogFragment extends AppCompatDialogFragment {
                 .create();
     }
 
+    private void setupCriticalRadioButtons() {
+        RadioGroup group = v.findViewById(R.id.radioGroupLessMore);
+        String[] lessMoreSelections = getResources().getStringArray(R.array.less_more_selection);
+        for (final String selectedLessMore : lessMoreSelections) {
+            RadioButton btn = new RadioButton(getContext());
+            btn.setText(selectedLessMore);
+            btn.setOnClickListener(v -> {
+                lessMore = selectedLessMore;
+            });
+            group.addView(btn);
+            if (selectedLessMore.equals("OFF")) {
+                btn.setChecked(true);
+            }
+        }
+
+    }
+
     private void setupHazardRadioButtons() {
         RadioGroup group = v.findViewById(R.id.radioGroupHazard);
         String[] hazardSelectionsArray = getResources().getStringArray(R.array.hazard_selection);
-        for (int i = 0; i < hazardSelectionsArray.length; i++){
-            final String selectedHazardFilter = hazardSelectionsArray[i];
+        for (final String selectedHazardFilter : hazardSelectionsArray) {
             RadioButton btn = new RadioButton(getContext());
             btn.setText(selectedHazardFilter);
             btn.setOnClickListener(v -> {
                 hazardFilter = selectedHazardFilter;
             });
             group.addView(btn);
-
+            if(selectedHazardFilter.equals("OFF")){
+                btn.setChecked(true);
+            }
         }
 
     }
@@ -96,7 +124,7 @@ public class SearchDialogFragment extends AppCompatDialogFragment {
     }
 
     public interface SearchDialogListener{
-        void sendSearchInput(String input, String hazard_filter, int num_critical_filter);
+        void sendSearchInput(String input, String hazard_filter, int num_critical_filter, String lessMore);
     }
 
 }

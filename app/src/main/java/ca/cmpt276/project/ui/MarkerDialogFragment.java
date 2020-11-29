@@ -130,7 +130,7 @@ public class MarkerDialogFragment extends AppCompatDialogFragment {
                 .setView(view)
                 .create();
     }
-
+    // pass object to fragment https://www.youtube.com/watch?v=Nvz2cUehJLU
     public static MarkerDialogFragment newInstance(Restaurant restaurant){
         MarkerDialogFragment fragment = new MarkerDialogFragment();
         Bundle info = new Bundle();

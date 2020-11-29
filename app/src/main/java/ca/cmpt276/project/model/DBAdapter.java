@@ -7,6 +7,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import java.util.ArrayList;
+
 
 public class DBAdapter {
 
@@ -29,15 +31,17 @@ public class DBAdapter {
     public static final String KEY_LONGITUDE = "long";
     public static final String KEY_INSPECTION_LIST = "inspections";
     public static final String KEY_FAVOURITE = "favourite";
+    public static final String KEY_HAZARD = "hazard";
+    public static final String KEY_NUM_CRITICAL = "num_critical";
 
     // INSPECTIONS TABLE COLUMNS
-    public static final String KEY_ROWID = "_id"; // KEY_INSPECTION_ID
-    public static final String KEY_DATE = "date";
-    public static final String KEY_TYPE = "type";
-    public static final String KEY_NUM_CRITICAL = "num_critical";
-    public static final String KEY_NUM_NON_CRITICAL = "num_non_critical";
-    public static final String KEY_VIOLUMP = "violump";
-    public static final String KEY_HAZARD = "hazard";
+//    public static final String KEY_ROWID = "_id"; // KEY_INSPECTION_ID
+//    public static final String KEY_DATE = "date";
+//    public static final String KEY_TYPE = "type";
+//    public static final String KEY_NUM_CRITICAL = "num_critical";
+//    public static final String KEY_NUM_NON_CRITICAL = "num_non_critical";
+//    public static final String KEY_VIOLUMP = "violump";
+//    public static final String KEY_HAZARD = "hazard";
 
     public static final int COL_TRACKING = 0;
     public static final int COL_NAME = 1;
@@ -47,6 +51,8 @@ public class DBAdapter {
     public static final int COL_LONGITUDE = 5;
     public static final int COL_INSPECTION_LIST = 6;
     public static final int COL_FAVOURITE = 7;
+    public static final int COL_HAZARD = 8;
+    public static final int COL_NUM_CRITICAL = 9;
 
     // ALL_KEYS_RESTAURANT
     public static final String[] ALL_KEYS = new String[] {KEY_TRACKING, KEY_NAME, KEY_ADDRESS, KEY_CITY, KEY_LATITUDE, KEY_LONGITUDE, KEY_INSPECTION_LIST, KEY_FAVOURITE};
@@ -67,20 +73,22 @@ public class DBAdapter {
                     + KEY_LATITUDE + " integer not null,"
                     + KEY_LONGITUDE + " integer not null,"
                     + KEY_INSPECTION_LIST + " text,"
-                    + KEY_FAVOURITE + " boolean not null"
+                    + KEY_FAVOURITE + " boolean not null,"
+                    + KEY_HAZARD + " text,"
+                    + KEY_NUM_CRITICAL + " integer"
             + ");";
 
-    private static final String CREATE_TABLE_INSPECTIONS =
-            "CREATE TABLE " + TABLE_INSPECTIONS + " ("
-                    + KEY_ROWID + " integer primary key autoincrement, "
-                    + KEY_TRACKING + " text not null,"
-                    + KEY_DATE + " text not null,"
-                    + KEY_TYPE + " text not null,"
-                    + KEY_NUM_CRITICAL + " integer not null,"
-                    + KEY_NUM_NON_CRITICAL + " integer not null,"
-                    + KEY_VIOLUMP + " text,"
-                    + KEY_HAZARD + " text not null"
-            + ");";
+//    private static final String CREATE_TABLE_INSPECTIONS =
+//            "CREATE TABLE " + TABLE_INSPECTIONS + " ("
+//                    + KEY_ROWID + " integer primary key autoincrement, "
+//                    + KEY_TRACKING + " text not null,"
+//                    + KEY_DATE + " text not null,"
+//                    + KEY_TYPE + " text not null,"
+//                    + KEY_NUM_CRITICAL + " integer not null,"
+//                    + KEY_NUM_NON_CRITICAL + " integer not null,"
+//                    + KEY_VIOLUMP + " text,"
+//                    + KEY_HAZARD + " text not null"
+//            + ");";
 
     // Context of application who uses us.
     private final Context context;
@@ -133,22 +141,22 @@ public class DBAdapter {
         return db.insert(TABLE_RESTAURANTS, null, rowValues);
     }
 
-    public long insertRowInspection(String tracking, String date, String type, int numCritical, int numNonCritical, String violump, String hazard) {
-        ContentValues rowValues = new ContentValues();
-
-        rowValues.put(KEY_TRACKING, tracking);
-        rowValues.put(KEY_DATE, date);
-        rowValues.put(KEY_TYPE, type);
-        rowValues.put(KEY_NUM_CRITICAL, numCritical);
-        rowValues.put(KEY_NUM_NON_CRITICAL, numNonCritical);
-        rowValues.put(KEY_VIOLUMP, violump);
-        rowValues.put(KEY_HAZARD, hazard);
-
-        return db.insert(TABLE_INSPECTIONS, null, rowValues);
-    }
+//    public long insertRowInspection(String tracking, String date, String type, int numCritical, int numNonCritical, String violump, String hazard) {
+//        ContentValues rowValues = new ContentValues();
+//
+//        rowValues.put(KEY_TRACKING, tracking);
+//        rowValues.put(KEY_DATE, date);
+//        rowValues.put(KEY_TYPE, type);
+//        rowValues.put(KEY_NUM_CRITICAL, numCritical);
+//        rowValues.put(KEY_NUM_NON_CRITICAL, numNonCritical);
+//        rowValues.put(KEY_VIOLUMP, violump);
+//        rowValues.put(KEY_HAZARD, hazard);
+//
+//        return db.insert(TABLE_INSPECTIONS, null, rowValues);
+//    }
 
     public void deleteAll() {
-        db.delete(TABLE_INSPECTIONS, null, null);
+     //   db.delete(TABLE_INSPECTIONS, null, null);
         db.delete(TABLE_RESTAURANTS, null, null);
     }
 
@@ -208,6 +216,67 @@ public class DBAdapter {
         return db.query(TABLE_RESTAURANTS, ALL_KEYS, selection, selectionArgs, null, null, null, null);
     }
 
+    public Cursor filterRestaurants(String name, String hazard, int numCritical, String lessMore){
+        String selection = sqlSelectionBuilder(name, hazard, numCritical, lessMore);
+        String[] selectionArgs = sqlArgsBuilder(name, hazard, numCritical);
+        if(selectionArgs != null){
+            return db.query(TABLE_RESTAURANTS, ALL_KEYS, selection, selectionArgs, null, null, null, null);
+        }
+        else {return null;}
+    }
+
+    public String sqlSelectionBuilder(String name, String hazard, int numCritical, String lessMore){
+        String selection = "";
+        if(name.length() > 0){
+            selection = DBAdapter.KEY_NAME + " LIKE ?";
+        }
+        if(!hazard.equals("OFF")){
+            if(name.length() > 0){
+                selection += " AND ";
+            }
+            selection = selection + DBAdapter.KEY_HAZARD + " LIKE ?";
+            Log.d(TAG, selection);
+        }
+        if(numCritical > 0 && !lessMore.equals("OFF")){
+            if(name.length() > 0 || !hazard.equals("OFF")){
+                selection += " AND ";
+            }
+            if(lessMore.equals("LESS")){
+                selection = selection + DBAdapter.KEY_NUM_CRITICAL + " < ?";
+            } else {
+                selection = selection + DBAdapter.KEY_NUM_CRITICAL + " > ?";
+            }
+        }
+        return selection;
+    }
+
+    public String[] sqlArgsBuilder(String name, String hazard, int numCritical){
+        ArrayList<String> selectionArgsList = new ArrayList<>();
+
+        if(name.length() > 0){
+            selectionArgsList.add("%" + name + "%");
+        }
+        if(!hazard.equals("OFF")){
+            Log.d(TAG, "selection args add " + hazard);
+            selectionArgsList.add(hazard);
+        }
+        if(numCritical > 0){
+            String numCriticalStr = Integer.toString(numCritical);
+            selectionArgsList.add(numCriticalStr);
+        }
+        int size = selectionArgsList.size();
+        String [] selectionArgs;
+        if(size > 0) {
+            selectionArgs = new String[selectionArgsList.size()];
+            for(int i = 0; i < selectionArgsList.size(); i++){
+                selectionArgs[i] = selectionArgsList.get(i);
+            }
+        } else {
+            selectionArgs = null;
+        }
+        return selectionArgs;
+    }
+
     public Cursor searchRestaurants(String column, int searchTerm, MatchInteger matchType) {
         String operation = "=";
         switch(matchType) {
@@ -254,6 +323,16 @@ public class DBAdapter {
          return db.update(TABLE_RESTAURANTS, newValues, where, null) != 0;
      }
 
+    public boolean updateRestaurantRow(String trackingID, String hazard, int numCritical) {
+        String where = KEY_TRACKING + "='" + trackingID + "'";
+        ContentValues newValues = new ContentValues();
+        newValues.put(KEY_HAZARD, hazard);
+        newValues.put(KEY_NUM_CRITICAL, numCritical);
+        return db.update(TABLE_RESTAURANTS, newValues, where, null) != 0;
+    }
+
+
+
     /////////////////////////////////////////////////////////////////////
     //	Private Helper Classes:
     /////////////////////////////////////////////////////////////////////
@@ -271,7 +350,7 @@ public class DBAdapter {
         @Override
         public void onCreate(SQLiteDatabase _db) {
             _db.execSQL(CREATE_TABLE_RESTAURANTS);
-            _db.execSQL(CREATE_TABLE_INSPECTIONS);
+            //_db.execSQL(CREATE_TABLE_INSPECTIONS);
         }
 
         @Override
