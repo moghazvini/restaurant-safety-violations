@@ -39,6 +39,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.tasks.Task;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.google.maps.android.clustering.Cluster;
 import com.google.maps.android.clustering.ClusterItem;
@@ -68,6 +69,7 @@ import ca.cmpt276.project.model.DBAdapter;
 import ca.cmpt276.project.model.Inspection;
 import ca.cmpt276.project.model.InspectionListManager;
 import ca.cmpt276.project.model.LastModified;
+import ca.cmpt276.project.model.LocalDateAdapter;
 import ca.cmpt276.project.model.Restaurant;
 import ca.cmpt276.project.model.RestaurantListManager;
 import ca.cmpt276.project.model.SurreyDataDownloader;
@@ -102,7 +104,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private LoadingDialogFragment loadingDialog;
 
     FragmentManager manager;
-
+    Gson gson;
     DBAdapter myDb;
     List<Restaurant> foundRestaurants;
     private static final String TAG = "MapsTag";
@@ -132,7 +134,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         restaurantManager = RestaurantListManager.getInstance();
         lastModified = LastModified.getInstance(this);
         manager = getSupportFragmentManager();
-
+        gson = new GsonBuilder().registerTypeAdapter(LocalDate.class, new LocalDateAdapter().nullSafe()).create();
         if(!read){
             fillInitialRestaurantList();
             read = true;
@@ -599,7 +601,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private ArrayList<Inspection> extractInspectionList(Cursor cursor){
-        Gson gson = new Gson();
+
         Type type = new TypeToken<ArrayList<Inspection>>() {}.getType();
         String outputString = cursor.getString(DBAdapter.COL_INSPECTION_LIST);
         ArrayList<Inspection> inspectionsArray = gson.fromJson(outputString, type);
@@ -734,7 +736,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 float gpsLat = Float.parseFloat(attributes[addrIndex + 3]);
                 float gpsLong = Float.parseFloat(attributes[addrIndex + 4]);
                 ArrayList<Inspection> inspectionsArray = new ArrayList<>();
-                Gson gson = new Gson();
+
                 String inspections = gson.toJson(inspectionsArray);
                 int favourite = 0;
                 //read data
@@ -760,7 +762,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         String line = "";
         try {
             reader.readLine();
-            Gson gson = new Gson();
+
             myDb.beginTransaction();
             while ((line = reader.readLine()) != null) {
                 line = line.replace("\"", "");
