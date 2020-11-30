@@ -504,18 +504,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void sendSearchInput(String name, String hazard_filter, int num_critical_filter, String lessMore) {
-        String msg = "name: " + name+" hazard filter: "+hazard_filter+" critical filter: "+num_critical_filter + "less: " + lessMore;
-        Log.d(TAG, msg);
         if(name.length() > 0 || hazard_filter.length() > 0 || num_critical_filter > 0) {
             //Cursor relevantRowsCursor = myDb.searchRestaurants(DBAdapter.KEY_NAME, input, DBAdapter.MatchString.CONTAINS);
             Cursor relevantRowsCursor = myDb.filterRestaurants(name, hazard_filter, num_critical_filter, lessMore);
-            Log.d(TAG, "NEW SEARCH: " + name);
             if (relevantRowsCursor != null) {
                 addRelevantMarkers(mMap, relevantRowsCursor);
             }
             //printCursor(relevantRowsCursor);
-        } else {
-            Log.d(TAG, "no filter");
         }
     }
 
@@ -579,7 +574,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         snippet = "" + pos;
                         severity_icon = high;
                     }
-                    //Log.d(TAG, "new restaurant added to map: " + name);
                     ClusterMarker newClusterMarker = new ClusterMarker(
                             coords,
                             name,
@@ -648,7 +642,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         BufferedReader reader = new BufferedReader(
                 new InputStreamReader(inputStream, StandardCharsets.UTF_8)
         );
-        Log.d(TAG, "INITIAL FILL CALLED!!!");
         restaurantManager.fillRestaurantManager(reader,this);
         InputStream is = getResources().openRawResource(R.raw.inspectionreports_itr1);
         BufferedReader inspectionReader = new BufferedReader(
@@ -836,7 +829,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 if(inspectionArrayList.size() > 0) {
                     Inspection latestInspection = Collections.max(inspectionArrayList);
                     hazardLevel = latestInspection.getStringHazard();
-                    Log.d(TAG, "Restaurant: " + restaurantDBcursor.getString(DBAdapter.COL_NAME));
                     numCritical = getLatestYearSumCritical(inspectionArrayList);
                     String tracking = restaurantDBcursor.getString(DBAdapter.COL_TRACKING);
                     myDb.updateRestaurantRow(tracking, hazardLevel, numCritical);
@@ -849,12 +841,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         LocalDateTime current = LocalDateTime.now();
         int totalCritical = 0;
         for(int i = 0; i < inspectionsArrayList.size(); i++){
-            Log.d(TAG, ""+Math.abs(current.getYear() - inspectionsArrayList.get(i).getDate().getYear()));
-            Log.d(TAG, "current: "+current.getYear());
-            Log.d(TAG, "inspection: "+inspectionsArrayList.get(i).getDate().toString());
             if(Math.abs(current.getYear() - inspectionsArrayList.get(i).getDate().getYear()) <= 1){
                 totalCritical += inspectionsArrayList.get(i).getCritical();
-                Log.d(TAG, "# critical: " + inspectionsArrayList.get(i).getCritical() + " total crit: " + totalCritical);
             }
         }
         return totalCritical;
@@ -868,20 +856,24 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         return previous.isBefore(compare) || compare.isEqual(previous);
     }
 
-    public static Intent makeLaunchIntentMapsActivity(Context context, Restaurant restaurant) {
+    public static Intent makeLaunchIntentMapsActivity(Context context, String tracking) {
         Intent intent = new Intent(context, MapsActivity.class);
-        intent.putExtra(REST_DETAILS, restaurant);
+        intent.putExtra(REST_DETAILS, tracking);
         return intent;
     }
 
     private void extractDataFromIntent() {
         Intent intent = getIntent();
-        Restaurant restaurant = intent.getParcelableExtra(REST_DETAILS);
-        if(restaurant != null){
-            openPopUpWindow(restaurant);
-            mMap.animateCamera(CameraUpdateFactory.zoomTo(20));
-        } else {
-            Toast.makeText(this, "could not find restaurant", Toast.LENGTH_SHORT).show();
+        String tracking = intent.getStringExtra(REST_DETAILS);
+        if(tracking == null){
+            tracking = "";
+        }
+        if(tracking.length() > 0) {
+            Restaurant restaurant = getRestaurantFromTracking(tracking);
+            if (restaurant != null) {
+                openPopUpWindow(restaurant);
+                mMap.animateCamera(CameraUpdateFactory.zoomTo(20));
+            }
         }
     }
 //        if(restaurant_details_idx > 0) {
