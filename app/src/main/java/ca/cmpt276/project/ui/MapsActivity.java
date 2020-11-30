@@ -722,7 +722,25 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
+    private List<String> favouriteTrackings() {
+        Cursor cursor = myDb.getAllRows();
+        if (cursor.getCount() > 0) {
+            List<String> trackings = new ArrayList<>();
+            do {
+                cursor.moveToNext();
+                if (Integer.parseInt(cursor.getString(DBAdapter.COL_FAVOURITE)) == 1) {
+                    trackings.add(cursor.getString(DBAdapter.COL_TRACKING));
+                }
+            } while (!cursor.isLast());
+            cursor.close();
+            return trackings;
+        } else {
+            return null;
+        }
+    }
+
     private void fillRestaurantDatabase(BufferedReader reader){
+        List<String> savedFavourites = favouriteTrackings();
         String line = "";
         try {
             reader.readLine();
@@ -734,19 +752,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 String[] attributes = line.split(",");
                 String tracking = attributes[0];
                 tracking = tracking.replace(" ", "");
+                String name = attributes[1];
                 int favourite = 0;
 
-                //Cursor cursor = myDb.searchRestaurants(DBAdapter.KEY_TRACKING, tracking, DBAdapter.MatchString.EQUALS);
-                Cursor cursor = myDb.trackingSearch(tracking);
-                if (cursor.getCount() > 0) {
-                    cursor.moveToFirst();
-                    favourite = Integer.parseInt(cursor.getString(DBAdapter.COL_FAVOURITE));
-                    if (favourite == 1) {
+                if (savedFavourites != null && !name.equals("The Unfindable Bar")) {
+                    if (savedFavourites.contains(tracking)) {
                         restaurantManager.getFavourited().add(restaurantManager.find(tracking));
                     }
                 } else {
-                    String name = attributes[1];
-
                     int addrIndex = attributes.length - 5;
                     for (int i = 2; i < addrIndex; i++) {
                         name = name.concat(attributes[i]);
