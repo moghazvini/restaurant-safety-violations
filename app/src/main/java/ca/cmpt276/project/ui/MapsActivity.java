@@ -519,10 +519,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     // SEARCH AND FILTER
     ///////////////////////////////////////////////
     @Override
-    public void sendSearchInput(String name, String hazard_filter, int num_critical_filter, String lessMore) {
+    public void sendSearchInput(String name, String hazard_filter, int num_critical_filter, String lessMore, boolean favFilter) {
+        Log.d(TAG, "fav filter: " + favFilter);
         if(name.length() > 0 || hazard_filter.length() > 0 || num_critical_filter > 0) {
-            //Cursor relevantRowsCursor = myDb.searchRestaurants(DBAdapter.KEY_NAME, input, DBAdapter.MatchString.CONTAINS);
-            Cursor relevantRowsCursor = myDb.filterRestaurants(name, hazard_filter, num_critical_filter, lessMore);
+            Cursor relevantRowsCursor = myDb.filterRestaurants(name, hazard_filter, num_critical_filter, lessMore, favFilter);
             if (relevantRowsCursor != null) {
                 addRelevantMarkers(mMap, relevantRowsCursor);
             }

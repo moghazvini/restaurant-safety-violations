@@ -167,9 +167,9 @@ public class DBAdapter {
         return db.query(TABLE_RESTAURANTS, ALL_KEYS, selection, selectionArgs, null, null, null, null);
     }
 
-    public Cursor filterRestaurants(String name, String hazard, int numCritical, String lessMore){
-        String selection = sqlSelectionBuilder(name, hazard, numCritical, lessMore);
-        String[] selectionArgs = sqlArgsBuilder(name, hazard, numCritical);
+    public Cursor filterRestaurants(String name, String hazard, int numCritical, String lessMore, boolean favFilter){
+        String selection = sqlSelectionBuilder(name, hazard, numCritical, lessMore, favFilter);
+        String[] selectionArgs = sqlArgsBuilder(name, hazard, numCritical, favFilter);
         if(selectionArgs != null){
             return db.query(TABLE_RESTAURANTS, ALL_KEYS, selection, selectionArgs, null, null, null, null);
         }
@@ -180,7 +180,7 @@ public class DBAdapter {
         return db.query(TABLE_RESTAURANTS, ALL_KEYS, KEY_TRACKING +"='"+tracking+"'", null, null, null, null, null);
     }
 
-    public String sqlSelectionBuilder(String name, String hazard, int numCritical, String lessMore){
+    public String sqlSelectionBuilder(String name, String hazard, int numCritical, String lessMore, boolean favFilter){
         String selection = "";
         if(name.length() > 0){
             selection = DBAdapter.KEY_NAME + " LIKE ?";
@@ -192,7 +192,7 @@ public class DBAdapter {
             selection = selection + DBAdapter.KEY_HAZARD + " LIKE ?";
             Log.d(TAG, selection);
         }
-        if(numCritical > 0 && !lessMore.equals("OFF")){
+        if(numCritical >= 0 && !lessMore.equals("OFF")){
             if(name.length() > 0 || !hazard.equals("OFF")){
                 selection += " AND ";
             }
@@ -202,10 +202,16 @@ public class DBAdapter {
                 selection = selection + DBAdapter.KEY_NUM_CRITICAL + " > ?";
             }
         }
+        if(favFilter){
+            if(selection.length() > 0){
+                selection += " AND ";
+            }
+            selection = selection + DBAdapter.KEY_FAVOURITE + " = ?";
+        }
         return selection;
     }
 
-    public String[] sqlArgsBuilder(String name, String hazard, int numCritical){
+    public String[] sqlArgsBuilder(String name, String hazard, int numCritical, boolean favFilter){
         ArrayList<String> selectionArgsList = new ArrayList<>();
 
         if(name.length() > 0){
@@ -215,9 +221,12 @@ public class DBAdapter {
             Log.d(TAG, "selection args add " + hazard);
             selectionArgsList.add(hazard);
         }
-        if(numCritical > 0){
+        if(numCritical >= 0){
             String numCriticalStr = Integer.toString(numCritical);
             selectionArgsList.add(numCriticalStr);
+        }
+        if(favFilter){
+            selectionArgsList.add("1");
         }
         int size = selectionArgsList.size();
         String [] selectionArgs;
