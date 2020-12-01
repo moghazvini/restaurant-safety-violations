@@ -3,6 +3,7 @@ package ca.cmpt276.project.ui;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 
 import androidx.annotation.NonNull;
@@ -42,7 +43,8 @@ public class RestaurantListActivity extends AppCompatActivity {
 
     public static final int REQUEST_CODE_DETAILS = 101;
     private RestaurantListManager restaurantManager;
-    private ArrayAdapter<Restaurant> adapter;
+    private RestaurantListCursorAdapter adapter;
+    Cursor cursor;
     DBAdapter myDb;
 
     @Override
@@ -55,10 +57,11 @@ public class RestaurantListActivity extends AppCompatActivity {
         restaurantManager = RestaurantListManager.getInstance();
         openDB();
 
-        populateListView();
+        popListViewDB();
         registerCallBack();
         // Check if it has been 20 hours since last check
     }
+
 
     private void openDB() {
         myDb = new DBAdapter(this);
@@ -71,13 +74,11 @@ public class RestaurantListActivity extends AppCompatActivity {
         myDb.close();
     }
 
-    private void populateListView() {
-        //code to sort alphabetically taken from https://www.youtube.com/watch?v=dZQqrPdqT1E
-        //Collections.sort(restaurantManager.getList());
-        Cursor cursor = myDb.getAllRows();
-
-        adapter = new RestaurantListAdapter(RestaurantListActivity.this,restaurantManager.getList());
+    private void popListViewDB() {
+        cursor = myDb.getAllRows();
+        cursor.moveToFirst();
         ListView list = findViewById(R.id.listViewRestaurants);
+        adapter = new RestaurantListCursorAdapter(this,cursor,false);
         list.setAdapter(adapter);
     }
 
@@ -94,7 +95,7 @@ public class RestaurantListActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CODE_DETAILS) {
-            adapter.notifyDataSetChanged();
+            adapter.changeCursor(cursor);
         }
     }
 

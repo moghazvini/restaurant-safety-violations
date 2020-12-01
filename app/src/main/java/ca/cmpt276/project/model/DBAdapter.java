@@ -19,7 +19,8 @@ public class DBAdapter {
     private static final String TAG = "DBAdapter_restaurants";
 
     // DB Fields
-
+    public static final String KEY_ROWID = "_id";
+    public static final int COL_ROWID = 0;
     //COMMON TABLE COLUMN
     public static final String KEY_TRACKING = "track";
 
@@ -34,30 +35,30 @@ public class DBAdapter {
     public static final String KEY_HAZARD = "hazard";
     public static final String KEY_NUM_CRITICAL = "num_critical";
 
-    public static final int COL_TRACKING = 0;
-    public static final int COL_NAME = 1;
-    public static final int COL_ADDRESS = 2;
-    public static final int COL_CITY = 3;
-    public static final int COL_LATITUDE = 4;
-    public static final int COL_LONGITUDE = 5;
-    public static final int COL_INSPECTION_LIST = 6;
-    public static final int COL_FAVOURITE = 7;
-    public static final int COL_HAZARD = 8;
-    public static final int COL_NUM_CRITICAL = 9;
+    public static final int COL_TRACKING = 1;
+    public static final int COL_NAME = 2;
+    public static final int COL_ADDRESS = 3;
+    public static final int COL_CITY = 4;
+    public static final int COL_LATITUDE = 5;
+    public static final int COL_LONGITUDE = 6;
+    public static final int COL_INSPECTION_LIST = 7;
+    public static final int COL_FAVOURITE = 8;
+    public static final int COL_HAZARD = 9;
+    public static final int COL_NUM_CRITICAL = 10;
 
     // ALL_KEYS_RESTAURANT
-    public static final String[] ALL_KEYS = new String[] {KEY_TRACKING, KEY_NAME, KEY_ADDRESS, KEY_CITY, KEY_LATITUDE, KEY_LONGITUDE, KEY_INSPECTION_LIST, KEY_FAVOURITE};
+    public static final String[] ALL_KEYS = new String[] {KEY_ROWID,KEY_TRACKING, KEY_NAME, KEY_ADDRESS, KEY_CITY, KEY_LATITUDE, KEY_LONGITUDE, KEY_INSPECTION_LIST, KEY_FAVOURITE};
 
     // DB info: it's name, and the table we are using (just one).
     public static final String DATABASE_NAME = "MyDb";
     public static final String TABLE_RESTAURANTS = "RestaurantsTable";
-    public static final String TABLE_INSPECTIONS = "InspectionsTable";
     // Track DB version if a new version of your app changes the format.
     public static final int DATABASE_VERSION = 1;
 
     private static final String CREATE_TABLE_RESTAURANTS =
             "CREATE TABLE " + TABLE_RESTAURANTS + " ("
-                    + KEY_TRACKING + " text primary key,"
+                    + KEY_ROWID + " integer primary key autoincrement,"
+                    + KEY_TRACKING + " text not null,"
                     + KEY_NAME + " text not null,"
                     + KEY_ADDRESS + " text not null,"
                     + KEY_CITY + " text not null,"
@@ -122,7 +123,6 @@ public class DBAdapter {
     }
 
     public void deleteAll() {
-     //   db.delete(TABLE_INSPECTIONS, null, null);
         db.delete(TABLE_RESTAURANTS, null, null);
     }
 
