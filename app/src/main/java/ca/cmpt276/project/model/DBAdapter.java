@@ -34,15 +34,6 @@ public class DBAdapter {
     public static final String KEY_HAZARD = "hazard";
     public static final String KEY_NUM_CRITICAL = "num_critical";
 
-    // INSPECTIONS TABLE COLUMNS
-//    public static final String KEY_ROWID = "_id"; // KEY_INSPECTION_ID
-//    public static final String KEY_DATE = "date";
-//    public static final String KEY_TYPE = "type";
-//    public static final String KEY_NUM_CRITICAL = "num_critical";
-//    public static final String KEY_NUM_NON_CRITICAL = "num_non_critical";
-//    public static final String KEY_VIOLUMP = "violump";
-//    public static final String KEY_HAZARD = "hazard";
-
     public static final int COL_TRACKING = 0;
     public static final int COL_NAME = 1;
     public static final int COL_ADDRESS = 2;
@@ -78,17 +69,6 @@ public class DBAdapter {
                     + KEY_NUM_CRITICAL + " integer"
             + ");";
 
-//    private static final String CREATE_TABLE_INSPECTIONS =
-//            "CREATE TABLE " + TABLE_INSPECTIONS + " ("
-//                    + KEY_ROWID + " integer primary key autoincrement, "
-//                    + KEY_TRACKING + " text not null,"
-//                    + KEY_DATE + " text not null,"
-//                    + KEY_TYPE + " text not null,"
-//                    + KEY_NUM_CRITICAL + " integer not null,"
-//                    + KEY_NUM_NON_CRITICAL + " integer not null,"
-//                    + KEY_VIOLUMP + " text,"
-//                    + KEY_HAZARD + " text not null"
-//            + ");";
 
     // Context of application who uses us.
     private final Context context;
@@ -141,20 +121,6 @@ public class DBAdapter {
         return db.insert(TABLE_RESTAURANTS, null, rowValues);
     }
 
-//    public long insertRowInspection(String tracking, String date, String type, int numCritical, int numNonCritical, String violump, String hazard) {
-//        ContentValues rowValues = new ContentValues();
-//
-//        rowValues.put(KEY_TRACKING, tracking);
-//        rowValues.put(KEY_DATE, date);
-//        rowValues.put(KEY_TYPE, type);
-//        rowValues.put(KEY_NUM_CRITICAL, numCritical);
-//        rowValues.put(KEY_NUM_NON_CRITICAL, numNonCritical);
-//        rowValues.put(KEY_VIOLUMP, violump);
-//        rowValues.put(KEY_HAZARD, hazard);
-//
-//        return db.insert(TABLE_INSPECTIONS, null, rowValues);
-//    }
-
     public void deleteAll() {
      //   db.delete(TABLE_INSPECTIONS, null, null);
         db.delete(TABLE_RESTAURANTS, null, null);
@@ -171,21 +137,6 @@ public class DBAdapter {
         }
         return c;
     }
-
-    // selection = "
-    // WHERE tracking IN (
-    //     SELECT i.tracking
-    //     FROM inspections i
-    //     JOIN 
-    //     (
-    //         SELECT tracking, MAX(date) as maxDate
-    //         FROM inspections
-    //         GROUP BY tracking
-
-    //     ) li ON li.tracking = i.tracking AND li.maxDate = i.date
-    //     WHERE i.hazard > ?
-    // )
-    // ";
 
     public enum MatchString {
         EQUALS,

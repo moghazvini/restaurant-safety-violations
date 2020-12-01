@@ -176,6 +176,7 @@ public class MarkerDialogFragment extends AppCompatDialogFragment {
         }
         return newRestaurant;
     }
+
     private ArrayList<Inspection> extractInspectionList(Cursor cursor){
         Gson gson = new GsonBuilder().registerTypeAdapter(LocalDate.class, new LocalDateAdapter().nullSafe()).create();
         Type type = new TypeToken<ArrayList<Inspection>>() {}.getType();

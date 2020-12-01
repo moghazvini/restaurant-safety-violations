@@ -504,7 +504,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private void openPopUpWindow(Restaurant restaurant) {
         LatLng coords = new LatLng(restaurant.getGpsLat(), restaurant.getGpsLong());
         mMap.moveCamera(CameraUpdateFactory.newLatLng(coords));
-        MarkerDialogFragment markerFragment = MarkerDialogFragment.newInstance(restaurant);
+        MarkerDialogFragment markerFragment = MarkerDialogFragment.newInstance(restaurant.getTracking());
         markerFragment.show(manager,"popup");
         stopLocationUpdates();
     }
@@ -698,11 +698,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             InputStreamReader inputReader_rest = new InputStreamReader(inputStream_rest, StandardCharsets.UTF_8);
             InputStreamReader inputReader_insp = new InputStreamReader(inputStream_insp, StandardCharsets.UTF_8);
             fillRestaurantDatabase(new BufferedReader(inputReader_rest));
-            long startTime = System.nanoTime();
+
             fillInspectionsDatabase(new BufferedReader(inputReader_insp));
             addHazardAndCriticalToDB();
-            long stopTime = System.nanoTime();
-            Log.d(TAG, "TIME TAKEN: " + (stopTime - startTime));
+
         } catch (FileNotFoundException e) {
             // No update files downloaded
         }
@@ -730,7 +729,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         String line = "";
         try {
             reader.readLine();
-            //myDb.deleteAll();
+            myDb.deleteAll();
             myDb.beginTransaction();
             while ((line = reader.readLine()) != null) {
                 line = line.replace("\"", "");
@@ -741,11 +740,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 String name = attributes[1];
                 int favourite = 0;
 
-                if (savedFavourites != null && !name.equals("The Unfindable Bar")) {
+                if (savedFavourites != null && savedFavourites.size() > 0 && !name.equals("The Unfindable Bar")) {
                     if (savedFavourites.contains(tracking)) {
                         restaurantManager.getFavourited().add(restaurantManager.find(tracking));
+                        favourite = 1;
                     }
-                } else {
+                }
+                //} else {
                     int addrIndex = attributes.length - 5;
                     for (int i = 2; i < addrIndex; i++) {
                         name = name.concat(attributes[i]);
@@ -767,7 +768,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                             gpsLong,
                             inspections,
                             favourite);
-                }
+                //}
             }
             myDb.endTransactionSuccessful();
 

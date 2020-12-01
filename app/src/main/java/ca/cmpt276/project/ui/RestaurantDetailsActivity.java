@@ -60,8 +60,7 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_restaurant_details);
         Toolbar toolbar = findViewById(R.id.toolbar_restaurant_det);
         setSupportActionBar(toolbar);
-        myDb = new DBAdapter(this);
-        myDb.open();
+        openDB();
         gson = new GsonBuilder().registerTypeAdapter(LocalDate.class, new LocalDateAdapter().nullSafe()).create();
         // Enable "up" on toolbar
         back = getSupportActionBar();
@@ -205,7 +204,7 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
     private void OnClick() {
         ListView insp_list = findViewById(R.id.list_insp);
         insp_list.setOnItemClickListener((parent, view, position, id) -> {
-            Intent i = InspectionDetailsActivity.makeLaunchIntent(RestaurantDetailsActivity.this, position, rest_index);
+            Intent i = InspectionDetailsActivity.makeLaunchIntent(RestaurantDetailsActivity.this, position, rest.getTracking());
             startActivity(i);
         });
 
