@@ -225,6 +225,10 @@ public class DBAdapter {
         else {return null;}
     }
 
+    public Cursor trackingSearch(String tracking) {
+        return db.query(TABLE_RESTAURANTS, ALL_KEYS, KEY_TRACKING +"='"+tracking+"'", null, null, null, null, null);
+    }
+
     public String sqlSelectionBuilder(String name, String hazard, int numCritical, String lessMore){
         String selection = "";
         if(name.length() > 0){
@@ -311,10 +315,15 @@ public class DBAdapter {
         return db.update(TABLE_RESTAURANTS, newValues, where, whereArgs) != 0;
     }
 
-     public boolean updateRestaurantRow(String trackingID, String inspections) {
+     public boolean updateRow(String key_column, String trackingID, String values) {
          String where = KEY_TRACKING + "='" + trackingID + "'";
          ContentValues newValues = new ContentValues();
-         newValues.put(KEY_INSPECTION_LIST, inspections);
+
+         if (key_column.equals(KEY_FAVOURITE)) {
+             newValues.put(key_column, Integer.parseInt(values));
+         } else {
+             newValues.put(key_column, values);
+         }
          return db.update(TABLE_RESTAURANTS, newValues, where, null) != 0;
      }
 

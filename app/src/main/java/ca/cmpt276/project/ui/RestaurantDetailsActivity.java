@@ -47,10 +47,11 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
     private final static String RESTAURANT_KEY = "Selected Restaurant";
     private RestaurantListManager restaurantManager;
     private InspectionListManager inspectionManager;
-    static Restaurant rest;
+    private static Restaurant rest;
     private int rest_index;
     Gson gson;
-    DBAdapter myDb;
+    private DBAdapter myDb;
+
     private ActionBar back;
 
     @Override
@@ -68,13 +69,26 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
             back.setDisplayHomeAsUpEnabled(true);
         }
 
+        openDB();
         restaurantManager = RestaurantListManager.getInstance();
+
         GetData();
         setupGpsClick();
         populateList();
         setValues();
         OnClick();
         setupFavouriteClick();
+    }
+
+    private void openDB() {
+        myDb = new DBAdapter(this);
+        myDb.open();
+    }
+
+    @Override
+    protected void onDestroy(){
+        super.onDestroy();
+        myDb.close();
     }
 
     @Override
@@ -85,12 +99,6 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        myDb.close();
     }
 
     private void populateList() {
@@ -207,10 +215,13 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
         ImageView favourite = findViewById(R.id.add_favourite);
         favourite.setOnClickListener(v -> {
             rest.setFavourite(!rest.isFavourite());
+
             if (rest.isFavourite()) {
                 favourite.setBackgroundResource(R.drawable.fav_color_2); //TODO colour error with fav_color
+                myDb.updateRow(DBAdapter.KEY_FAVOURITE, rest.getTracking(), "1");
             } else {
                 favourite.setBackgroundResource(R.drawable.not_fav_2);
+                myDb.updateRow(DBAdapter.KEY_FAVOURITE, rest.getTracking(), "0");
             }
         });
     }

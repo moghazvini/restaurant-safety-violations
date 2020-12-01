@@ -2,6 +2,7 @@ package ca.cmpt276.project.model;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -21,7 +22,6 @@ public class LastModified {
     private LocalDateTime last_mod_restaurants;
     private LocalDateTime last_mod_inspections;
     private boolean appStart;
-    private boolean initalStart;
     // Singleton Support
     private static LastModified instance;
 
@@ -30,7 +30,7 @@ public class LastModified {
         last_mod_restaurants = getLastUpdate(context, LAST_MODIFIED_REST);
         last_mod_inspections = getLastUpdate(context, LAST_MODIFIED_INSP);
         appStart = true;
-        initalStart = true;
+        boolean initalStart = true;
     }
 
     public static LastModified getInstance(Context context) {

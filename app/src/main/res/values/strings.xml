@@ -37,4 +37,7 @@
     <string name="violation">Violation</string>
     <string name="title_activity_maps">Restaurant Inspector</string>
     <string name="date">%s %d, %d</string>
+
+    <!--Map-->
+    <string name="updated">These have new inspections!</string>
 </resources>
