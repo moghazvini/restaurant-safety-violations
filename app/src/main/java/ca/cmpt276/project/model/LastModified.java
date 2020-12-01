@@ -2,6 +2,7 @@ package ca.cmpt276.project.model;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -21,7 +22,6 @@ public class LastModified {
     private LocalDateTime last_mod_restaurants;
     private LocalDateTime last_mod_inspections;
     private boolean appStart;
-
     // Singleton Support
     private static LastModified instance;
 
@@ -30,6 +30,7 @@ public class LastModified {
         last_mod_restaurants = getLastUpdate(context, LAST_MODIFIED_REST);
         last_mod_inspections = getLastUpdate(context, LAST_MODIFIED_INSP);
         appStart = true;
+        boolean initalStart = true;
     }
 
     public static LastModified getInstance(Context context) {
@@ -99,6 +100,18 @@ public class LastModified {
     public void setLast_mod_inspections(Context context, LocalDateTime last_mod_inspections) {
         writeLastUpdated(context, last_mod_inspections, LAST_MODIFIED_INSP);
         this.last_mod_inspections = last_mod_inspections;
+    }
+
+    public void writeInitialStart(Context context){
+        SharedPreferences stored = context.getSharedPreferences("InitialPrefs", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = stored.edit();
+        editor.putBoolean("key", false);
+        editor.apply();
+    }
+
+    public boolean readInitialStart(Context context){
+        SharedPreferences stored = context.getSharedPreferences("InitialPrefs", Context.MODE_PRIVATE);
+        return stored.getBoolean("key", true);
     }
 
     public boolean getAppStart() {

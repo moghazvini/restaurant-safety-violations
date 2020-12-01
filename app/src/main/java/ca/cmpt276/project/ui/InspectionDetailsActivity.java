@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.MenuItem;
@@ -18,13 +19,21 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
+
+import java.lang.reflect.Type;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collections;
 
 
 import ca.cmpt276.project.R;
+import ca.cmpt276.project.model.DBAdapter;
 import ca.cmpt276.project.model.Inspection;
 import ca.cmpt276.project.model.InspectionListManager;
+import ca.cmpt276.project.model.LocalDateAdapter;
 import ca.cmpt276.project.model.Restaurant;
 import ca.cmpt276.project.model.RestaurantListManager;
 import ca.cmpt276.project.model.Violation;
@@ -35,10 +44,10 @@ import ca.cmpt276.project.model.Violation;
 public class InspectionDetailsActivity extends AppCompatActivity {
 
     private final static String INDEX = "Inspection Report Index";
-    private final static String REST_INDEX = "Restaurant Index";
-    private  static RestaurantListManager restaurantManager;
+    private final static String REST_TRACKING = "Restaurant Tracking";
     private static InspectionListManager inspectionManager;
     private static Inspection inspection;
+    private DBAdapter myDb;
 
     private ActionBar back;
 
@@ -55,8 +64,7 @@ public class InspectionDetailsActivity extends AppCompatActivity {
             back.setDisplayHomeAsUpEnabled(true);
         }
 
-
-        restaurantManager = RestaurantListManager.getInstance();
+        openDB();
 
         getData();
         setValues();
@@ -66,8 +74,6 @@ public class InspectionDetailsActivity extends AppCompatActivity {
     }
 
     private void populateListView() {
-
-        Collections.sort(restaurantManager.getList());
         ListView listView = findViewById(R.id.listView);
 
         ArrayAdapter<Violation> arrayAdapter = new ViolationListAdapter();
@@ -96,7 +102,7 @@ public class InspectionDetailsActivity extends AppCompatActivity {
             TextView brief_description_txt = itemView.findViewById(R.id.txt_critissues);
             TextView crit_or_not_txt = itemView.findViewById(R.id.txt_critical_or_not);
 
-            if(inspectionManager.getInspections().size()>0) {
+            //if(inspectionManager.getInspections().size()>0) {
                 String brief_description = violation.getCode() +"  "+ violation.getType().violation;
                 String crit_or_not = violation.getSeverity().severity;
                 boolean crit = crit_or_not.equals("Critical");
@@ -146,11 +152,11 @@ public class InspectionDetailsActivity extends AppCompatActivity {
                     default:
                         assert false;
                 }
-            }
-            else {
+            //}
+            /*else {
                 brief_description_txt.setText(R.string.no_inspection_found);
                 crit_or_not_txt.setText(R.string.no_inspection_found);
-            }
+            }*/
             return itemView;
         }
     }
@@ -200,21 +206,46 @@ public class InspectionDetailsActivity extends AppCompatActivity {
         list.setOnItemClickListener((parent, viewClicked, position, id) -> Toast.makeText(InspectionDetailsActivity.this, inspection.getViolation(position).getLongDis(), Toast.LENGTH_LONG).show());
     }
 
-    public static Intent makeLaunchIntent(RestaurantDetailsActivity restaurantDetails, int position, int rest_position) {
+    public static Intent makeLaunchIntent(RestaurantDetailsActivity restaurantDetails, int position, String tracking) {
         Intent intent = new Intent(restaurantDetails, InspectionDetailsActivity.class);
         intent.putExtra(INDEX, position);
-        intent.putExtra(REST_INDEX, rest_position);
+        intent.putExtra(REST_TRACKING, tracking);
         return intent;
     }
 
     private void getData() {
         Intent intent = getIntent();
         int index = intent.getIntExtra(INDEX, 0);
-        int rest_index = intent.getIntExtra(REST_INDEX, 0);
-        Restaurant restaurant = restaurantManager.getRestaurant(rest_index);
-        inspectionManager = restaurant.getInspections();
-        inspection = inspectionManager.getInspection(index);
+        String rest_tracking = intent.getStringExtra(REST_TRACKING);
+        getRestaurantFromTracking(rest_tracking, index);
     }
+
+    public void getRestaurantFromTracking(String tracking, int index){
+        Cursor restaurantCursor = myDb.searchRestaurants(DBAdapter.KEY_TRACKING, tracking, DBAdapter.MatchString.EQUALS);
+        if(restaurantCursor.moveToFirst()){
+            inspection = extractInspectionList(restaurantCursor, index);
+        }
+    }
+
+    private Inspection extractInspectionList(Cursor cursor, int index){
+        Gson gson = new GsonBuilder().registerTypeAdapter(LocalDate.class, new LocalDateAdapter().nullSafe()).create();
+        Type type = new TypeToken<ArrayList<Inspection>>() {}.getType();
+        String outputString = cursor.getString(DBAdapter.COL_INSPECTION_LIST);
+        ArrayList<Inspection> inspectionsArray = gson.fromJson(outputString, type);
+        return inspectionsArray.get(index);
+    }
+
+    private void openDB() {
+        myDb = new DBAdapter(this);
+        myDb.open();
+    }
+
+    @Override
+    protected void onDestroy(){
+        super.onDestroy();
+        myDb.close();
+    }
+
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {

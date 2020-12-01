@@ -6,9 +6,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.os.Parcelable;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,13 +20,21 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
+
+import java.lang.reflect.Type;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Collections;
 
 import ca.cmpt276.project.R;
+import ca.cmpt276.project.model.DBAdapter;
 import ca.cmpt276.project.model.Inspection;
 import ca.cmpt276.project.model.InspectionListManager;
+import ca.cmpt276.project.model.LocalDateAdapter;
 import ca.cmpt276.project.model.Restaurant;
 import ca.cmpt276.project.model.RestaurantListManager;
 
@@ -33,10 +44,13 @@ import ca.cmpt276.project.model.RestaurantListManager;
 public class RestaurantDetailsActivity extends AppCompatActivity {
 
     private final static String INDEX = "Inspection Report Index";
+    private final static String RESTAURANT_KEY = "Selected Restaurant";
     private RestaurantListManager restaurantManager;
     private InspectionListManager inspectionManager;
-    static Restaurant rest;
+    private static Restaurant rest;
     private int rest_index;
+    Gson gson;
+    private DBAdapter myDb;
 
     private ActionBar back;
 
@@ -46,20 +60,34 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_restaurant_details);
         Toolbar toolbar = findViewById(R.id.toolbar_restaurant_det);
         setSupportActionBar(toolbar);
-
+        openDB();
+        gson = new GsonBuilder().registerTypeAdapter(LocalDate.class, new LocalDateAdapter().nullSafe()).create();
         // Enable "up" on toolbar
         back = getSupportActionBar();
         if (back != null) {
             back.setDisplayHomeAsUpEnabled(true);
         }
 
+        openDB();
         restaurantManager = RestaurantListManager.getInstance();
+
         GetData();
         setupGpsClick();
         populateList();
         setValues();
         OnClick();
         setupFavouriteClick();
+    }
+
+    private void openDB() {
+        myDb = new DBAdapter(this);
+        myDb.open();
+    }
+
+    @Override
+    protected void onDestroy(){
+        super.onDestroy();
+        myDb.close();
     }
 
     @Override
@@ -176,8 +204,7 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
     private void OnClick() {
         ListView insp_list = findViewById(R.id.list_insp);
         insp_list.setOnItemClickListener((parent, view, position, id) -> {
-
-            Intent i = InspectionDetailsActivity.makeLaunchIntent(RestaurantDetailsActivity.this, position, rest_index);
+            Intent i = InspectionDetailsActivity.makeLaunchIntent(RestaurantDetailsActivity.this, position, rest.getTracking());
             startActivity(i);
         });
 
@@ -187,10 +214,13 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
         ImageView favourite = findViewById(R.id.add_favourite);
         favourite.setOnClickListener(v -> {
             rest.setFavourite(!rest.isFavourite());
+
             if (rest.isFavourite()) {
                 favourite.setBackgroundResource(R.drawable.fav_color);
+                myDb.updateRow(DBAdapter.KEY_FAVOURITE, rest.getTracking(), "1");
             } else {
                 favourite.setBackgroundResource(R.drawable.not_fav_2);
+                myDb.updateRow(DBAdapter.KEY_FAVOURITE, rest.getTracking(), "0");
             }
         });
     }
@@ -198,7 +228,8 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
     private void setupGpsClick() {
         TextView gpsText = findViewById(R.id.txt_gps);
         gpsText.setOnClickListener(v -> {
-            Intent i = MapsActivity.makeLaunchIntentMapsActivity(RestaurantDetailsActivity.this, rest_index);
+            String tracking = rest.getTracking();
+            Intent i = MapsActivity.makeLaunchIntentMapsActivity(RestaurantDetailsActivity.this, tracking);
             startActivity(i);
             finish();
         });
@@ -206,19 +237,48 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
 
     private void GetData() {
         Intent intent = getIntent();
-        rest_index = intent.getIntExtra(INDEX,0);
-        rest = restaurantManager.getRestaurant(rest_index);
+        //rest_index = intent.getIntExtra(INDEX,0);
+        String rest_tracking = intent.getStringExtra(RESTAURANT_KEY);
+        Cursor restaurantCursor = myDb.searchRestaurants(DBAdapter.KEY_TRACKING, rest_tracking, DBAdapter.MatchString.EQUALS);
+        if(restaurantCursor.moveToFirst()){
+            String tracking = restaurantCursor.getString(DBAdapter.COL_TRACKING);
+            String address = restaurantCursor.getString(DBAdapter.COL_ADDRESS);
+            String city = restaurantCursor.getString(DBAdapter.COL_CITY);
+            String name = restaurantCursor.getString(DBAdapter.COL_NAME);
+            float latitude = restaurantCursor.getFloat(DBAdapter.COL_LATITUDE);
+            float longitude = restaurantCursor.getFloat(DBAdapter.COL_LONGITUDE);
+            int fav = restaurantCursor.getInt(DBAdapter.COL_FAVOURITE);
+            boolean favour = false;
+            if(fav == 1) {
+                favour = true;
+            }
+            rest = new Restaurant(tracking, name, address, city, longitude, latitude,favour);
+            ArrayList<Inspection> inspectionArrayList = extractInspectionList(restaurantCursor);
+            InspectionListManager inspectionListManager = new InspectionListManager();
+            inspectionListManager.setInspectionsList(inspectionArrayList);
+            rest.setInspections(inspectionListManager);
+        }
+
         inspectionManager = rest.getInspections();
+        Log.d("RestDetails", "restaurant name: " + rest.getName());
+        Log.d("RestDetails", "inspection list size: " + inspectionManager.getInspections().size());
     }
 
-    public static Intent makeLaunchIntent(RestaurantListActivity restaurantListActivity, int position) {
+    private ArrayList<Inspection> extractInspectionList(Cursor cursor){
+        Type type = new TypeToken<ArrayList<Inspection>>() {}.getType();
+        String outputString = cursor.getString(DBAdapter.COL_INSPECTION_LIST);
+        ArrayList<Inspection> inspectionsArray = gson.fromJson(outputString, type);
+        return inspectionsArray;
+    }
+
+    public static Intent makeLaunchIntent(RestaurantListActivity restaurantListActivity, String tracking) {
         Intent intent = new Intent(restaurantListActivity, RestaurantDetailsActivity.class);
-        intent.putExtra(INDEX, position);
+        intent.putExtra(RESTAURANT_KEY, tracking);
         return intent;
     }
-    public static Intent makeLaunchIntent(MapsActivity mapsActivity, int position){
+    public static Intent makeLaunchIntent(MapsActivity mapsActivity, String tracking){
         Intent intent = new Intent(mapsActivity, RestaurantDetailsActivity.class);
-        intent.putExtra(INDEX, position);
+        intent.putExtra(RESTAURANT_KEY, tracking);
         return intent;
     }
 }

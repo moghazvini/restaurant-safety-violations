@@ -1,5 +1,6 @@
 package ca.cmpt276.project.model;
 
+import android.content.Context;
 import android.util.Log;
 
 import java.io.BufferedReader;
@@ -18,11 +19,13 @@ import ca.cmpt276.project.model.types.InspectionType;
  * inspections.
  */
 public class RestaurantListManager {
-    private final List<Restaurant> restaurants;
+    private List<Restaurant> restaurants;
     private static RestaurantListManager instance;
+    private final List<Restaurant> favourited;
 
     private RestaurantListManager() {
         restaurants = new ArrayList<>();
+        favourited = new ArrayList<>();
     }
 
     public static RestaurantListManager getInstance() {
@@ -30,10 +33,6 @@ public class RestaurantListManager {
             instance = new RestaurantListManager();
         }
         return instance;
-    }
-
-    public void add (Restaurant restaurant) {
-        restaurants.add(restaurant);
     }
 
     public List<Restaurant> getList() {
@@ -60,14 +59,15 @@ public class RestaurantListManager {
         String line = "";
         try {
             reader.readLine();
-            instance.getList().clear();
+            List<Restaurant> updated = new ArrayList<>();
             while ((line = reader.readLine()) != null) {
-                //System.out.println(line);
                 line = line.replace("\"", "");
 
+                boolean favourite = false;
                 String[] attributes = line.split(",");
                 String tracking = attributes[0];
                 tracking = tracking.replace(" ", "");
+
                 String name = attributes[1];
 
                 int addrIndex = attributes.length - 5;
@@ -86,10 +86,12 @@ public class RestaurantListManager {
                         addr,
                         city,
                         gpsLong, // Restaurant Longitude
-                        gpsLat // Restaurant Latitude
+                        gpsLat, // Restaurant Latitude
+                        favourite
                 );
-                instance.add(restaurant);
+                updated.add(restaurant);
             }
+            restaurants = updated;
             Collections.sort(restaurants);
         } catch(IOException e){
             Log.wtf("RestaurantListActivity", "error reading data file on line " + line, e);
@@ -100,7 +102,6 @@ public class RestaurantListManager {
         String line = "";
         try {
             Restaurant restaurant = instance.getRestaurant(0);
-
             reader.readLine();
             while ((line = reader.readLine()) != null) {
                 line = line.replace("\"", "");
@@ -115,9 +116,9 @@ public class RestaurantListManager {
                     if (!restaurant.getTracking().equals(inspectionTracking)) {
                         restaurant = instance.find(inspectionTracking);
                     }
+
                     if (restaurant != null) {
                         InspectionListManager inspectionList = restaurant.getInspections();
-
                         // Format string date
                         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
                         LocalDate date = LocalDate.parse(tokens[1], formatter);
@@ -139,15 +140,32 @@ public class RestaurantListManager {
                             inspection = new Inspection(date, type, numCritical, numNonCritical, hazardLevel);
                         }
                         inspectionList.add(inspection);
+
                     } else {
                         // reset restaurant if restaurant wasn't found
                         // otherwise restaurant would be null for next iteration
                         restaurant = instance.getRestaurant(0);
                     }
                 }
+
             }
+
+            checkUpdatedFavourites();
         } catch(IOException e){
             Log.wtf("RestaurantListActivity", "error reading data file on line " + line, e);
+        }
+    }
+
+    private void checkUpdatedFavourites() {
+        for (Restaurant favourite : favourited) {
+            List<Inspection> previous = favourite.getInspections().getInspections();
+            List<Inspection> updated = this.find(favourite.getTracking()).getInspections().getInspections();
+
+            if (previous.size() == updated.size()) {
+                favourited.remove(favourite);
+            } else {
+                favourite.getInspections().setInspectionsList(updated);
+            }
         }
     }
 
@@ -175,5 +193,9 @@ public class RestaurantListManager {
             lump.append(inspectionRow[i]).append(",");
         }
         return lump.toString();
+    }
+
+    public List<Restaurant> getFavourited() {
+        return favourited;
     }
 }

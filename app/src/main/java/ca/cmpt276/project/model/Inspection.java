@@ -1,5 +1,8 @@
 package ca.cmpt276.project.model;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
@@ -95,6 +98,16 @@ public class Inspection implements Comparable<Inspection>{
         return level;
     }
 
+    public String getStringHazard(){
+        String stringHazard;
+        if(level == HazardLevel.HIGH){
+            stringHazard = "HIGH";
+        } else if (level == HazardLevel.MODERATE){
+            stringHazard = "MODERATE";
+        } else {stringHazard = "LOW";}
+        return stringHazard;
+    }
+
     public void setLevel(HazardLevel level) {
         this.level = level;
     }
@@ -111,4 +124,5 @@ public class Inspection implements Comparable<Inspection>{
     public int compareTo(Inspection other) {
         return this.date.compareTo(other.date);
     }
+
 }
