@@ -196,7 +196,7 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
 
         ImageView favourite = findViewById(R.id.add_favourite);
         if (rest.isFavourite()) {
-            favourite.setBackgroundResource(R.drawable.fav_color_2);
+            favourite.setBackgroundResource(R.drawable.fav_color);
         } else {
             favourite.setBackgroundResource(R.drawable.not_fav_2);
         }
@@ -217,7 +217,7 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
             rest.setFavourite(!rest.isFavourite());
 
             if (rest.isFavourite()) {
-                favourite.setBackgroundResource(R.drawable.fav_color_2); //TODO colour error with fav_color
+                favourite.setBackgroundResource(R.drawable.fav_color);
                 myDb.updateRow(DBAdapter.KEY_FAVOURITE, rest.getTracking(), "1");
             } else {
                 favourite.setBackgroundResource(R.drawable.not_fav_2);
@@ -248,7 +248,12 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
             String name = restaurantCursor.getString(DBAdapter.COL_NAME);
             float latitude = restaurantCursor.getFloat(DBAdapter.COL_LATITUDE);
             float longitude = restaurantCursor.getFloat(DBAdapter.COL_LONGITUDE);
-            rest = new Restaurant(tracking, name, address, city, longitude, latitude);
+            int fav = restaurantCursor.getInt(DBAdapter.COL_FAVOURITE);
+            boolean favour = false;
+            if(fav == 1) {
+                favour = true;
+            }
+            rest = new Restaurant(tracking, name, address, city, longitude, latitude,favour);
             ArrayList<Inspection> inspectionArrayList = extractInspectionList(restaurantCursor);
             InspectionListManager inspectionListManager = new InspectionListManager();
             inspectionListManager.setInspectionsList(inspectionArrayList);

@@ -109,7 +109,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     DBAdapter myDb;
     List<Restaurant> foundRestaurants;
     List<Restaurant> favouritesUpdated;
-    private static final String TAG = "MapsTag";
     //Location callBack
     private LocationCallback locationCallback;
 
@@ -640,7 +639,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         BufferedReader reader = new BufferedReader(
                 new InputStreamReader(inputStream, StandardCharsets.UTF_8)
         );
-        restaurantManager.fillRestaurantManager(reader,this);
+        restaurantManager.fillRestaurantManager(reader);
         InputStream is = getResources().openRawResource(R.raw.inspectionreports_itr1);
         BufferedReader inspectionReader = new BufferedReader(
                 new InputStreamReader(is, StandardCharsets.UTF_8)
@@ -656,7 +655,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             inputStream_insp = MapsActivity.this.openFileInput(SurreyDataDownloader.DOWNLOAD_INSPECTIONS);
             InputStreamReader inputReader_rest = new InputStreamReader(inputStream_rest, StandardCharsets.UTF_8);
             InputStreamReader inputReader_insp = new InputStreamReader(inputStream_insp, StandardCharsets.UTF_8);
-            restaurantManager.fillRestaurantManager(new BufferedReader(inputReader_rest),this);
+            restaurantManager.fillRestaurantManager(new BufferedReader(inputReader_rest));
             restaurantManager.fillInspectionManager(new BufferedReader(inputReader_insp));
         } catch (FileNotFoundException e) {
             // No update files downloaded
