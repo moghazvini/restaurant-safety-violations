@@ -495,7 +495,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         Toast.makeText(this, "marker clicked", Toast.LENGTH_SHORT).show();
 
         Restaurant restaurant = item.getRest();
-//        int index = restaurantManager.getList().indexOf(restaurant);
         openPopUpWindow(restaurant);
 
         return true;
