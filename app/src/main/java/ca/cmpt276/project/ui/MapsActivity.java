@@ -725,11 +725,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             InputStreamReader inputReader_rest = new InputStreamReader(inputStream_rest, StandardCharsets.UTF_8);
             InputStreamReader inputReader_insp = new InputStreamReader(inputStream_insp, StandardCharsets.UTF_8);
             fillRestaurantDatabase(new BufferedReader(inputReader_rest));
-
             fillInspectionsDatabase(new BufferedReader(inputReader_insp));
             addHazardAndCriticalToDB();
-
-
         } catch (FileNotFoundException e) {
             // No update files downloaded
         }
