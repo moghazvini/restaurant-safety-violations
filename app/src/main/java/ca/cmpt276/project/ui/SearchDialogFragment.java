@@ -8,13 +8,16 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
+import android.widget.Switch;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatDialogFragment;
+import androidx.appcompat.widget.SwitchCompat;
 
 import ca.cmpt276.project.R;
 
@@ -26,7 +29,7 @@ public class SearchDialogFragment extends AppCompatDialogFragment {
     private String searchTerm;
     private String hazardFilter;
     private int numCriticalFilter;
-    //private boolean less;
+    private boolean favFilter;
     private String lessMore;
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -34,6 +37,7 @@ public class SearchDialogFragment extends AppCompatDialogFragment {
         v = LayoutInflater.from(getActivity()).inflate(R.layout.search_dialog_layout, null);
         setupHazardRadioButtons();
         setupCriticalRadioButtons();
+        setupFavFilter();
         DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -61,11 +65,15 @@ public class SearchDialogFragment extends AppCompatDialogFragment {
                             lessMore = "OFF";
                         }
 
-                        dialogListener.sendSearchInput(searchTerm, hazardFilter, numCriticalFilter, lessMore);
+                        dialogListener.sendSearchInput(searchTerm, hazardFilter, numCriticalFilter, lessMore, favFilter,false);
                         break;
 
                     case DialogInterface.BUTTON_NEGATIVE:
                         Toast.makeText(getContext(), "Search cancelled", Toast.LENGTH_SHORT).show();
+                        break;
+                    case DialogInterface.BUTTON_NEUTRAL:
+                        dialogListener.sendSearchInput("one", hazardFilter, numCriticalFilter, lessMore, favFilter,true);
+                        Toast.makeText(getContext(), "Reset search", Toast.LENGTH_SHORT).show();
                         break;
                 }
             }
@@ -73,9 +81,22 @@ public class SearchDialogFragment extends AppCompatDialogFragment {
         return new AlertDialog.Builder(getActivity())
                 .setTitle("Search")
                 .setView(v)
-                .setPositiveButton(android.R.string.ok, listener)
-                .setNegativeButton(android.R.string.cancel, listener)
+                .setPositiveButton(R.string.search, listener)
+                .setNegativeButton(R.string.cancel, listener)
+                .setNeutralButton(R.string.reset, listener)
                 .create();
+    }
+
+    private void setupFavFilter() {
+        CheckBox favouritesCheck = v.findViewById(R.id.checkBox_fav);
+        favouritesCheck.setOnClickListener(v -> {
+            Log.d(TAG, "is checked: " + favouritesCheck.isChecked());
+            if(favouritesCheck.isChecked()){
+                favFilter = true;
+            } else {
+                favFilter = false;
+            }
+        });
     }
 
     private void setupCriticalRadioButtons() {
@@ -124,7 +145,7 @@ public class SearchDialogFragment extends AppCompatDialogFragment {
     }
 
     public interface SearchDialogListener{
-        void sendSearchInput(String input, String hazard_filter, int num_critical_filter, String lessMore);
+        void sendSearchInput(String input, String hazard_filter, int num_critical_filter, String lessMore, boolean favFilter,boolean reset);
     }
 
 }

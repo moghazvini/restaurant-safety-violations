@@ -518,14 +518,15 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     // SEARCH AND FILTER
     ///////////////////////////////////////////////
     @Override
-    public void sendSearchInput(String name, String hazard_filter, int num_critical_filter, String lessMore) {
-        if(name.length() > 0 || hazard_filter.length() > 0 || num_critical_filter > 0) {
-            //Cursor relevantRowsCursor = myDb.searchRestaurants(DBAdapter.KEY_NAME, input, DBAdapter.MatchString.CONTAINS);
-            Cursor relevantRowsCursor = myDb.filterRestaurants(name, hazard_filter, num_critical_filter, lessMore);
+    public void sendSearchInput(String name, String hazard_filter, int num_critical_filter, String lessMore, boolean favFilter, boolean reset) {
+        Log.d(TAG, "fav filter: " + favFilter);
+        if((name.length() > 0 || hazard_filter.length() > 0 || num_critical_filter > 0) && (!reset)) {
+            Cursor relevantRowsCursor = myDb.filterRestaurants(name, hazard_filter, num_critical_filter, lessMore, favFilter);
             if (relevantRowsCursor != null) {
                 addRelevantMarkers(mMap, relevantRowsCursor);
             }
-            //printCursor(relevantRowsCursor);
+        } else if (reset){
+            addAllMarkers(mMap);
         }
     }
 
@@ -745,7 +746,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         favourite = 1;
                     }
                 }
-                //} else {
+                // else
                     int addrIndex = attributes.length - 5;
                     for (int i = 2; i < addrIndex; i++) {
                         name = name.concat(attributes[i]);
@@ -767,7 +768,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                             gpsLong,
                             inspections,
                             favourite);
-                //}
             }
             myDb.endTransactionSuccessful();
 
@@ -821,7 +821,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         String inputString = gson.toJson(inspectionsListDB);
                         myDb.updateRow(DBAdapter.KEY_INSPECTION_LIST, trackingID, inputString);
                     }
-                    //myDb.insertRowInspection(inspectionTracking, stringDate, stringType, numCritical, numNonCritical, violationLump, stringHazard);
                 }
             }
             myDb.endTransactionSuccessful();
@@ -906,10 +905,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         }
     }
-//        if(restaurant_details_idx > 0) {
-//            openPopUpWindow(restaurant_details_idx);
-//            mMap.animateCamera(CameraUpdateFactory.zoomTo(20));
-//        }
 
     private Restaurant getRestaurantFromTracking(String tracking){
         Cursor restaurantCursor = myDb.searchRestaurants(DBAdapter.KEY_TRACKING, tracking, DBAdapter.MatchString.EQUALS);

@@ -40,4 +40,10 @@
 
     <!--Map-->
     <string name="updated">These have new inspections!</string>
+
+    <!--search dialog-->
+    <string name="reset">Reset</string>
+    <string name="cancel">Cancel</string>
+    <string name="search">Search</string>
+
 </resources>
