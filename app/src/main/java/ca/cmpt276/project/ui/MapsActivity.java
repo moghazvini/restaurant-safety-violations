@@ -111,9 +111,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private static final String NUM_FILTER_PREF = "num critical shared pref";
     private static final String LESS_FILTER_PREF = "less shared pref";
     private static final String FAV_FILTER_PREF = "favourite shared pref";
-
+    long startTime;
+    long stopTime;
     FragmentManager manager;
     Gson gson;
+    Type type;
     DBAdapter myDb;
     List<Restaurant> foundRestaurants;
     List<Restaurant> favouritesUpdated;
@@ -126,12 +128,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         setContentView(R.layout.activity_maps);
         Toolbar toolbar = findViewById(R.id.map_toolbar);
         setSupportActionBar(toolbar);
-
         openDB();
         restaurantManager = RestaurantListManager.getInstance();
         lastModified = LastModified.getInstance(this);
         manager = getSupportFragmentManager();
-
+        type = new TypeToken<ArrayList<Inspection>>() {}.getType();
         gson = new GsonBuilder().registerTypeAdapter(LocalDate.class, new LocalDateAdapter().nullSafe()).create();
         if(!read){
             fillInitialRestaurantList();
@@ -568,8 +569,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private ArrayList<Inspection> extractInspectionList(Cursor cursor){
-
-        Type type = new TypeToken<ArrayList<Inspection>>() {}.getType();
         String outputString = cursor.getString(DBAdapter.COL_INSPECTION_LIST);
         ArrayList<Inspection> inspectionsArray = gson.fromJson(outputString, type);
         return inspectionsArray;
@@ -605,6 +604,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         protected void onPreExecute() {
             loadingDialog = new LoadingDialogFragment(); // loading dialog
             loadingDialog.show(manager, "LoadingDialog");
+            startTime = System.nanoTime();
         }
 
         @Override
@@ -630,6 +630,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 Cursor allRestCursor = myDb.getAllRows();
                 addRelevantMarkers(mMap, allRestCursor);
                 loadingDialog.dismiss();
+                stopTime = System.nanoTime();
+                Log.d(TAG, "TIME TAKEN FOR LOADING: " + (stopTime - startTime));
                 showUpdatedFavourites();
             }
         }
@@ -723,11 +725,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             InputStreamReader inputReader_rest = new InputStreamReader(inputStream_rest, StandardCharsets.UTF_8);
             InputStreamReader inputReader_insp = new InputStreamReader(inputStream_insp, StandardCharsets.UTF_8);
             fillRestaurantDatabase(new BufferedReader(inputReader_rest));
-            long startTime = System.nanoTime();
+
             fillInspectionsDatabase(new BufferedReader(inputReader_insp));
             addHazardAndCriticalToDB();
-            long stopTime = System.nanoTime();
-            Log.d(TAG, "TIME TAKEN FOR INSPECTIONS: " + (stopTime - startTime));
+
 
         } catch (FileNotFoundException e) {
             // No update files downloaded
@@ -831,7 +832,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     int numCritical = Integer.parseInt(tokens[3]);
                     int numNonCritical = Integer.parseInt(tokens[4]);
                     String violationLump = "[empty]";
-                    String stringHazard = tokens[tokens.length-1];
                     HazardLevel hazard = getHazardLevel(tokens[tokens.length-1]);
                     Inspection inspection;
                     if(tokens.length > 5 && tokens[5].length() > 0) {
@@ -847,9 +847,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         String trackingID = restaurantCursor.getString(DBAdapter.COL_TRACKING);
                         String inputString = gson.toJson(inspectionsListDB);
                         myDb.updateRow(DBAdapter.KEY_INSPECTION_LIST, trackingID, inputString);
+                        //restaurantCursor.close();
+                    }
+                    if(restaurantCursor != null){
                         restaurantCursor.close();
                     }
-
                 }
             }
             myDb.endTransactionSuccessful();
