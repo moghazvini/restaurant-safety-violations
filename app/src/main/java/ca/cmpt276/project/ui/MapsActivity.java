@@ -340,6 +340,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         Cursor allRestCursor = myDb.getAllRows();
         popLatlong();
         addAllMarkers(mMap);
+        //addRelevantMarkers(mMap, allRestCursor);
     }
 
     private void popLatlong() {
@@ -400,14 +401,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
         if (mClusterManagerRenderer == null) {
             mClusterManagerRenderer = new ClusterManagerRenderer(this, map, mClusterManager );
-            mClusterManager.setRenderer(mClusterManagerRenderer);
         }
+        mClusterManager.setRenderer(mClusterManagerRenderer);
         mClusterManager.clearItems();
         mClusterManager.cluster();
         int pos = 0;
 
         if(cursor.moveToFirst()){
-            myDb.beginTransaction();
+            //myDb.beginTransaction();
             do{
                 String tracking = cursor.getString(DBAdapter.COL_TRACKING);
                 String address = cursor.getString(DBAdapter.COL_ADDRESS);
@@ -460,7 +461,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 }
 
             }while(cursor.moveToNext());
-            myDb.endTransactionSuccessful();
+            //myDb.endTransactionSuccessful();
             mClusterManager.cluster();
         }
 
@@ -519,7 +520,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     ///////////////////////////////////////////////
     @Override
     public void sendSearchInput(String name, String hazard_filter, int num_critical_filter, String lessMore, boolean favFilter, boolean reset) {
-        Log.d(TAG, "fav filter: " + favFilter);
         if((name.length() > 0 || hazard_filter.length() > 0 || num_critical_filter > 0) && (!reset)) {
             Cursor relevantRowsCursor = myDb.filterRestaurants(name, hazard_filter, num_critical_filter, lessMore, favFilter);
             if (relevantRowsCursor != null) {
@@ -698,9 +698,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             InputStreamReader inputReader_rest = new InputStreamReader(inputStream_rest, StandardCharsets.UTF_8);
             InputStreamReader inputReader_insp = new InputStreamReader(inputStream_insp, StandardCharsets.UTF_8);
             fillRestaurantDatabase(new BufferedReader(inputReader_rest));
-
+            long startTime = System.nanoTime();
             fillInspectionsDatabase(new BufferedReader(inputReader_insp));
             addHazardAndCriticalToDB();
+            long stopTime = System.nanoTime();
+            Log.d(TAG, "TIME TAKEN FOR INSPECTIONS: " + (stopTime - startTime));
 
         } catch (FileNotFoundException e) {
             // No update files downloaded
@@ -820,7 +822,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         String trackingID = restaurantCursor.getString(DBAdapter.COL_TRACKING);
                         String inputString = gson.toJson(inspectionsListDB);
                         myDb.updateRow(DBAdapter.KEY_INSPECTION_LIST, trackingID, inputString);
+                        restaurantCursor.close();
                     }
+
                 }
             }
             myDb.endTransactionSuccessful();
