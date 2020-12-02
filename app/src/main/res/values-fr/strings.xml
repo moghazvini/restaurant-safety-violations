@@ -46,4 +46,11 @@
     <string name="cancel">Annuler</string>
     <string name="search">Chercher</string>
 
+    <!--TODO To be translated-->
+    <string name="search_restaurant_name">Search restaurant name</string>
+    <string name="hazard_filter">Hazard filter:</string>
+    <string name="of_critical_violations"># of critical violations:</string>
+    <string name="filter_by_favourites">Filter by favourites</string>
+    <string name="new_update_found_do_you_want_to_update">New update found, do you want to update?</string>
+
 </resources>
