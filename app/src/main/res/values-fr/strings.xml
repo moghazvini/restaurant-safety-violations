@@ -1,0 +1,56 @@
+<resources>
+    <string name="app_name">Inspecteur de restaurant</string>
+    <!--Restaurant List-->
+    <string name="restaurants">Restaurants</string>
+    <string name="no_inspection_found">Aucune inspection</string>
+    <string name="restaurant_icon">Icône de restaurant</string>
+    <string name="restaurant_name">Nom du restaurant</string>
+    <string name="issues_found">Questions trouvé</string>
+    <string name="latest_inspection">Dernière inspection</string>
+    <string name="hazard_low">Faible</string>
+    <string name="hazard_moderate">Moyenne</string>
+    <string name="hazard_high">Haute</string>
+
+    <string name="operator_violation">Violation d\'opérateur</string>
+    <string name="food_violation">Violation alimentaire</string>
+    <string name="equipment_violation">Violation de l\'équipement</string>
+    <string name="pest_violation">Violation de parasites</string>
+    <string name="employee_violation">Violation d\'employé</string>
+    <string name="establishment_violation">Violation d\'établissement</string>
+
+    <!--Restaurant Details-->
+    <string name="critical_issue">nombre de problèmes critiques: %d</string>
+    <string name="non_critical_issue">nombre de problèmes non critiques: %d</string>
+    <string name="inspection_date">Date d\'inspection</string>
+    <string name="rest_name">Nom du restaurant ici</string>
+    <string name="restaurant_add">Adresse de l\'établissement:\n %s %s</string>
+    <string name="rest_gps">GPS:\n %f, %f</string>
+    <string name="inspections_list">Liste des inspections:</string>
+    <string name="empty_inspections">Aucune inspection disponible.</string>
+
+    <!--Inspection-->
+    <string name="type">Type</string>
+    <string name="brief">Brève description</string>
+    <string name="hazard_level">Danger: </string>
+    <string name="issue">Problème</string>
+    <string name="empty_violations">aucune violation enregistrée.</string>
+    <string name="violation">Violation</string>
+    <string name="title_activity_maps">Inspecteur de restaurant</string>
+    <string name="date">%s %d, %d</string>
+
+    <!--Map-->
+    <string name="updated">Ceux-ci ont de nouvelles inspections!</string>
+
+    <!--search dialog-->
+    <string name="reset">Réinitialiser</string>
+    <string name="cancel">Annuler</string>
+    <string name="search">Chercher</string>
+
+    <!--TODO To be translated-->
+    <string name="search_restaurant_name">Search restaurant name</string>
+    <string name="hazard_filter">Hazard filter:</string>
+    <string name="of_critical_violations"># of critical violations:</string>
+    <string name="filter_by_favourites">Filter by favourites</string>
+    <string name="new_update_found_do_you_want_to_update">New update found, do you want to update?</string>
+
+</resources>
