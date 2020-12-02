@@ -712,11 +712,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         if (cursor.getCount() > 0) {
             List<String> trackings = new ArrayList<>();
             do {
-                cursor.moveToNext();
                 if (Integer.parseInt(cursor.getString(DBAdapter.COL_FAVOURITE)) == 1) {
                     trackings.add(cursor.getString(DBAdapter.COL_TRACKING));
                 }
-            } while (!cursor.isLast());
+            } while (cursor.moveToNext());
             cursor.close();
             return trackings;
         } else {
