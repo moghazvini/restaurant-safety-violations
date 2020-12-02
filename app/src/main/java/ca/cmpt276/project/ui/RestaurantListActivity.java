@@ -86,7 +86,8 @@ public class RestaurantListActivity extends AppCompatActivity implements SearchD
     private void registerCallBack(){
         ListView list = findViewById(R.id.listViewRestaurants);
         list.setOnItemClickListener((parent, viewClicked, position, id) -> {
-            String tracking = restaurantManager.getRestaurant(position).getTracking();
+            Cursor cursor = myDb.getRestaurantRow(id);
+            String tracking = cursor.getString(DBAdapter.COL_TRACKING);
             Intent i = RestaurantDetailsActivity.makeLaunchIntent(RestaurantListActivity.this, tracking);
             startActivityForResult(i, REQUEST_CODE_DETAILS);
         });

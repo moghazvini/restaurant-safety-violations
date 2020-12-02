@@ -138,6 +138,16 @@ public class DBAdapter {
         return c;
     }
 
+    public Cursor getRestaurantRow(long rowId) {
+        String where = KEY_ROWID + "=" + rowId;
+        Cursor c = 	db.query(true, TABLE_RESTAURANTS, ALL_KEYS,
+                where, null, null, null, null, null);
+        if (c != null) {
+            c.moveToFirst();
+        }
+        return c;
+    }
+
     public enum MatchString {
         EQUALS,
         CONTAINS
