@@ -131,7 +131,7 @@ public class DBAdapter {
     public Cursor getAllRows() {
         String where = null;
         Cursor c = db.query(true, TABLE_RESTAURANTS, ALL_KEYS,
-                where, null, null, null, null, null);
+                where, null, null, null, KEY_NAME, null);
         if (c != null) {
             c.moveToFirst();
         }

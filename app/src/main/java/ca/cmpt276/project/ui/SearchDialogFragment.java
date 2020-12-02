@@ -65,11 +65,15 @@ public class SearchDialogFragment extends AppCompatDialogFragment {
                             lessMore = "OFF";
                         }
 
-                        dialogListener.sendSearchInput(searchTerm, hazardFilter, numCriticalFilter, lessMore, favFilter);
+                        dialogListener.sendSearchInput(searchTerm, hazardFilter, numCriticalFilter, lessMore, favFilter,false);
                         break;
 
                     case DialogInterface.BUTTON_NEGATIVE:
                         Toast.makeText(getContext(), "Search cancelled", Toast.LENGTH_SHORT).show();
+                        break;
+                    case DialogInterface.BUTTON_NEUTRAL:
+                        dialogListener.sendSearchInput("one", hazardFilter, numCriticalFilter, lessMore, favFilter,true);
+                        Toast.makeText(getContext(), "Reset search", Toast.LENGTH_SHORT).show();
                         break;
                 }
             }
@@ -77,8 +81,9 @@ public class SearchDialogFragment extends AppCompatDialogFragment {
         return new AlertDialog.Builder(getActivity())
                 .setTitle("Search")
                 .setView(v)
-                .setPositiveButton(android.R.string.ok, listener)
-                .setNegativeButton(android.R.string.cancel, listener)
+                .setPositiveButton(R.string.search, listener)
+                .setNegativeButton(R.string.cancel, listener)
+                .setNeutralButton(R.string.reset, listener)
                 .create();
     }
 
@@ -140,7 +145,7 @@ public class SearchDialogFragment extends AppCompatDialogFragment {
     }
 
     public interface SearchDialogListener{
-        void sendSearchInput(String input, String hazard_filter, int num_critical_filter, String lessMore, boolean favFilter);
+        void sendSearchInput(String input, String hazard_filter, int num_critical_filter, String lessMore, boolean favFilter,boolean reset);
     }
 
 }
