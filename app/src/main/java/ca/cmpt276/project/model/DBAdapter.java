@@ -181,13 +181,9 @@ public class DBAdapter {
         String selection = sqlSelectionBuilder(name, hazard, numCritical, lessMore, favFilter);
         String[] selectionArgs = sqlArgsBuilder(name, hazard, numCritical, favFilter);
         if(selectionArgs != null){
-            return db.query(TABLE_RESTAURANTS, ALL_KEYS, selection, selectionArgs, null, null, null, null);
+            return db.query(TABLE_RESTAURANTS, ALL_KEYS, selection, selectionArgs, null, null, KEY_NAME, null);
         }
         else {return null;}
-    }
-
-    public Cursor trackingSearch(String tracking) {
-        return db.query(TABLE_RESTAURANTS, ALL_KEYS, KEY_TRACKING +"='"+tracking+"'", null, null, null, null, null);
     }
 
     public String sqlSelectionBuilder(String name, String hazard, int numCritical, String lessMore, boolean favFilter){
