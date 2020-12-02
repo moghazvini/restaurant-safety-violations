@@ -12,6 +12,7 @@ import android.content.Context;
 import android.Manifest;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.location.Location;
@@ -103,6 +104,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private static boolean read = false;
     private ListUpdateTask listUpdateTask = null;
     private LoadingDialogFragment loadingDialog;
+
+    private static final String PREFS_NAME = "AppPrefs";
+    private static final String NAME_FILTER_PREF = "name shared pref";
+    private static final String HAZARD_FILTER_PREF = "hazard shared pref";
+    private static final String NUM_FILTER_PREF = "num critical shared pref";
+    private static final String LESS_FILTER_PREF = "less shared pref";
+    private static final String FAV_FILTER_PREF = "favourite shared pref";
 
     FragmentManager manager;
     Gson gson;
@@ -336,10 +344,26 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap.setOnMarkerClickListener(mClusterManager);
         mClusterManager.setOnClusterClickListener(this);
         mClusterManager.setOnClusterItemClickListener(this);
-        Cursor allRestCursor = myDb.getAllRows();
+        Cursor allRestCursor = getFilterPrefs();
         popLatlong();
-        addAllMarkers(mMap);
-        //addRelevantMarkers(mMap, allRestCursor);
+        //addAllMarkers(mMap);
+        addRelevantMarkers(mMap, allRestCursor);
+    }
+
+    private Cursor getFilterPrefs(){
+        SharedPreferences prefs = this.getSharedPreferences(PREFS_NAME, 0);
+        String searchTerm = prefs.getString(NAME_FILTER_PREF, "");
+        String hazardFilter = prefs.getString(HAZARD_FILTER_PREF, "OFF");
+        int numCriticalFilter = prefs.getInt(NUM_FILTER_PREF, -1);
+        String lessMore = prefs.getString(LESS_FILTER_PREF, "OFF");
+        boolean favFilter = prefs.getBoolean(FAV_FILTER_PREF, false);
+        Cursor cursor = myDb.filterRestaurants(searchTerm, hazardFilter, numCriticalFilter, lessMore, favFilter);
+        if(cursor != null){
+            return cursor;
+        } else {
+            return myDb.getAllRows();
+        }
+
     }
 
     private void popLatlong() {
@@ -603,8 +627,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 lastModified.setLast_mod_restaurants(MapsActivity.this, restaurantUpdate.get(0).getLast_modified());
                 lastModified.setLast_mod_inspections(MapsActivity.this, restaurantUpdate.get(1).getLast_modified());
                 getUpdatedFiles();
-                addAllMarkers(mMap);
-
+                Cursor allRestCursor = myDb.getAllRows();
+                addRelevantMarkers(mMap, allRestCursor);
                 loadingDialog.dismiss();
                 showUpdatedFavourites();
             }

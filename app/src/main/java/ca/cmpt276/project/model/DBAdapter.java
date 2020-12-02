@@ -200,7 +200,6 @@ public class DBAdapter {
                 selection += " AND ";
             }
             selection = selection + DBAdapter.KEY_HAZARD + " LIKE ?";
-            Log.d(TAG, selection);
         }
         if(numCritical >= 0 && !lessMore.equals("OFF")){
             if(name.length() > 0 || !hazard.equals("OFF")){
@@ -217,6 +216,7 @@ public class DBAdapter {
                 selection += " AND ";
             }
             selection = selection + DBAdapter.KEY_FAVOURITE + " = ?";
+            Log.d(TAG, selection);
         }
         return selection;
     }
@@ -228,7 +228,6 @@ public class DBAdapter {
             selectionArgsList.add("%" + name + "%");
         }
         if(!hazard.equals("OFF")){
-            Log.d(TAG, "selection args add " + hazard);
             selectionArgsList.add(hazard);
         }
         if(numCritical >= 0){
@@ -244,6 +243,7 @@ public class DBAdapter {
             selectionArgs = new String[selectionArgsList.size()];
             for(int i = 0; i < selectionArgsList.size(); i++){
                 selectionArgs[i] = selectionArgsList.get(i);
+                Log.d(TAG, "ADD: " + selectionArgs[i]);
             }
         } else {
             selectionArgs = null;

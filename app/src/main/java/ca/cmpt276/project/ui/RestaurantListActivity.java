@@ -1,6 +1,7 @@
 package ca.cmpt276.project.ui;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -20,6 +21,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -47,7 +49,17 @@ public class RestaurantListActivity extends AppCompatActivity implements SearchD
     private RestaurantListCursorAdapter adapter;
     Cursor cursor;
     DBAdapter myDb;
-
+    private static final String PREFS_NAME = "AppPrefs";
+    private static final String NAME_FILTER_PREF = "name shared pref";
+    private static final String HAZARD_FILTER_PREF = "hazard shared pref";
+    private static final String NUM_FILTER_PREF = "num critical shared pref";
+    private static final String LESS_FILTER_PREF = "less shared pref";
+    private static final String FAV_FILTER_PREF = "favourite shared pref";
+    private String searchTerm;
+    private String hazardFilter;
+    private int numCriticalFilter;
+    private boolean favFilter;
+    private String lessMore;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -76,11 +88,27 @@ public class RestaurantListActivity extends AppCompatActivity implements SearchD
     }
 
     private void popListViewDB() {
-        cursor = myDb.getAllRows();
+        cursor = getFilterPrefs();
         cursor.moveToFirst();
         ListView list = findViewById(R.id.listViewRestaurants);
         adapter = new RestaurantListCursorAdapter(this,cursor,false);
         list.setAdapter(adapter);
+    }
+
+    private Cursor getFilterPrefs(){
+        SharedPreferences prefs = this.getSharedPreferences(PREFS_NAME, 0);
+        searchTerm = prefs.getString(NAME_FILTER_PREF, "");
+        hazardFilter = prefs.getString(HAZARD_FILTER_PREF, "OFF");
+        numCriticalFilter = prefs.getInt(NUM_FILTER_PREF, -1);
+        lessMore = prefs.getString(LESS_FILTER_PREF, "OFF");
+        favFilter = prefs.getBoolean(FAV_FILTER_PREF, false);
+        Cursor cursor = myDb.filterRestaurants(searchTerm, hazardFilter, numCriticalFilter, lessMore, favFilter);
+        if(cursor != null){
+            return cursor;
+        } else {
+            return myDb.getAllRows();
+        }
+
     }
 
     private void registerCallBack(){
