@@ -334,7 +334,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mClusterManager = new ClusterManager<>(this, mMap);
         mMap.setOnCameraIdleListener(mClusterManager);
         mMap.setOnMarkerClickListener(mClusterManager);
-        mMap.setOnInfoWindowClickListener(mClusterManager);
         mClusterManager.setOnClusterClickListener(this);
         mClusterManager.setOnClusterItemClickListener(this);
         Cursor allRestCursor = myDb.getAllRows();
@@ -361,6 +360,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 mClusterManagerRenderer = new ClusterManagerRenderer(this, googleMap, mClusterManager );
             }
             mClusterManager.setRenderer(mClusterManagerRenderer);
+            mClusterManager.clearItems();
             int pos = 0 ;
             // set the severity icons
             int low = R.drawable.green_hazard;
@@ -464,7 +464,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             //myDb.endTransactionSuccessful();
             mClusterManager.cluster();
         }
-
+        cursor.close();
     }
 
     //////////////////////////////////////////////
@@ -494,6 +494,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public boolean onClusterItemClick(ClusterMarker item) {
         Toast.makeText(this, "marker clicked", Toast.LENGTH_SHORT).show();
+        Log.d("ItemClick", item.getRest().toString());
 
         Restaurant restaurant = item.getRest();
         openPopUpWindow(restaurant);
@@ -602,7 +603,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 lastModified.setLast_mod_restaurants(MapsActivity.this, restaurantUpdate.get(0).getLast_modified());
                 lastModified.setLast_mod_inspections(MapsActivity.this, restaurantUpdate.get(1).getLast_modified());
                 getUpdatedFiles();
-                setupMap();
+                addAllMarkers(mMap);
 
                 loadingDialog.dismiss();
                 showUpdatedFavourites();
