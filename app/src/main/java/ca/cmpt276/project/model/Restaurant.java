@@ -142,4 +142,12 @@ public class Restaurant implements Comparable<Restaurant>, Parcelable {
         dest.writeString(tracking);
         dest.writeByte((byte) (isFavourite ? 1 : 0));
     }
+
+    @Override
+    public String toString() {
+        return "Restaurant{" +
+                "name='" + name + '\'' +
+                ", address='" + address + '\'' +
+                '}';
+    }
 }

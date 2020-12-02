@@ -181,13 +181,9 @@ public class DBAdapter {
         String selection = sqlSelectionBuilder(name, hazard, numCritical, lessMore, favFilter);
         String[] selectionArgs = sqlArgsBuilder(name, hazard, numCritical, favFilter);
         if(selectionArgs != null){
-            return db.query(TABLE_RESTAURANTS, ALL_KEYS, selection, selectionArgs, null, null, null, null);
+            return db.query(TABLE_RESTAURANTS, ALL_KEYS, selection, selectionArgs, null, null, KEY_NAME, null);
         }
         else {return null;}
-    }
-
-    public Cursor trackingSearch(String tracking) {
-        return db.query(TABLE_RESTAURANTS, ALL_KEYS, KEY_TRACKING +"='"+tracking+"'", null, null, null, null, null);
     }
 
     public String sqlSelectionBuilder(String name, String hazard, int numCritical, String lessMore, boolean favFilter){
@@ -200,7 +196,6 @@ public class DBAdapter {
                 selection += " AND ";
             }
             selection = selection + DBAdapter.KEY_HAZARD + " LIKE ?";
-            Log.d(TAG, selection);
         }
         if(numCritical >= 0 && !lessMore.equals("OFF")){
             if(name.length() > 0 || !hazard.equals("OFF")){
@@ -217,6 +212,7 @@ public class DBAdapter {
                 selection += " AND ";
             }
             selection = selection + DBAdapter.KEY_FAVOURITE + " = ?";
+            Log.d(TAG, selection);
         }
         return selection;
     }
@@ -228,7 +224,6 @@ public class DBAdapter {
             selectionArgsList.add("%" + name + "%");
         }
         if(!hazard.equals("OFF")){
-            Log.d(TAG, "selection args add " + hazard);
             selectionArgsList.add(hazard);
         }
         if(numCritical >= 0){
@@ -244,6 +239,7 @@ public class DBAdapter {
             selectionArgs = new String[selectionArgsList.size()];
             for(int i = 0; i < selectionArgsList.size(); i++){
                 selectionArgs[i] = selectionArgsList.get(i);
+                Log.d(TAG, "ADD: " + selectionArgs[i]);
             }
         } else {
             selectionArgs = null;

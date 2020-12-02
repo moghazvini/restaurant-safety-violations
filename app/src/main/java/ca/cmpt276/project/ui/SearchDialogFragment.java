@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -22,9 +23,18 @@ import androidx.appcompat.widget.SwitchCompat;
 import ca.cmpt276.project.R;
 
 public class SearchDialogFragment extends AppCompatDialogFragment {
-    
+
+
     private SearchDialogListener dialogListener;
     private static final String TAG = "SearchDialogTag";
+    private static final String PREFS_NAME = "AppPrefs";
+    private static final String NAME_FILTER_PREF = "name shared pref";
+    private static final String HAZARD_FILTER_PREF = "hazard shared pref";
+    private static final String NUM_FILTER_PREF = "num critical shared pref";
+    private static final String LESS_FILTER_PREF = "less shared pref";
+    private static final String FAV_FILTER_PREF = "favourite shared pref";
+    EditText searchTxt;
+    EditText criticalTxt;
     View v;
     private String searchTerm;
     private String hazardFilter;
@@ -35,6 +45,8 @@ public class SearchDialogFragment extends AppCompatDialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         // code for alert dialog via fragment from Dr Brian Fraser's video https://www.youtube.com/watch?v=y6StJRn-Y-A
         v = LayoutInflater.from(getActivity()).inflate(R.layout.search_dialog_layout, null);
+        getFiltersFromPref();
+        setupTextFields();
         setupHazardRadioButtons();
         setupCriticalRadioButtons();
         setupFavFilter();
@@ -43,8 +55,6 @@ public class SearchDialogFragment extends AppCompatDialogFragment {
             public void onClick(DialogInterface dialog, int which) {
                 switch(which){
                     case DialogInterface.BUTTON_POSITIVE:
-                        EditText searchTxt = v.findViewById(R.id.inputSearchBar);
-                        EditText criticalTxt = v.findViewById(R.id.inputCriticalFilter);
                         String stringCritical = criticalTxt.getText().toString();
                         if(stringCritical.length() > 0) {
                             numCriticalFilter = Integer.parseInt(criticalTxt.getText().toString());
@@ -57,14 +67,15 @@ public class SearchDialogFragment extends AppCompatDialogFragment {
                         }
                         if(lessMore == null){
                             lessMore = "OFF";
-                        } else if (lessMore.equals("Less than")){
-                            lessMore = "LESS";
-                        } else if (lessMore.equals("More than")){
-                            lessMore = "MORE";
-                        } else {
-                            lessMore = "OFF";
                         }
-
+//                        else if (lessMore.equals("Less than")){
+//                            lessMore = "LESS";
+//                        } else if (lessMore.equals("More than")){
+//                            lessMore = "MORE";
+//                        } else {
+//                            lessMore = "OFF";
+//                        }
+                        saveFiltersToPref(searchTerm, hazardFilter, numCriticalFilter, lessMore, favFilter);
                         dialogListener.sendSearchInput(searchTerm, hazardFilter, numCriticalFilter, lessMore, favFilter,false);
                         break;
 
@@ -72,6 +83,7 @@ public class SearchDialogFragment extends AppCompatDialogFragment {
                         Toast.makeText(getContext(), "Search cancelled", Toast.LENGTH_SHORT).show();
                         break;
                     case DialogInterface.BUTTON_NEUTRAL:
+                        saveFiltersToPref("", "OFF", -1, "OFF", false);
                         dialogListener.sendSearchInput("one", hazardFilter, numCriticalFilter, lessMore, favFilter,true);
                         Toast.makeText(getContext(), "Reset search", Toast.LENGTH_SHORT).show();
                         break;
@@ -90,13 +102,11 @@ public class SearchDialogFragment extends AppCompatDialogFragment {
     private void setupFavFilter() {
         CheckBox favouritesCheck = v.findViewById(R.id.checkBox_fav);
         favouritesCheck.setOnClickListener(v -> {
-            Log.d(TAG, "is checked: " + favouritesCheck.isChecked());
-            if(favouritesCheck.isChecked()){
-                favFilter = true;
-            } else {
-                favFilter = false;
-            }
+            favFilter = favouritesCheck.isChecked();
         });
+        if(favFilter){
+            favouritesCheck.setChecked(true);
+        }
     }
 
     private void setupCriticalRadioButtons() {
@@ -109,7 +119,10 @@ public class SearchDialogFragment extends AppCompatDialogFragment {
                 lessMore = selectedLessMore;
             });
             group.addView(btn);
-            if (selectedLessMore.equals("OFF")) {
+//            if (selectedLessMore.equals("OFF")) {
+//                btn.setChecked(true);
+//            }
+            if (selectedLessMore.equals(lessMore)){
                 btn.setChecked(true);
             }
         }
@@ -126,11 +139,45 @@ public class SearchDialogFragment extends AppCompatDialogFragment {
                 hazardFilter = selectedHazardFilter;
             });
             group.addView(btn);
-            if(selectedHazardFilter.equals("OFF")){
+//            if(selectedHazardFilter.equals("OFF")){
+//                btn.setChecked(true);
+//            }
+            if(selectedHazardFilter.equals(hazardFilter)){
                 btn.setChecked(true);
             }
         }
 
+    }
+
+    private void setupTextFields(){
+        searchTxt = v.findViewById(R.id.inputSearchBar);
+        criticalTxt = v.findViewById(R.id.inputCriticalFilter);
+        searchTxt.setText(searchTerm);
+        String numCriticalStr = "";
+        if(numCriticalFilter >= 0) {
+            numCriticalStr = Integer.toString(numCriticalFilter);
+        }
+        criticalTxt.setText(numCriticalStr);
+    }
+
+    private void getFiltersFromPref(){
+        SharedPreferences prefs = getContext().getSharedPreferences(PREFS_NAME, 0);
+        searchTerm = prefs.getString(NAME_FILTER_PREF, "");
+        hazardFilter = prefs.getString(HAZARD_FILTER_PREF, "OFF");
+        numCriticalFilter = prefs.getInt(NUM_FILTER_PREF, -1);
+        lessMore = prefs.getString(LESS_FILTER_PREF, "OFF");
+        favFilter = prefs.getBoolean(FAV_FILTER_PREF, false);
+    }
+
+    private void saveFiltersToPref(String name, String hazard, int numCritical, String lessMore, boolean fav){
+        SharedPreferences prefs = getActivity().getSharedPreferences(PREFS_NAME, 0);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putString(NAME_FILTER_PREF, name);
+        editor.putString(HAZARD_FILTER_PREF, hazard);
+        editor.putInt(NUM_FILTER_PREF, numCritical);
+        editor.putString(LESS_FILTER_PREF, lessMore);
+        editor.putBoolean(FAV_FILTER_PREF, fav);
+        editor.apply();
     }
 
     // code to send data from dialog to activity from https://www.youtube.com/watch?v=ARezg1D9Zd0
