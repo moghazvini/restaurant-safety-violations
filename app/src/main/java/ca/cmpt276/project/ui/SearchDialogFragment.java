@@ -14,12 +14,10 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
-import android.widget.Switch;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatDialogFragment;
-import androidx.appcompat.widget.SwitchCompat;
 
 import java.util.Locale;
 
@@ -36,6 +34,8 @@ public class SearchDialogFragment extends AppCompatDialogFragment {
     private static final String NUM_FILTER_PREF = "num critical shared pref";
     private static final String LESS_FILTER_PREF = "less shared pref";
     private static final String FAV_FILTER_PREF = "favourite shared pref";
+    private static final String SAVED_LANGUAGE = "saved language pref";
+
     EditText searchTxt;
     EditText criticalTxt;
     View v;
@@ -44,6 +44,7 @@ public class SearchDialogFragment extends AppCompatDialogFragment {
     private int numCriticalFilter;
     private boolean favFilter;
     private String lessMore;
+
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         // code for alert dialog via fragment from Dr Brian Fraser's video https://www.youtube.com/watch?v=y6StJRn-Y-A
@@ -53,38 +54,35 @@ public class SearchDialogFragment extends AppCompatDialogFragment {
         setupHazardRadioButtons();
         setupCriticalRadioButtons();
         setupFavFilter();
-        DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                switch(which){
-                    case DialogInterface.BUTTON_POSITIVE:
-                        String stringCritical = criticalTxt.getText().toString();
-                        if(stringCritical.length() > 0) {
-                            numCriticalFilter = Integer.parseInt(criticalTxt.getText().toString());
-                        } else {
-                            numCriticalFilter = -1;
-                        }
-                        searchTerm = searchTxt.getText().toString();
-                        if(hazardFilter == null){
-                            hazardFilter = getString(R.string.off);
-                        }
-                        if(lessMore == null){
-                            lessMore = getString(R.string.off);
-                        }
+        DialogInterface.OnClickListener listener = (dialog, which) -> {
+            switch(which){
+                case DialogInterface.BUTTON_POSITIVE:
+                    String stringCritical = criticalTxt.getText().toString();
+                    if(stringCritical.length() > 0) {
+                        numCriticalFilter = Integer.parseInt(criticalTxt.getText().toString());
+                    } else {
+                        numCriticalFilter = -1;
+                    }
+                    searchTerm = searchTxt.getText().toString();
+                    if(hazardFilter == null){
+                        hazardFilter = getString(R.string.off);
+                    }
+                    if(lessMore == null){
+                        lessMore = getString(R.string.off);
+                    }
 
-                        saveFiltersToPref(searchTerm, hazardFilter, numCriticalFilter, lessMore, favFilter);
-                        dialogListener.sendSearchInput(searchTerm, hazardFilter, numCriticalFilter, lessMore, favFilter,false);
-                        break;
+                    saveFiltersToPref(searchTerm, hazardFilter, numCriticalFilter, lessMore, favFilter);
+                    dialogListener.sendSearchInput(searchTerm, hazardFilter, numCriticalFilter, lessMore, favFilter,false);
+                    break;
 
-                    case DialogInterface.BUTTON_NEGATIVE:
-                        Toast.makeText(getContext(), "Search cancelled", Toast.LENGTH_SHORT).show();
-                        break;
-                    case DialogInterface.BUTTON_NEUTRAL:
-                        saveFiltersToPref("", getString(R.string.off), -1, getString(R.string.off), false);
-                        dialogListener.sendSearchInput("one", hazardFilter, numCriticalFilter, lessMore, favFilter,true);
-                        Toast.makeText(getContext(), "Reset search", Toast.LENGTH_SHORT).show();
-                        break;
-                }
+                case DialogInterface.BUTTON_NEGATIVE:
+                    Toast.makeText(getContext(), "Search cancelled", Toast.LENGTH_SHORT).show();
+                    break;
+                case DialogInterface.BUTTON_NEUTRAL:
+                    saveFiltersToPref("", getString(R.string.off), -1, getString(R.string.off), false);
+                    dialogListener.sendSearchInput("one", hazardFilter, numCriticalFilter, lessMore, favFilter,true);
+                    Toast.makeText(getContext(), "Reset search", Toast.LENGTH_SHORT).show();
+                    break;
             }
         };
 
@@ -109,31 +107,6 @@ public class SearchDialogFragment extends AppCompatDialogFragment {
         });
 
         return builder;
-    }
-
-    private String translateHazardEn(String hazardFr){
-        String hazardEn = hazardFr;
-        if(hazardFr.equals("FAIBLE")){
-            hazardEn = "LOW";
-        } else if (hazardFr.equals("MODÉRER")){
-            hazardEn = "MODERATE";
-        } else if (hazardFr.equals("HAUTE")){
-            hazardEn = "HIGH";
-        } else if (hazardFr.equals("DE")){
-            hazardEn = "OFF";
-        }
-        return hazardEn;
-    }
-
-    private String translateLessMoreEn(String lessMore) {
-        if (lessMore.equals("DE")) {
-            lessMore = "OFF";
-        } else if (lessMore.equals("MOINS QUE")) {
-            lessMore = "LESS THAN";
-        } else if (lessMore.equals("PLUS QUE")) {
-            lessMore = "MORE THAN";
-        }
-        return lessMore;
     }
 
     private void setupFavFilter() {
@@ -170,9 +143,7 @@ public class SearchDialogFragment extends AppCompatDialogFragment {
         for (final String selectedHazardFilter : hazardSelectionsArray) {
             RadioButton btn = new RadioButton(getContext());
             btn.setText(selectedHazardFilter);
-            btn.setOnClickListener(v -> {
-                hazardFilter = selectedHazardFilter;
-            });
+            btn.setOnClickListener(v -> hazardFilter = selectedHazardFilter);
             group.addView(btn);
 
             if(selectedHazardFilter.equals(hazardFilter)){
@@ -193,13 +164,92 @@ public class SearchDialogFragment extends AppCompatDialogFragment {
         criticalTxt.setText(numCriticalStr);
     }
 
-    private void getFiltersFromPref(){
+    private void getFiltersFromPref() {
         SharedPreferences prefs = getContext().getSharedPreferences(PREFS_NAME, 0);
+        String language = prefs.getString(SAVED_LANGUAGE, Locale.getDefault().getLanguage());
         searchTerm = prefs.getString(NAME_FILTER_PREF, "");
         hazardFilter = prefs.getString(HAZARD_FILTER_PREF, getString(R.string.off));
         numCriticalFilter = prefs.getInt(NUM_FILTER_PREF, -1);
         lessMore = prefs.getString(LESS_FILTER_PREF, getString(R.string.off));
         favFilter = prefs.getBoolean(FAV_FILTER_PREF, false);
+
+        if (!language.equals(Locale.getDefault().getLanguage())) {
+            if (language.equalsIgnoreCase("french")) {
+                lessMore = translateLessMoreEn(lessMore);
+                hazardFilter = translateHazardEn(hazardFilter);
+            } else {
+                lessMore = translateLessMoreFr(lessMore);
+                hazardFilter = translateHazardFr(hazardFilter);
+            }
+        }
+    }
+
+    private String translateHazardEn(String hazardFr){
+        String hazardEn = hazardFr;
+        switch (hazardFr) {
+            case "FAIBLE":
+                hazardEn = "LOW";
+                break;
+            case "MODÉRER":
+                hazardEn = "MODERATE";
+                break;
+            case "HAUTE":
+                hazardEn = "HIGH";
+                break;
+            case "DE":
+                hazardEn = "OFF";
+                break;
+        }
+        return hazardEn;
+    }
+
+    private String translateHazardFr(String hazardEn) {
+        String hazardFr = hazardEn;
+        switch (hazardFr) {
+            case "LOW":
+                hazardEn = "FAIBLE";
+                break;
+            case "MODERATE":
+                hazardEn = "MODÉRER";
+                break;
+            case "HIGH":
+                hazardEn = "HAUTE";
+                break;
+            case "OFF":
+                hazardEn = "DE";
+                break;
+        }
+        return hazardEn;
+    }
+
+    private String translateLessMoreEn(String lessMore) {
+        switch (lessMore) {
+            case "DE":
+                lessMore = "OFF";
+                break;
+            case "MOINS QUE":
+                lessMore = "LESS THAN";
+                break;
+            case "PLUS QUE":
+                lessMore = "MORE THAN";
+                break;
+        }
+        return lessMore;
+    }
+
+    private String translateLessMoreFr(String lessMore) {
+        switch (lessMore) {
+            case "OFF":
+                lessMore = "DE";
+                break;
+            case "LESS THAN":
+                lessMore = "MOINS QUE";
+                break;
+            case "MORE THAN":
+                lessMore = "LESS THAN";
+                break;
+        }
+        return lessMore;
     }
 
     private void saveFiltersToPref(String name, String hazard, int numCritical, String lessMore, boolean fav){
@@ -210,6 +260,7 @@ public class SearchDialogFragment extends AppCompatDialogFragment {
         editor.putInt(NUM_FILTER_PREF, numCritical);
         editor.putString(LESS_FILTER_PREF, lessMore);
         editor.putBoolean(FAV_FILTER_PREF, fav);
+        editor.putString(SAVED_LANGUAGE, Locale.getDefault().getLanguage());
         editor.apply();
     }
 
