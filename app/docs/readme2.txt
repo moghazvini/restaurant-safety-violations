@@ -7,3 +7,4 @@ running. Only press Cancel in the first 3s, otherwise it may cause the app to cr
 unresponsiveness.
 
 App language is dependent on current system language and will change upon device language change.
+Data, such as restaurant name, long violation description, and addresses are not translated.
