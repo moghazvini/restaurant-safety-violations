@@ -9,6 +9,8 @@ import android.util.Log;
 
 import java.util.ArrayList;
 
+import ca.cmpt276.project.R;
+
 
 public class DBAdapter {
 
@@ -183,17 +185,17 @@ public class DBAdapter {
         if(name.length() > 0){
             selection = DBAdapter.KEY_NAME + " LIKE ?";
         }
-        if(!hazard.equals("OFF")){
+        if(!hazard.equals(context.getString(R.string.off))){
             if(name.length() > 0){
                 selection += " AND ";
             }
             selection = selection + DBAdapter.KEY_HAZARD + " LIKE ?";
         }
-        if(numCritical >= 0 && !lessMore.equals("OFF")){
-            if(name.length() > 0 || !hazard.equals("OFF")){
+        if(numCritical >= 0 && !lessMore.equals(context.getString(R.string.off))){
+            if(selection.length() > 0){
                 selection += " AND ";
             }
-            if(lessMore.equals("LESS")){
+            if(lessMore.equals(String.valueOf(R.string.less_than))){
                 selection = selection + DBAdapter.KEY_NUM_CRITICAL + " < ?";
             } else {
                 selection = selection + DBAdapter.KEY_NUM_CRITICAL + " > ?";
@@ -206,16 +208,17 @@ public class DBAdapter {
             selection = selection + DBAdapter.KEY_FAVOURITE + " = ?";
             Log.d(TAG, selection);
         }
+        Log.d(TAG, "selection: " + selection);
         return selection;
     }
 
     public String[] sqlArgsBuilder(String name, String hazard, int numCritical, boolean favFilter){
         ArrayList<String> selectionArgsList = new ArrayList<>();
-
         if(name.length() > 0){
             selectionArgsList.add("%" + name + "%");
         }
-        if(!hazard.equals("OFF")){
+        if(!hazard.equals(context.getString(R.string.off))){
+            hazard = translateHazard(hazard);
             selectionArgsList.add(hazard);
         }
         if(numCritical >= 0){
@@ -237,6 +240,18 @@ public class DBAdapter {
             selectionArgs = null;
         }
         return selectionArgs;
+    }
+
+    private String translateHazard(String hazardFr){
+        String hazardEn = hazardFr;
+        if(hazardFr.equals("FAIBLE")){
+            hazardEn = "LOW";
+        } else if (hazardFr.equals("MODÉRER")){
+            hazardEn = "MODERATE";
+        } else if (hazardFr.equals("HAUTE")){
+            hazardEn = "HIGH";
+        }
+        return hazardEn;
     }
 
      public void updateRow(String key_column, String trackingID, String values) {

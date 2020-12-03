@@ -301,9 +301,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private Cursor getFilterPrefs(){
         SharedPreferences prefs = this.getSharedPreferences(PREFS_NAME, 0);
         String searchTerm = prefs.getString(NAME_FILTER_PREF, "");
-        String hazardFilter = prefs.getString(HAZARD_FILTER_PREF, "OFF");
+        String hazardFilter = prefs.getString(HAZARD_FILTER_PREF, this.getString(R.string.off));
         int numCriticalFilter = prefs.getInt(NUM_FILTER_PREF, -1);
-        String lessMore = prefs.getString(LESS_FILTER_PREF, "OFF");
+        String lessMore = prefs.getString(LESS_FILTER_PREF, this.getString(R.string.off));
         boolean favFilter = prefs.getBoolean(FAV_FILTER_PREF, false);
         Cursor cursor = myDb.filterRestaurants(searchTerm, hazardFilter, numCriticalFilter, lessMore, favFilter);
         if(cursor != null){
