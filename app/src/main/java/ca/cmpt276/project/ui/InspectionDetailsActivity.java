@@ -25,6 +25,7 @@ import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -113,9 +114,9 @@ public class InspectionDetailsActivity extends AppCompatActivity {
                 }else {
                     crit_or_not_txt.setTextColor(Color.parseColor("#45DE08")); // Green
                 }
-            if(crit_or_not == "Critical") {
+            if(crit_or_not.equals("Critical")) {
                 crit_or_not_txt.setText(R.string.critical);
-            } else if (crit_or_not == "Non-Critical") {
+            } else if (crit_or_not.equals("Non-Critical")) {
                 crit_or_not_txt.setText(R.string.non_critical);
             }
 
@@ -157,11 +158,6 @@ public class InspectionDetailsActivity extends AppCompatActivity {
                     default:
                         assert false;
                 }
-            //}
-            /*else {
-                brief_description_txt.setText(R.string.no_inspection_found);
-                crit_or_not_txt.setText(R.string.no_inspection_found);
-            }*/
             return itemView;
         }
     }
@@ -173,18 +169,20 @@ public class InspectionDetailsActivity extends AppCompatActivity {
 
         // Format inspection date for the toolbar
         LocalDate inspectionDate = inspection.getDate();
-        String inspectionDateText = getString(R.string.date,inspectionDate.getMonth().toString().toLowerCase(), inspectionDate.getDayOfMonth(), inspectionDate.getYear());
-        inspectionDateText = inspectionDateText.substring(0,1).toUpperCase().concat(inspectionDateText.substring(1));
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMMM dd, yyyy");
+        /*String inspectionDateText = getString(R.string.date,inspectionDate.getMonth().toString().toLowerCase(), inspectionDate.getDayOfMonth(), inspectionDate.getYear());
+        inspectionDateText = inspectionDateText.substring(0,1).toUpperCase().concat(inspectionDateText.substring(1));*/
+        String inspectionDateText = formatter.format(inspectionDate);
         back.setTitle(inspectionDateText);
 
         TextView plain_hazard_txt = findViewById(R.id.plain_txt_hazard);
         plain_hazard_txt.setText(R.string.hazard_level);
 
         String type = inspection.getType().value;
-        if(type == "Routine Check") {
+        if(type.equals("Routine Check")) {
             inspectionType_txt.setText(R.string.routine_check);
         }
-        if(type == "Follow-up Check") {
+        if(type.equals("Follow-up Check")) {
             inspectionType_txt.setText(R.string.follow_up_check);
         }
 

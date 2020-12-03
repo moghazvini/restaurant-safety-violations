@@ -29,6 +29,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Locale;
 
 import ca.cmpt276.project.R;
 import ca.cmpt276.project.model.DBAdapter;
@@ -167,7 +168,7 @@ public class RestaurantDetailsActivity extends AppCompatActivity {
                     inspectionDateText = formatter.format(insp.getDate());
                 }
                 else{
-                    inspectionDateText = insp.getDate().getDayOfMonth() + " days ago";
+                    inspectionDateText = getString(R.string.daysago, insp.getDate().getDayOfMonth());
                 }
                 inspDate_txt.setText(inspectionDateText);
             }

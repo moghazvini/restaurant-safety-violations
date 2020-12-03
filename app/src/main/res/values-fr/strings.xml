@@ -68,6 +68,6 @@
     <string name="critical">Critique</string>
     <string name="non_critical">Non Critique</string>
     <string name="newdata">Nouvelles données</string>
-
+    <string name="daysago">il y a %d jour(s)</string>
 
 </resources>

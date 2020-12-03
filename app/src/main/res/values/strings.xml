@@ -65,7 +65,7 @@
     <string name="less_than">LESS THAN</string>
     <string name="critical">Critical</string>
     <string name="non_critical">Non-Critical</string>
-
+    <string name="daysago">%d day(s) ago</string>
 
 </resources>
 
