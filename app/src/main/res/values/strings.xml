@@ -42,6 +42,7 @@
     <string name="updating">Updating…</string>
     <string name="updated">These have new inspections!</string>
     <string name="cancelled">CANCELLED DOWNLOAD</string>
+    <string name="newdata">New Update</string>
 
     <!--search dialog-->
     <string name="reset">Reset</string>
