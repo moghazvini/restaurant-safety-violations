@@ -75,7 +75,9 @@ public class RestaurantListAdapter extends ArrayAdapter<Restaurant> {
         if(currentInspectionList.getInspections().size() > 0) {
             Inspection latestInspection;
             latestInspection = Collections.max(currentInspectionList.getInspections());
-            String issuesMessage = (latestInspection.getCritical() + latestInspection.getNonCritical()) + " issue(s)";
+           String tempString = String.valueOf(R.string.num_issues);
+           String issuesMessage = latestInspection.getCritical() + latestInspection.getNonCritical() + tempString;
+
             issuesText.setText(issuesMessage);
 
             switch (latestInspection.getLevel()) {

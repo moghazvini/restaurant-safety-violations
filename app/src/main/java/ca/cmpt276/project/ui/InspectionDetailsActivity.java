@@ -172,10 +172,19 @@ public class InspectionDetailsActivity extends AppCompatActivity {
         inspectionDateText = inspectionDateText.substring(0,1).toUpperCase().concat(inspectionDateText.substring(1));
         back.setTitle(inspectionDateText);
 
+        TextView plain_hazard_txt = findViewById(R.id.plain_txt_hazard);
+        plain_hazard_txt.setText(R.string.hazard_level);
+
         String type = inspection.getType().value;
-        inspectionType_txt.setText(type);
-        String nonCrit = "# of Critical Issues: " + inspection.getCritical();
-        String crit = "# of Non-Critical Issues: " + inspection.getNonCritical();
+        if(type == "Routine Check") {
+            inspectionType_txt.setText(R.string.routine_check);
+        }
+        if(type == "Follow-up Check") {
+            inspectionType_txt.setText(R.string.follow_up_check);
+        }
+
+        String nonCrit = getString(R.string.critical_issue, inspection.getCritical());
+        String crit = getString(R.string.non_critical_issue, inspection.getNonCritical());
 
         critissues.setText(nonCrit);
         Ncritissues.setText(crit);

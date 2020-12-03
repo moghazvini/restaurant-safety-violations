@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="hazard_selection">
-        <item>"OFF"</item>
-        <item>"LOW"</item>
-        <item>"MODERATE"</item>
-        <item>"HIGH"</item>
+        <item>@string/off</item>
+        <item>@string/low</item>
+        <item>@string/moderate</item>
+        <item>@string/high</item>
     </string-array>
 
     <string-array name="less_more_selection">
-        <item>"OFF"</item>
-        <item>"Less than"</item>
-        <item>"More than"</item>
+        <item>@string/off</item>
+        <item>@string/less_than</item>
+        <item>@string/more_than</item>
     </string-array>
 </resources>

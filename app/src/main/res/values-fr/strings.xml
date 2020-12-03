@@ -39,20 +39,32 @@
     <string name="date">%s %d, %d</string>
 
     <!--Map-->
+    <string name="updating">Mise à jour…</string>
     <string name="updated">Ceux-ci ont de nouvelles inspections!</string>
+    <string name="cancelled">Téléchargement annulé</string>
 
     <!--search dialog-->
     <string name="reset">Réinitialiser</string>
     <string name="cancel">Annuler</string>
     <string name="search">Chercher</string>
+    <string name="search_restaurant_name">Rechercher le nom du restaurant</string>
 
-    <!--TODO To be translated-->
-    <string name="search_restaurant_name">Search restaurant name</string>
-    <string name="hazard_filter">Hazard filter:</string>
-    <string name="of_critical_violations"># of critical violations:</string>
-    <string name="filter_by_favourites">Filter by favourites</string>
-    <string name="new_update_found_do_you_want_to_update">New update found, do you want to update?</string>
-    <string name="cancelled">CANCELLED DOWNLOAD</string>
-    <string name="updating">Updating…</string>
+
+    <string name="hazard_filter">Filtre de danger:</string>
+    <string name="of_critical_violations">Nombre de violations critiques:</string>
+    <string name="filter_by_favourites">Filtrer par favoris</string>
+    <string name="new_update_found_do_you_want_to_update">Nouvelle mise à jour trouvée, voulez-vous mettre à jour?</string>
+
+    <string name="Critical">Critique</string>
+    <string name="routine_check">Vérification de routine</string>
+    <string name="follow_up_check">Vérification de suivi</string>
+    <string name="num_issues">problème(s)</string>
+    <string name="off">DE</string>
+    <string name="low">FAIBLE</string>
+    <string name="moderate">MODÉRER</string>
+    <string name="high">HAUTE</string>
+    <string name="more_than">PLUS QUE</string>
+    <string name="less_than">MOINS QUE</string>
+
 
 </resources>

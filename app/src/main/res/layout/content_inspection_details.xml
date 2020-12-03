@@ -25,7 +25,7 @@
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView2"
+        app:layout_constraintTop_toBottomOf="@+id/plain_txt_hazard"
         app:layout_constraintVertical_bias="0.0">
 
         <ListView
@@ -93,11 +93,11 @@
         android:layout_centerHorizontal="true"
         android:layout_marginStart="8dp"
         android:contentDescription="@string/hazard_level"
-        app:layout_constraintBottom_toBottomOf="@+id/textView2"
-        app:layout_constraintStart_toEndOf="@+id/textView2" />
+        app:layout_constraintBottom_toBottomOf="@+id/plain_txt_hazard"
+        app:layout_constraintStart_toEndOf="@+id/plain_txt_hazard" />
 
     <TextView
-        android:id="@+id/textView2"
+        android:id="@+id/plain_txt_hazard"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
