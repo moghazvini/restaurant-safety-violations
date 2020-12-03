@@ -78,10 +78,10 @@ public class SearchDialogFragment extends AppCompatDialogFragment {
                 case DialogInterface.BUTTON_NEGATIVE:
                     Toast.makeText(getContext(), "Search cancelled", Toast.LENGTH_SHORT).show();
                     break;
+
                 case DialogInterface.BUTTON_NEUTRAL:
                     saveFiltersToPref("", getString(R.string.off), -1, getString(R.string.off), false);
                     dialogListener.sendSearchInput("one", hazardFilter, numCriticalFilter, lessMore, favFilter,true);
-                    Toast.makeText(getContext(), "Reset search", Toast.LENGTH_SHORT).show();
                     break;
             }
         };
