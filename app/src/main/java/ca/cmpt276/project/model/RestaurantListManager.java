@@ -1,6 +1,5 @@
 package ca.cmpt276.project.model;
 
-import android.content.Context;
 import android.util.Log;
 
 import java.io.BufferedReader;

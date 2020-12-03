@@ -3,6 +3,10 @@ package ca.cmpt276.project.ui;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.widget.ListView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -10,14 +14,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.FragmentManager;
 
-import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.widget.ListView;
-
 import ca.cmpt276.project.R;
 import ca.cmpt276.project.model.DBAdapter;
-import ca.cmpt276.project.model.RestaurantListManager;
 
 /**
  * Displays the list of all restaurants in alphabetical order
@@ -42,7 +40,6 @@ public class RestaurantListActivity extends AppCompatActivity implements SearchD
         Toolbar toolbar = findViewById(R.id.toolbar_restaurant_list);
         setSupportActionBar(toolbar);
 
-        RestaurantListManager restaurantManager = RestaurantListManager.getInstance();
         openDB();
 
         popListViewDB();
