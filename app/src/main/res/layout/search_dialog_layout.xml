@@ -37,10 +37,12 @@
 
     <TextView
         android:id="@+id/txt_numCritical"
-        android:layout_width="wrap_content"
+        android:layout_width="193dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="65dp"
         android:text="@string/of_critical_violations"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.753"
         app:layout_constraintStart_toEndOf="@+id/txt_hazardSelection"
         app:layout_constraintTop_toTopOf="@+id/txt_hazardSelection" />
 
@@ -66,7 +68,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/filter_by_favourites"
-        android:textSize="12sp"
+        android:textSize="14sp"
         app:layout_constraintStart_toStartOf="@+id/inputCriticalFilter"
         app:layout_constraintTop_toBottomOf="@+id/inputCriticalFilter" />
 
