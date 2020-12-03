@@ -57,6 +57,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 
 import ca.cmpt276.project.R;
 import ca.cmpt276.project.model.ClusterManagerRenderer;
@@ -301,9 +302,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private Cursor getFilterPrefs(){
         SharedPreferences prefs = this.getSharedPreferences(PREFS_NAME, 0);
         String searchTerm = prefs.getString(NAME_FILTER_PREF, "");
-        String hazardFilter = prefs.getString(HAZARD_FILTER_PREF, this.getString(R.string.off));
+        String hazardFilter = prefs.getString(HAZARD_FILTER_PREF, "OFF");
         int numCriticalFilter = prefs.getInt(NUM_FILTER_PREF, -1);
-        String lessMore = prefs.getString(LESS_FILTER_PREF, this.getString(R.string.off));
+        String lessMore = prefs.getString(LESS_FILTER_PREF, "OFF");
         boolean favFilter = prefs.getBoolean(FAV_FILTER_PREF, false);
         Cursor cursor = myDb.filterRestaurants(searchTerm, hazardFilter, numCriticalFilter, lessMore, favFilter);
         if(cursor != null){
