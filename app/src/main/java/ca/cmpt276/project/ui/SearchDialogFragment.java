@@ -5,6 +5,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -86,13 +87,28 @@ public class SearchDialogFragment extends AppCompatDialogFragment {
                 }
             }
         };
-        return new AlertDialog.Builder(getActivity())
+
+        AlertDialog builder = new AlertDialog.Builder(getActivity())
                 .setTitle(R.string.search)
                 .setView(v)
                 .setPositiveButton(R.string.search, listener)
                 .setNegativeButton(R.string.cancel, listener)
                 .setNeutralButton(R.string.reset, listener)
                 .create();
+
+        builder.setOnShowListener(dialog -> {
+            int currentNightMode = getContext().getResources().getConfiguration().uiMode &
+                    Configuration.UI_MODE_NIGHT_MASK;
+
+            if (currentNightMode == Configuration.UI_MODE_NIGHT_YES) {
+                int color = getResources().getColor(R.color.teal_200);
+                builder.getButton(Dialog.BUTTON_NEGATIVE).setTextColor(color);
+                builder.getButton(Dialog.BUTTON_POSITIVE).setTextColor(color);
+                builder.getButton(Dialog.BUTTON_NEUTRAL).setTextColor(color);
+            }
+        });
+
+        return builder;
     }
 
     private String translateHazardEn(String hazardFr){
