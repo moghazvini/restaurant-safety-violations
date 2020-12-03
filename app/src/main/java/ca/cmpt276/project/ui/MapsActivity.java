@@ -7,7 +7,6 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentManager;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.Manifest;
 import android.content.Intent;
@@ -25,9 +24,7 @@ import android.widget.Toast;
 
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResponse;
@@ -45,7 +42,6 @@ import com.google.gson.reflect.TypeToken;
 import com.google.maps.android.clustering.Cluster;
 import com.google.maps.android.clustering.ClusterItem;
 import com.google.maps.android.clustering.ClusterManager;
-
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -77,7 +73,7 @@ import ca.cmpt276.project.model.SurreyDataDownloader;
 import ca.cmpt276.project.model.types.HazardLevel;
 import ca.cmpt276.project.model.types.InspectionType;
 
-public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, UpdateFragment.UpdateDialogListener, LoadingDialogFragment.CancelDialogListener, SearchDialogFragment.SearchDialogListener, ClusterManager.OnClusterClickListener<ClusterMarker>, ClusterManager.OnClusterItemClickListener<ClusterMarker>,GoogleMap.OnCameraMoveStartedListener, MarkerDialogFragment.PopUpDialogListener {
+public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, UpdateFragment.UpdateDialogListener, LoadingDialogFragment.CancelDialogListener, SearchDialogFragment.SearchDialogListener, ClusterManager.OnClusterClickListener<ClusterMarker>, ClusterManager.OnClusterItemClickListener<ClusterMarker>,MarkerDialogFragment.PopUpDialogListener {
 
     private static final String FINE_LOCATION = Manifest.permission.ACCESS_FINE_LOCATION;
     private static final String COURSE_LOCATION = Manifest.permission.ACCESS_COARSE_LOCATION;
@@ -95,7 +91,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private ClusterManager<ClusterMarker> mClusterManager;
     private ClusterManagerRenderer mClusterManagerRenderer;
     private static final String REST_DETAILS = "restaurant details tracking";
-    private final List<ClusterMarker> markerList = new ArrayList<>();
 
     //User Locations permission
     private Boolean mLocationPermissionsGranted = false;
@@ -111,16 +106,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private static final String NUM_FILTER_PREF = "num critical shared pref";
     private static final String LESS_FILTER_PREF = "less shared pref";
     private static final String FAV_FILTER_PREF = "favourite shared pref";
-    long startTime;
-    long stopTime;
+
     FragmentManager manager;
     Gson gson;
     Type type;
     DBAdapter myDb;
-    List<Restaurant> foundRestaurants;
     List<Restaurant> favouritesUpdated;
     //Location callBack
-    private LocationCallback locationCallback;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -129,11 +121,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         Toolbar toolbar = findViewById(R.id.map_toolbar);
         setSupportActionBar(toolbar);
         openDB();
+
         restaurantManager = RestaurantListManager.getInstance();
         lastModified = LastModified.getInstance(this);
         manager = getSupportFragmentManager();
         type = new TypeToken<ArrayList<Inspection>>() {}.getType();
         gson = new GsonBuilder().registerTypeAdapter(LocalDate.class, new LocalDateAdapter().nullSafe()).create();
+
         if(!read){
             fillInitialRestaurantList();
             read = true;
@@ -150,20 +144,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             new GetDataTask().execute();
         }
         getLocationPermission();
-
-        locationCallback = new LocationCallback() {
-            @Override
-            public void onLocationResult(LocationResult locationResult) {
-                super.onLocationResult(locationResult);
-                if (locationResult == null) {
-                    return;
-                }
-                for(Location location : locationResult.getLocations()){
-                    mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(location.getLatitude(), location.getLongitude())));
-                    mMap.animateCamera(CameraUpdateFactory.zoomTo(13f));
-                }
-            }
-        };
 
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
 
@@ -190,10 +170,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         SettingsClient client = LocationServices.getSettingsClient(this);
 
         Task<LocationSettingsResponse> locationSettingsResponseTask = client.checkLocationSettings(request);
-        locationSettingsResponseTask.addOnSuccessListener(locationSettingsResponse -> {
-            //Settings of device are satisfied and we can start location updates
-            startLocationUpdates();
-        });
         locationSettingsResponseTask.addOnFailureListener(e -> {
             if (e instanceof ResolvableApiException) {
                 ResolvableApiException apiException = (ResolvableApiException) e;
@@ -262,33 +238,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                             mMap.animateCamera(CameraUpdateFactory.zoomTo(13f));
                         }
 
-                        startLocationUpdates();
                         extractDataFromIntent();
-                    }else{
-                        Toast.makeText(MapsActivity.this, "unable to get current location", Toast.LENGTH_SHORT).show();
                     }
                 });
             }
         }catch (SecurityException e){
             Log.e("user location", "getDeviceLocation: SecurityException: " + e.getMessage() );
         }
-    }
-
-    @Override
-    public void onCameraMoveStarted(int reason) {
-        if (reason == GoogleMap.OnCameraMoveStartedListener.REASON_GESTURE) {
-            Toast.makeText(this, "sensed", Toast.LENGTH_SHORT).show();
-            stopLocationUpdates();
-        }
-    }
-
-    @SuppressLint("MissingPermission")
-    private void startLocationUpdates() {
-        //mFusedLocationProviderClient.requestLocationUpdates(mLocationRequest, locationCallback, Looper.getMainLooper());
-    }
-
-    private void stopLocationUpdates() {
-        mFusedLocationProviderClient.removeLocationUpdates(locationCallback);
     }
 
     ////////////////////////////////////////////////////
@@ -325,14 +281,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
             mMap.setMyLocationEnabled(true);
         }
-        mMap.setOnMyLocationButtonClickListener(new GoogleMap.OnMyLocationButtonClickListener(){
-            @Override
-            public boolean onMyLocationButtonClick()
-            {
-                //startLocationUpdates();
-                return true;
-            }
-        });
     }
 
     public void setupMap(){
@@ -347,7 +295,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mClusterManager.setOnClusterItemClickListener(this);
         Cursor allRestCursor = getFilterPrefs();
         popLatlong();
-        //addAllMarkers(mMap);
         addRelevantMarkers(mMap, allRestCursor);
     }
 
@@ -375,51 +322,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
-    private void addAllMarkers(GoogleMap googleMap) {
-        if(googleMap != null) {
-
-            if (mClusterManager == null) {
-                mClusterManager = new ClusterManager<>(this.getApplicationContext(), googleMap);
-            }
-            if (mClusterManagerRenderer == null) {
-                mClusterManagerRenderer = new ClusterManagerRenderer(this, googleMap, mClusterManager );
-            }
-            mClusterManager.setRenderer(mClusterManagerRenderer);
-            mClusterManager.clearItems();
-            int pos = 0 ;
-            // set the severity icons
-            int low = R.drawable.green_hazard;
-            int med = R.drawable.orange_hazard;
-            int high = R.drawable.red_hazard;
-            for (LatLng current : restaurantlatlong) {
-                try {
-                    if (restaurantManager.getRestaurant(pos).getInspections().getInspections().size() > 0) {
-                        String snippet = "";
-                        int severity_icon = R.drawable.green_hazard;
-                        Inspection latestInspection = Collections.max(restaurantManager.getRestaurant(pos).getInspections().getInspections());
-                        if (latestInspection.getLevel() == HazardLevel.LOW) {
-                            snippet = ""+ pos;
-                            severity_icon = low;
-                        } else if (latestInspection.getLevel() == HazardLevel.MODERATE) {
-                            snippet = ""+ pos;
-                            severity_icon = med;
-                        } else if (latestInspection.getLevel() == HazardLevel.HIGH) {
-                            snippet = ""+ pos;
-                            severity_icon = high;
-                        }
-                        ClusterMarker newClusterMarker = new ClusterMarker(current,restaurantManager.getRestaurant(pos).getName(), snippet, severity_icon, restaurantManager.getRestaurant(pos));
-                        mClusterManager.addItem(newClusterMarker);
-                        markerList.add(newClusterMarker);
-                    }
-                } catch(NullPointerException e){
-                    Log.e("CMarker", "addMapMarkers: NullPointerException: " + e.getMessage());
-                }
-                pos++;
-            }
-            mClusterManager.cluster();
-        }
-    }
-
     private void addRelevantMarkers(GoogleMap map, Cursor cursor){
         if (mClusterManager == null) {
             mClusterManager = new ClusterManager<>(this.getApplicationContext(), map);
@@ -433,7 +335,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         int pos = 0;
 
         if(cursor.moveToFirst()){
-            //myDb.beginTransaction();
             do{
                 String tracking = cursor.getString(DBAdapter.COL_TRACKING);
                 String address = cursor.getString(DBAdapter.COL_ADDRESS);
@@ -461,7 +362,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 int high = R.drawable.red_hazard;
                 String snippet = "";
                 int severity_icon = R.drawable.green_hazard;
-                //Inspection latestInspection = extractLatestInspection(cursor);
+
                 if(latestInspection != null) {
                     if (latestInspection.getLevel() == HazardLevel.LOW) {
                         snippet = "" + pos;
@@ -485,8 +386,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     Log.d(TAG, "null inspection");
                 }
 
-            }while(cursor.moveToNext());
-            //myDb.endTransactionSuccessful();
+            } while(cursor.moveToNext());
+
             mClusterManager.cluster();
         }
         cursor.close();
@@ -512,15 +413,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         } catch (Exception e) {
             e.printStackTrace();
         }
-        stopLocationUpdates();
         return true;
     }
 
     @Override
     public boolean onClusterItemClick(ClusterMarker item) {
-        Toast.makeText(this, "marker clicked", Toast.LENGTH_SHORT).show();
-        Log.d("ItemClick", item.getRest().toString());
-
         Restaurant restaurant = item.getRest();
         openPopUpWindow(restaurant);
 
@@ -532,7 +429,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap.moveCamera(CameraUpdateFactory.newLatLng(coords));
         MarkerDialogFragment markerFragment = MarkerDialogFragment.newInstance(restaurant.getTracking());
         markerFragment.show(manager,"popup");
-        stopLocationUpdates();
     }
 
     @Override
@@ -546,25 +442,15 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     ///////////////////////////////////////////////
     @Override
     public void sendSearchInput(String name, String hazard_filter, int num_critical_filter, String lessMore, boolean favFilter, boolean reset) {
+        Cursor relevantRowsCursor;
         if((name.length() > 0 || hazard_filter.length() > 0 || num_critical_filter > 0) && (!reset)) {
-            Cursor relevantRowsCursor = myDb.filterRestaurants(name, hazard_filter, num_critical_filter, lessMore, favFilter);
+            relevantRowsCursor = myDb.filterRestaurants(name, hazard_filter, num_critical_filter, lessMore, favFilter);
             if (relevantRowsCursor != null) {
                 addRelevantMarkers(mMap, relevantRowsCursor);
             }
         } else if (reset){
-            addAllMarkers(mMap);
-        }
-    }
-
-    private void printCursor(Cursor cursor){
-        if(cursor.moveToFirst()){
-            do{
-                String name = cursor.getString(DBAdapter.COL_NAME);
-                Log.d(TAG, "printing cursor: " + name);
-            }while(cursor.moveToNext());
-        }
-        else{
-            Log.d(TAG, "null cursor");
+            relevantRowsCursor = myDb.getAllRows();
+            addRelevantMarkers(mMap, relevantRowsCursor);
         }
     }
 
@@ -604,7 +490,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         protected void onPreExecute() {
             loadingDialog = new LoadingDialogFragment(); // loading dialog
             loadingDialog.show(manager, "LoadingDialog");
-            startTime = System.nanoTime();
         }
 
         @Override
@@ -630,8 +515,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 Cursor allRestCursor = myDb.getAllRows();
                 addRelevantMarkers(mMap, allRestCursor);
                 loadingDialog.dismiss();
-                stopTime = System.nanoTime();
-                Log.d(TAG, "TIME TAKEN FOR LOADING: " + (stopTime - startTime));
                 showUpdatedFavourites();
             }
         }
@@ -648,7 +531,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void sendCancel(boolean input) {
         if (input) {
             listUpdateTask.cancel(true);
-            Toast.makeText(this, "CANCELLED DOWNLOAD", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, R.string.cancelled, Toast.LENGTH_LONG).show();
         }
     }
 
@@ -660,7 +543,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
-    private String TAG1 = "Tag1";
     private void fillInitialRestaurantList() {
         InputStream inputStream = getResources().openRawResource(R.raw.restaurants_itr1);
         BufferedReader reader = new BufferedReader(
@@ -843,7 +725,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         String trackingID = restaurantCursor.getString(DBAdapter.COL_TRACKING);
                         String inputString = gson.toJson(inspectionsListDB);
                         myDb.updateRow(DBAdapter.KEY_INSPECTION_LIST, trackingID, inputString);
-                        //restaurantCursor.close();
                     }
                     if(restaurantCursor != null){
                         restaurantCursor.close();

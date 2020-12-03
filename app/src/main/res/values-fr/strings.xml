@@ -52,5 +52,7 @@
     <string name="of_critical_violations"># of critical violations:</string>
     <string name="filter_by_favourites">Filter by favourites</string>
     <string name="new_update_found_do_you_want_to_update">New update found, do you want to update?</string>
+    <string name="cancelled">CANCELLED DOWNLOAD</string>
+    <string name="updating">Updating…</string>
 
 </resources>

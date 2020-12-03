@@ -44,11 +44,12 @@ public class MarkerDialogFragment extends AppCompatDialogFragment {
     @NonNull
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         View view = LayoutInflater.from(getActivity()).inflate(R.layout.custom_infowindow, null);
-        TextView restaurant_Title = (TextView) view.findViewById(R.id.txt_name);
-        TextView restaurant_address = (TextView) view.findViewById(R.id.txt_add);
-        TextView restaurant_severity = (TextView) view.findViewById(R.id.txt_severity);
+        TextView restaurant_Title = view.findViewById(R.id.txt_name);
+        TextView restaurant_address = view.findViewById(R.id.txt_add);
+        TextView restaurant_severity = view.findViewById(R.id.txt_severity);
         ImageView img_icon = view.findViewById(R.id.img_icon);
         open();
+
         String restTracking = getArguments().getString(RESTAURANT_KEY);
         Restaurant restaurant = getRestaurantFromTracking(restTracking);
 

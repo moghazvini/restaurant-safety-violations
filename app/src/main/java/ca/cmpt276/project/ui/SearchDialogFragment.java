@@ -68,13 +68,6 @@ public class SearchDialogFragment extends AppCompatDialogFragment {
                         if(lessMore == null){
                             lessMore = "OFF";
                         }
-//                        else if (lessMore.equals("Less than")){
-//                            lessMore = "LESS";
-//                        } else if (lessMore.equals("More than")){
-//                            lessMore = "MORE";
-//                        } else {
-//                            lessMore = "OFF";
-//                        }
                         saveFiltersToPref(searchTerm, hazardFilter, numCriticalFilter, lessMore, favFilter);
                         dialogListener.sendSearchInput(searchTerm, hazardFilter, numCriticalFilter, lessMore, favFilter,false);
                         break;
@@ -91,7 +84,7 @@ public class SearchDialogFragment extends AppCompatDialogFragment {
             }
         };
         return new AlertDialog.Builder(getActivity())
-                .setTitle("Search")
+                .setTitle(R.string.search)
                 .setView(v)
                 .setPositiveButton(R.string.search, listener)
                 .setNegativeButton(R.string.cancel, listener)
@@ -119,9 +112,7 @@ public class SearchDialogFragment extends AppCompatDialogFragment {
                 lessMore = selectedLessMore;
             });
             group.addView(btn);
-//            if (selectedLessMore.equals("OFF")) {
-//                btn.setChecked(true);
-//            }
+
             if (selectedLessMore.equals(lessMore)){
                 btn.setChecked(true);
             }
@@ -139,9 +130,7 @@ public class SearchDialogFragment extends AppCompatDialogFragment {
                 hazardFilter = selectedHazardFilter;
             });
             group.addView(btn);
-//            if(selectedHazardFilter.equals("OFF")){
-//                btn.setChecked(true);
-//            }
+
             if(selectedHazardFilter.equals(hazardFilter)){
                 btn.setChecked(true);
             }

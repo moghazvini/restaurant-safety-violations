@@ -21,7 +21,6 @@ import ca.cmpt276.project.R;
  * Gives the user the option to cancel the download.
  */
 public class LoadingDialogFragment extends AppCompatDialogFragment {
-    public static final String LOADING_CANCELABLE = "Able to cancel";
     private static final String TAG = "DialogFragmentTag";
     private CancelDialogListener cancelListener;
 
@@ -37,7 +36,7 @@ public class LoadingDialogFragment extends AppCompatDialogFragment {
 
         AlertDialog builder;
         builder = new AlertDialog.Builder(getActivity())
-                .setTitle("Updating...")
+                .setTitle(R.string.updating)
                 .setView(v)
                 .setNegativeButton(android.R.string.cancel, listener)
                 .create();

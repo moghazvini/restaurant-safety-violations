@@ -2,10 +2,7 @@ package ca.cmpt276.project.ui;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.Configuration;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
-import android.graphics.Color;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -14,29 +11,12 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.FragmentManager;
 
 import android.os.Bundle;
-import android.util.Log;
-import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.TextView;
-import android.widget.Toast;
-
-import java.lang.reflect.Type;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.Collections;
 
 import ca.cmpt276.project.R;
 import ca.cmpt276.project.model.DBAdapter;
-import ca.cmpt276.project.model.Inspection;
-import ca.cmpt276.project.model.InspectionListManager;
-import ca.cmpt276.project.model.Restaurant;
 import ca.cmpt276.project.model.RestaurantListManager;
 
 /**
@@ -45,7 +25,6 @@ import ca.cmpt276.project.model.RestaurantListManager;
 public class RestaurantListActivity extends AppCompatActivity implements SearchDialogFragment.SearchDialogListener {
 
     public static final int REQUEST_CODE_DETAILS = 101;
-    private RestaurantListManager restaurantManager;
     private RestaurantListCursorAdapter adapter;
     Cursor cursor;
     DBAdapter myDb;
@@ -55,11 +34,7 @@ public class RestaurantListActivity extends AppCompatActivity implements SearchD
     private static final String NUM_FILTER_PREF = "num critical shared pref";
     private static final String LESS_FILTER_PREF = "less shared pref";
     private static final String FAV_FILTER_PREF = "favourite shared pref";
-    private String searchTerm;
-    private String hazardFilter;
-    private int numCriticalFilter;
-    private boolean favFilter;
-    private String lessMore;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -67,7 +42,7 @@ public class RestaurantListActivity extends AppCompatActivity implements SearchD
         Toolbar toolbar = findViewById(R.id.toolbar_restaurant_list);
         setSupportActionBar(toolbar);
 
-        restaurantManager = RestaurantListManager.getInstance();
+        RestaurantListManager restaurantManager = RestaurantListManager.getInstance();
         openDB();
 
         popListViewDB();
@@ -97,11 +72,11 @@ public class RestaurantListActivity extends AppCompatActivity implements SearchD
 
     private Cursor getFilterPrefs(){
         SharedPreferences prefs = this.getSharedPreferences(PREFS_NAME, 0);
-        searchTerm = prefs.getString(NAME_FILTER_PREF, "");
-        hazardFilter = prefs.getString(HAZARD_FILTER_PREF, "OFF");
-        numCriticalFilter = prefs.getInt(NUM_FILTER_PREF, -1);
-        lessMore = prefs.getString(LESS_FILTER_PREF, "OFF");
-        favFilter = prefs.getBoolean(FAV_FILTER_PREF, false);
+        String searchTerm = prefs.getString(NAME_FILTER_PREF, "");
+        String hazardFilter = prefs.getString(HAZARD_FILTER_PREF, "OFF");
+        int numCriticalFilter = prefs.getInt(NUM_FILTER_PREF, -1);
+        String lessMore = prefs.getString(LESS_FILTER_PREF, "OFF");
+        boolean favFilter = prefs.getBoolean(FAV_FILTER_PREF, false);
         Cursor cursor = myDb.filterRestaurants(searchTerm, hazardFilter, numCriticalFilter, lessMore, favFilter);
         if(cursor != null){
             return cursor;
@@ -143,7 +118,8 @@ public class RestaurantListActivity extends AppCompatActivity implements SearchD
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CODE_DETAILS) {
-            displayAllRows();
+            Cursor newCursor = getFilterPrefs();
+            adapter.changeCursor(newCursor);
         }
     }
 

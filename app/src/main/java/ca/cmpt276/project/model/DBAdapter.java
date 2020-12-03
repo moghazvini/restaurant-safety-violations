@@ -74,7 +74,7 @@ public class DBAdapter {
     // Context of application who uses us.
     private final Context context;
 
-    private DatabaseHelper myDBHelper;
+    private final DatabaseHelper myDBHelper;
     private SQLiteDatabase db;
 
     /////////////////////////////////////////////////////////////////////
@@ -87,9 +87,8 @@ public class DBAdapter {
     }
 
     // Open the database connection.
-    public DBAdapter open() {
+    public void open() {
         db = myDBHelper.getWritableDatabase();
-        return this;
     }
 
     // Close the database connection.
@@ -107,7 +106,7 @@ public class DBAdapter {
     }
 
     // Add a new set of values to the database.
-    public long insertRowRestaurant(String tracking, String name, String address, String city, float lat, float log, String inspections, int favourite) {
+    public void insertRowRestaurant(String tracking, String name, String address, String city, float lat, float log, String inspections, int favourite) {
         ContentValues rowValues = new ContentValues();
 
         rowValues.put(KEY_TRACKING, tracking);
@@ -119,7 +118,7 @@ public class DBAdapter {
         rowValues.put(KEY_INSPECTION_LIST, inspections);
         rowValues.put(KEY_FAVOURITE, favourite);
 
-        return db.insert(TABLE_RESTAURANTS, null, rowValues);
+        db.insert(TABLE_RESTAURANTS, null, rowValues);
     }
 
     public void deleteAll() {
@@ -153,14 +152,7 @@ public class DBAdapter {
         CONTAINS
     }
 
-    public enum MatchInteger {
-        LESS,
-        EQUALS,
-        GREATER
-    }
-
     // https://stackoverflow.com/questions/9076561/android-sqlitedatabase-query-with-like
-    // TODO: Rename to searchForRestaurants
     // retrieveByConstraint
     public Cursor searchRestaurants(String column, String searchTerm, MatchString matchType) {
         String selection;
@@ -247,41 +239,7 @@ public class DBAdapter {
         return selectionArgs;
     }
 
-    public Cursor searchRestaurants(String column, int searchTerm, MatchInteger matchType) {
-        String operation = "=";
-        switch(matchType) {
-            case LESS:
-                operation = "<";
-                break;
-            case GREATER:
-                operation = ">";
-                break;
-        }
-
-        String selection = column + " " + operation + " ?";
-        String[] selectionArgs = new String[] {"" + searchTerm};
-
-        return db.query(TABLE_RESTAURANTS, ALL_KEYS, selection, selectionArgs, null, null, null, null);
-    }
-
-    // Change an existing row to be equal to new data.
-    public boolean updateRow(String tracking, String name, String address, String city, float lat, float log, String inspections) {
-        String where = KEY_TRACKING + " = ?";
-        String[] whereArgs = new String[] {tracking};
-
-        ContentValues newValues = new ContentValues();
-        newValues.put(KEY_TRACKING, tracking);
-        newValues.put(KEY_NAME, name);
-        newValues.put(KEY_ADDRESS, address);
-        newValues.put(KEY_CITY, city);
-        newValues.put(KEY_LATITUDE, lat);
-        newValues.put(KEY_LONGITUDE, log);
-        newValues.put(KEY_INSPECTION_LIST, inspections);
-
-        return db.update(TABLE_RESTAURANTS, newValues, where, whereArgs) != 0;
-    }
-
-     public boolean updateRow(String key_column, String trackingID, String values) {
+     public void updateRow(String key_column, String trackingID, String values) {
          String where = KEY_TRACKING + "='" + trackingID + "'";
          ContentValues newValues = new ContentValues();
 
@@ -290,15 +248,15 @@ public class DBAdapter {
          } else {
              newValues.put(key_column, values);
          }
-         return db.update(TABLE_RESTAURANTS, newValues, where, null) != 0;
+         db.update(TABLE_RESTAURANTS, newValues, where, null);
      }
 
-    public boolean updateRestaurantRow(String trackingID, String hazard, int numCritical) {
+    public void updateRestaurantRow(String trackingID, String hazard, int numCritical) {
         String where = KEY_TRACKING + "='" + trackingID + "'";
         ContentValues newValues = new ContentValues();
         newValues.put(KEY_HAZARD, hazard);
         newValues.put(KEY_NUM_CRITICAL, numCritical);
-        return db.update(TABLE_RESTAURANTS, newValues, where, null) != 0;
+        db.update(TABLE_RESTAURANTS, newValues, where, null);
     }
 
 
