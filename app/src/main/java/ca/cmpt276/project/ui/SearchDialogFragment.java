@@ -63,10 +63,10 @@ public class SearchDialogFragment extends AppCompatDialogFragment {
                         }
                         searchTerm = searchTxt.getText().toString();
                         if(hazardFilter == null){
-                            hazardFilter = "OFF";
+                            hazardFilter = getString(R.string.off);
                         }
                         if(lessMore == null){
-                            lessMore = "OFF";
+                            lessMore = getString(R.string.off);
                         }
                         saveFiltersToPref(searchTerm, hazardFilter, numCriticalFilter, lessMore, favFilter);
                         dialogListener.sendSearchInput(searchTerm, hazardFilter, numCriticalFilter, lessMore, favFilter,false);
@@ -76,7 +76,7 @@ public class SearchDialogFragment extends AppCompatDialogFragment {
                         Toast.makeText(getContext(), "Search cancelled", Toast.LENGTH_SHORT).show();
                         break;
                     case DialogInterface.BUTTON_NEUTRAL:
-                        saveFiltersToPref("", "OFF", -1, "OFF", false);
+                        saveFiltersToPref("", getString(R.string.off), -1, getString(R.string.off), false);
                         dialogListener.sendSearchInput("one", hazardFilter, numCriticalFilter, lessMore, favFilter,true);
                         Toast.makeText(getContext(), "Reset search", Toast.LENGTH_SHORT).show();
                         break;
@@ -152,9 +152,9 @@ public class SearchDialogFragment extends AppCompatDialogFragment {
     private void getFiltersFromPref(){
         SharedPreferences prefs = getContext().getSharedPreferences(PREFS_NAME, 0);
         searchTerm = prefs.getString(NAME_FILTER_PREF, "");
-        hazardFilter = prefs.getString(HAZARD_FILTER_PREF, "OFF");
+        hazardFilter = prefs.getString(HAZARD_FILTER_PREF, this.getString(R.string.off));
         numCriticalFilter = prefs.getInt(NUM_FILTER_PREF, -1);
-        lessMore = prefs.getString(LESS_FILTER_PREF, "OFF");
+        lessMore = prefs.getString(LESS_FILTER_PREF, this.getString(R.string.off));
         favFilter = prefs.getBoolean(FAV_FILTER_PREF, false);
     }
 
