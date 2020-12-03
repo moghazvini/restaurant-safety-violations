@@ -173,7 +173,7 @@ public class DBAdapter {
 
     public Cursor filterRestaurants(String name, String hazard, int numCritical, String lessMore, boolean favFilter){
         String selection = sqlSelectionBuilder(name, hazard, numCritical, lessMore, favFilter);
-        String[] selectionArgs = sqlArgsBuilder(name, hazard, numCritical, favFilter);
+        String[] selectionArgs = sqlArgsBuilder(name, hazard, numCritical, lessMore, favFilter);
         if(selectionArgs != null){
             return db.query(TABLE_RESTAURANTS, ALL_KEYS, selection, selectionArgs, null, null, KEY_NAME, null);
         }
@@ -195,7 +195,7 @@ public class DBAdapter {
             if(selection.length() > 0){
                 selection += " AND ";
             }
-            if(lessMore.equals(String.valueOf(R.string.less_than))){
+            if(lessMore.equals(context.getString(R.string.less_than))){
                 selection = selection + DBAdapter.KEY_NUM_CRITICAL + " < ?";
             } else {
                 selection = selection + DBAdapter.KEY_NUM_CRITICAL + " > ?";
@@ -212,7 +212,7 @@ public class DBAdapter {
         return selection;
     }
 
-    public String[] sqlArgsBuilder(String name, String hazard, int numCritical, boolean favFilter){
+    public String[] sqlArgsBuilder(String name, String hazard, int numCritical, String lessMore, boolean favFilter){
         ArrayList<String> selectionArgsList = new ArrayList<>();
         if(name.length() > 0){
             selectionArgsList.add("%" + name + "%");
@@ -221,7 +221,7 @@ public class DBAdapter {
             hazard = translateHazard(hazard);
             selectionArgsList.add(hazard);
         }
-        if(numCritical >= 0){
+        if(numCritical >= 0 && !lessMore.equals(context.getString(R.string.off))){
             String numCriticalStr = Integer.toString(numCritical);
             selectionArgsList.add(numCriticalStr);
         }
