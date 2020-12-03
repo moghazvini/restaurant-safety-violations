@@ -31,7 +31,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="5dp"
-        android:text="@string/issues_found"
+        android:text="@string/num_issues"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toEndOf="@+id/item_restaurantIcon"
         app:layout_constraintTop_toBottomOf="@+id/item_txt_restaurant_name" />

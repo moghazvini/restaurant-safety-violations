@@ -22,12 +22,12 @@ import ca.cmpt276.project.model.InspectionListManager;
 import ca.cmpt276.project.model.Restaurant;
 import ca.cmpt276.project.model.RestaurantListManager;
 
-public class RestaurantListAdapter extends ArrayAdapter<Restaurant> {
+public class FavouritesUpdatedAdapter extends ArrayAdapter<Restaurant> {
     private final List<Restaurant> restaurantList;
     private final LayoutInflater inflater;
     private final Context context;
 
-    public RestaurantListAdapter(Context context, List<Restaurant> list){
+    public FavouritesUpdatedAdapter(Context context, List<Restaurant> list){
         super(context, R.layout.restaurant_list_item, list);
         inflater = LayoutInflater.from(context);
         this.restaurantList = list;
@@ -75,13 +75,10 @@ public class RestaurantListAdapter extends ArrayAdapter<Restaurant> {
         if(currentInspectionList.getInspections().size() > 0) {
             Inspection latestInspection;
             latestInspection = Collections.max(currentInspectionList.getInspections());
-           String issues_txt = String.valueOf(R.string.num_issues);
-           int num_issues = latestInspection.getCritical() + latestInspection.getNonCritical();
-           // String issuesMessage = num_issues + issues_txt;
+            int num_issues = latestInspection.getCritical() + latestInspection.getNonCritical();
+            String issues_txt = context.getString(R.string.num_issues, num_issues);
 
-            String issuesMessage = context.getString(num_issues, issues_txt);
-
-            issuesText.setText(issuesMessage);
+            issuesText.setText(issues_txt);
 
             switch (latestInspection.getLevel()) {
                 case LOW:

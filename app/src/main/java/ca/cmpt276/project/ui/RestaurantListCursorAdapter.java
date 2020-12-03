@@ -78,8 +78,10 @@ public class RestaurantListCursorAdapter extends CursorAdapter {
         if(currentInspectionList.getInspections().size() > 0) {
             Inspection latestInspection;
             latestInspection = Collections.max(currentInspectionList.getInspections());
-            String issuesMessage = (latestInspection.getCritical() + latestInspection.getNonCritical()) + " issue(s)";
-            issuesText.setText(issuesMessage);
+            int num_issues = latestInspection.getCritical() + latestInspection.getNonCritical();
+            String issues_txt = context.getString(R.string.num_issues, num_issues);
+
+            issuesText.setText(issues_txt);
 
             switch (latestInspection.getLevel()) {
                 case LOW:

@@ -25,7 +25,7 @@ public class FavouritesUpdatedDialogFragment extends AppCompatDialogFragment {
         System.out.println(restaurantList.size() + "----SIZE IN FRAGMENT");
 
         ListView updated = view.findViewById(R.id.list_favourites);
-        RestaurantListAdapter adapter = new RestaurantListAdapter(this.getContext(), restaurantList);
+        FavouritesUpdatedAdapter adapter = new FavouritesUpdatedAdapter(this.getContext(), restaurantList);
 
         updated.setAdapter(adapter);
 

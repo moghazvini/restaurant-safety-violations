@@ -63,11 +63,14 @@ public class SearchDialogFragment extends AppCompatDialogFragment {
                         }
                         searchTerm = searchTxt.getText().toString();
                         if(hazardFilter == null){
-                            hazardFilter = getString(R.string.off);
+                            hazardFilter = "OFF";
                         }
                         if(lessMore == null){
-                            lessMore = getString(R.string.off);
+                            lessMore = "OFF";
                         }
+                        hazardFilter = translateHazard(hazardFilter);
+                        lessMore = translateLessMore(lessMore);
+
                         saveFiltersToPref(searchTerm, hazardFilter, numCriticalFilter, lessMore, favFilter);
                         dialogListener.sendSearchInput(searchTerm, hazardFilter, numCriticalFilter, lessMore, favFilter,false);
                         break;
@@ -76,7 +79,7 @@ public class SearchDialogFragment extends AppCompatDialogFragment {
                         Toast.makeText(getContext(), "Search cancelled", Toast.LENGTH_SHORT).show();
                         break;
                     case DialogInterface.BUTTON_NEUTRAL:
-                        saveFiltersToPref("", getString(R.string.off), -1, getString(R.string.off), false);
+                        saveFiltersToPref("", "OFF", -1, "OFF", false);
                         dialogListener.sendSearchInput("one", hazardFilter, numCriticalFilter, lessMore, favFilter,true);
                         Toast.makeText(getContext(), "Reset search", Toast.LENGTH_SHORT).show();
                         break;
@@ -90,6 +93,31 @@ public class SearchDialogFragment extends AppCompatDialogFragment {
                 .setNegativeButton(R.string.cancel, listener)
                 .setNeutralButton(R.string.reset, listener)
                 .create();
+    }
+
+    private String translateHazard(String hazardFr){
+        String hazardEn = hazardFr;
+        if(hazardFr.equals("FAIBLE")){
+            hazardEn = "LOW";
+        } else if (hazardFr.equals("MODÉRER")){
+            hazardEn = "MODERATE";
+        } else if (hazardFr.equals("HAUTE")){
+            hazardEn = "HIGH";
+        } else if (hazardFr.equals("DE")){
+            hazardEn = "OFF";
+        }
+        return hazardEn;
+    }
+
+    private String translateLessMore(String lessMore) {
+        if (lessMore.equals("DE")) {
+            lessMore = "OFF";
+        } else if (lessMore.equals("MOINS QUE")) {
+            lessMore = "LESS THAN";
+        } else if (lessMore.equals("PLUS QUE")) {
+            lessMore = "MORE THAN";
+        }
+        return lessMore;
     }
 
     private void setupFavFilter() {
@@ -152,9 +180,9 @@ public class SearchDialogFragment extends AppCompatDialogFragment {
     private void getFiltersFromPref(){
         SharedPreferences prefs = getContext().getSharedPreferences(PREFS_NAME, 0);
         searchTerm = prefs.getString(NAME_FILTER_PREF, "");
-        hazardFilter = prefs.getString(HAZARD_FILTER_PREF, this.getString(R.string.off));
+        hazardFilter = prefs.getString(HAZARD_FILTER_PREF, "OFF");
         numCriticalFilter = prefs.getInt(NUM_FILTER_PREF, -1);
-        lessMore = prefs.getString(LESS_FILTER_PREF, this.getString(R.string.off));
+        lessMore = prefs.getString(LESS_FILTER_PREF, "OFF");
         favFilter = prefs.getBoolean(FAV_FILTER_PREF, false);
     }
 
