@@ -1,11 +1,5 @@
 package ca.cmpt276.project.ui;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Color;
@@ -19,6 +13,12 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
@@ -27,16 +27,11 @@ import java.lang.reflect.Type;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Collections;
-
 
 import ca.cmpt276.project.R;
 import ca.cmpt276.project.model.DBAdapter;
 import ca.cmpt276.project.model.Inspection;
-import ca.cmpt276.project.model.InspectionListManager;
 import ca.cmpt276.project.model.LocalDateAdapter;
-import ca.cmpt276.project.model.Restaurant;
-import ca.cmpt276.project.model.RestaurantListManager;
 import ca.cmpt276.project.model.Violation;
 
 /**
@@ -46,7 +41,6 @@ public class InspectionDetailsActivity extends AppCompatActivity {
 
     private final static String INDEX = "Inspection Report Index";
     private final static String REST_TRACKING = "Restaurant Tracking";
-    private static InspectionListManager inspectionManager;
     private static Inspection inspection;
     private DBAdapter myDb;
 
@@ -170,8 +164,6 @@ public class InspectionDetailsActivity extends AppCompatActivity {
         // Format inspection date for the toolbar
         LocalDate inspectionDate = inspection.getDate();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMMM dd, yyyy");
-        /*String inspectionDateText = getString(R.string.date,inspectionDate.getMonth().toString().toLowerCase(), inspectionDate.getDayOfMonth(), inspectionDate.getYear());
-        inspectionDateText = inspectionDateText.substring(0,1).toUpperCase().concat(inspectionDateText.substring(1));*/
         String inspectionDateText = formatter.format(inspectionDate);
         back.setTitle(inspectionDateText);
 
