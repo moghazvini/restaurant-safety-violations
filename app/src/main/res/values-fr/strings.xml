@@ -17,6 +17,7 @@
     <string name="pest_violation">Violation de parasites</string>
     <string name="employee_violation">Violation d\'employé</string>
     <string name="establishment_violation">Violation d\'établissement</string>
+    <string name="chemical_violation">violation chimique</string>
 
     <!--Restaurant Details-->
     <string name="critical_issue">nombre de problèmes critiques: %d</string>

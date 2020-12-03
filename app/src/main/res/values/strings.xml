@@ -11,12 +11,13 @@
     <string name="hazard_moderate">Medium</string>
     <string name="hazard_high">High</string>
 
-    <string name="operator_violation">operator violation</string>
-    <string name="food_violation">food violation</string>
-    <string name="equipment_violation">equipment violation</string>
-    <string name="pest_violation">pest violation</string>
-    <string name="employee_violation">employee violation</string>
-    <string name="establishment_violation">establishment violation</string>
+    <string name="operator_violation">Operator violation</string>
+    <string name="food_violation">Food violation</string>
+    <string name="equipment_violation">Equipment violation</string>
+    <string name="pest_violation">Pest violation</string>
+    <string name="employee_violation">Employee violation</string>
+    <string name="establishment_violation">Establishment violation</string>
+    <string name="chemical_violation">Chemical violation</string>
 
     <!--Restaurant Details-->
     <string name="critical_issue"># of Critical Issues: %d</string>

@@ -97,61 +97,69 @@ public class InspectionDetailsActivity extends AppCompatActivity {
             TextView brief_description_txt = itemView.findViewById(R.id.txt_critissues);
             TextView crit_or_not_txt = itemView.findViewById(R.id.txt_critical_or_not);
 
-            //if(inspectionManager.getInspections().size()>0) {
-                String brief_description = violation.getCode() +"  "+ violation.getType().violation;
-                String crit_or_not = violation.getSeverity().severity;
-                boolean crit = crit_or_not.equals("Critical");
-                brief_description_txt.setText(brief_description);
+            String crit_or_not = violation.getSeverity().severity;
+            boolean crit = crit_or_not.equals("Critical");
 
-                if(crit){
-                    crit_or_not_txt.setTextColor(Color.parseColor("#FA2828")); // Red
-                }else {
-                    crit_or_not_txt.setTextColor(Color.parseColor("#45DE08")); // Green
-                }
+            if(crit){
+                crit_or_not_txt.setTextColor(Color.parseColor("#FA2828")); // Red
+            }else {
+                crit_or_not_txt.setTextColor(Color.parseColor("#45DE08")); // Green
+            }
+
             if(crit_or_not.equals("Critical")) {
                 crit_or_not_txt.setText(R.string.critical);
             } else if (crit_or_not.equals("Non-Critical")) {
                 crit_or_not_txt.setText(R.string.non_critical);
             }
 
+            String violationType = "";
+            switch (violation.getType()) {
+                case OPERATOR:
+                    violation_img.setBackgroundResource(R.drawable.non_crit_operator_violations);
+                    violationType = getString(R.string.operator_violation);
+                    break;
+                case FOOD:
+                    violationType = getString(R.string.food_violation);
+                    if (crit) {
+                        violation_img.setBackgroundResource(R.drawable.crit_food_violations);
+                    } else {
+                        violation_img.setBackgroundResource(R.drawable._07_212ncrit_food_violations);
+                    }
+                    break;
+                case EQUIPMENT:
+                    violationType = getString(R.string.equipment_violation);
+                    if (crit) {
+                        violation_img.setBackgroundResource(R.drawable.crit_equiptment_violations);
+                    } else {
+                        violation_img.setBackgroundResource(R.drawable._06_308_315ncrit_equipment_violations);
+                    }
+                    break;
+                case PESTS:
+                    violationType = getString(R.string.pest_violation);
+                    violation_img.setBackgroundResource(R.drawable.non_crit_pest_violations);
+                    break;
+                case EMPLOYEES:
+                    violationType = getString(R.string.employee_violation);
+                    if (crit) {
+                        violation_img.setBackgroundResource(R.drawable.crit_employees_violations);
+                    } else {
+                        violation_img.setBackgroundResource(R.drawable.non_crit_employee_violations);
+                    }
+                    break;
+                case ESTABLISHMENT:
+                    violationType = getString(R.string.establishment_violation);
+                    violation_img.setBackgroundResource(R.drawable._01_104_violations);
+                    break;
+                case CHEMICAL:
+                    violationType = getString(R.string.chemical_violation);
+                    violation_img.setBackgroundResource(R.drawable._09ncrit_chems);
+                    break;
+                default:
+                    assert false;
+            }
 
-                switch (violation.getType()) {
-                    case OPERATOR:
-                        violation_img.setBackgroundResource(R.drawable.non_crit_operator_violations);
-                        break;
-                    case FOOD:
-                        if (crit) {
-                            violation_img.setBackgroundResource(R.drawable.crit_food_violations);
-                        } else {
-                            violation_img.setBackgroundResource(R.drawable._07_212ncrit_food_violations);
-                        }
-                        break;
-                    case EQUIPMENT:
-                        if (crit) {
-                            violation_img.setBackgroundResource(R.drawable.crit_equiptment_violations);
-                        } else {
-                            violation_img.setBackgroundResource(R.drawable._06_308_315ncrit_equipment_violations);
-                        }
-                        break;
-                    case PESTS:
-                        violation_img.setBackgroundResource(R.drawable.non_crit_pest_violations);
-                        break;
-                    case EMPLOYEES:
-                        if (crit) {
-                            violation_img.setBackgroundResource(R.drawable.crit_employees_violations);
-                        } else {
-                            violation_img.setBackgroundResource(R.drawable.non_crit_employee_violations);
-                        }
-                        break;
-                    case ESTABLISHMENT:
-                        violation_img.setBackgroundResource(R.drawable._01_104_violations);
-                        break;
-                    case CHEMICAL:
-                        violation_img.setBackgroundResource(R.drawable._09ncrit_chems);
-                        break;
-                    default:
-                        assert false;
-                }
+            String brief_description = violation.getCode() +"  "+ violationType;
+            brief_description_txt.setText(brief_description);
             return itemView;
         }
     }
