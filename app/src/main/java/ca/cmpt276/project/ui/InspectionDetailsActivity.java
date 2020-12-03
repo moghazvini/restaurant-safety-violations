@@ -113,7 +113,12 @@ public class InspectionDetailsActivity extends AppCompatActivity {
                 }else {
                     crit_or_not_txt.setTextColor(Color.parseColor("#45DE08")); // Green
                 }
-                crit_or_not_txt.setText(crit_or_not);
+            if(crit_or_not == "Critical") {
+                crit_or_not_txt.setText(R.string.critical);
+            } else if (crit_or_not == "Non-Critical") {
+                crit_or_not_txt.setText(R.string.non_critical);
+            }
+
 
                 switch (violation.getType()) {
                     case OPERATOR:

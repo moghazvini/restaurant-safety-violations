@@ -55,13 +55,16 @@
     <string name="Critical">Critical</string>
     <string name="routine_check">Routine check</string>
     <string name="follow_up_check">Follow-up check</string>
-    <string name="num_issues">issue(s)</string>
+    <string name="num_issues">%d issue(s)</string>
     <string name="off">OFF</string>
     <string name="low">LOW</string>
     <string name="moderate">MODERATE</string>
     <string name="high">HIGH</string>
     <string name="more_than">MORE THAN</string>
     <string name="less_than">LESS_THAN</string>
+    <string name="critical">Critical</string>
+    <string name="non_critical">Non-Critical</string>
+
 
 </resources>
 

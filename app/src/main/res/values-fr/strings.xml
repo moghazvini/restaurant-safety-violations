@@ -58,13 +58,15 @@
     <string name="Critical">Critique</string>
     <string name="routine_check">Vérification de routine</string>
     <string name="follow_up_check">Vérification de suivi</string>
-    <string name="num_issues">problème(s)</string>
+    <string name="num_issues">%d problème(s)</string>
     <string name="off">DE</string>
     <string name="low">FAIBLE</string>
     <string name="moderate">MODÉRER</string>
     <string name="high">HAUTE</string>
     <string name="more_than">PLUS QUE</string>
     <string name="less_than">MOINS QUE</string>
+    <string name="critical">Critique</string>
+    <string name="non_critical">Non Critique</string>
 
 
 </resources>
